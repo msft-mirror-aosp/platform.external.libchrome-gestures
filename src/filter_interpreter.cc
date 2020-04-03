@@ -43,4 +43,27 @@ void FilterInterpreter::Clear() {
     log_->Clear();
   next_->Clear();
 }
+
+stime_t FilterInterpreter::SetNextDeadlineAndReturnTimeoutVal(
+    stime_t now, stime_t local_deadline, stime_t next_timeout) {
+  next_timer_deadline_ = next_timeout > 0.0 ? now + next_timeout : 0.0;
+  stime_t local_timeout =
+    local_deadline <= 0.0 ? -1.0 : std::max(local_deadline - now, 0.0);
+
+  if (next_timeout <= 0.0 && local_timeout <= 0.0)
+    return -1.0;
+  if (next_timeout <= 0.0)
+    return local_timeout;
+  if (local_timeout <= 0.0)
+    return next_timeout;
+  return std::min(next_timeout, local_timeout);
+}
+
+bool FilterInterpreter::ShouldCallNextTimer(stime_t local_deadline) {
+  if (local_deadline > 0.0 && next_timer_deadline_ > 0.0)
+    return local_deadline > next_timer_deadline_;
+  else
+    return next_timer_deadline_ > 0.0;
+}
+
 }  // namespace gestures

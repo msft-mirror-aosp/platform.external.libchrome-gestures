@@ -42,7 +42,6 @@ class FlingStopFilterInterpreter : public FilterInterpreter {
   bool NeedsExtraTime(const HardwareState& hwstate) const;
   bool FlingStopNeeded(const Gesture& gesture) const;
   void UpdateFlingStopDeadline(const HardwareState& hwstate);
-  stime_t SetNextDeadlineAndReturnTimeoutVal(stime_t now, stime_t next_timeout);
 
   // Has the deadline has already been extended once
   bool already_extended_;
@@ -65,8 +64,6 @@ class FlingStopFilterInterpreter : public FilterInterpreter {
 
   // When we should send fling-stop, or 0.0 if not set.
   stime_t fling_stop_deadline_;
-  // When we need to call HandlerTimer on next_, or 0.0 if no outstanding timer.
-  stime_t next_timer_deadline_;
 
   // Device class (e.g. touchpad, mouse).
   GestureInterpreterDeviceClass devclass_;

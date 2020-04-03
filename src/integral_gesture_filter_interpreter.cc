@@ -8,6 +8,7 @@
 
 #include "gestures/include/gestures.h"
 #include "gestures/include/interpreter.h"
+#include "gestures/include/logging.h"
 #include "gestures/include/tracer.h"
 
 namespace gestures {
@@ -19,16 +20,51 @@ IntegralGestureFilterInterpreter::IntegralGestureFilterInterpreter(
       hscroll_remainder_(0.0),
       vscroll_remainder_(0.0),
       hscroll_ordinal_remainder_(0.0),
-      vscroll_ordinal_remainder_(0.0) {
+      vscroll_ordinal_remainder_(0.0),
+      remainder_reset_deadline_(-1.0) {
   InitName();
 }
 
 void IntegralGestureFilterInterpreter::SyncInterpretImpl(
     HardwareState* hwstate, stime_t* timeout) {
-  if (hwstate->finger_cnt == 0 && hwstate->touch_cnt == 0)
-    hscroll_ordinal_remainder_ = vscroll_ordinal_remainder_ =
-        hscroll_remainder_ = vscroll_remainder_ = 0.0;
-  next_->SyncInterpret(hwstate, timeout);
+  can_clear_remainders_ = hwstate->finger_cnt == 0 && hwstate->touch_cnt == 0;
+  stime_t next_timeout = -1.0;
+  next_->SyncInterpret(hwstate, &next_timeout);
+  *timeout = SetNextDeadlineAndReturnTimeoutVal(
+      hwstate->timestamp, remainder_reset_deadline_, next_timeout);
+}
+
+void IntegralGestureFilterInterpreter::HandleTimerImpl(
+    stime_t now, stime_t *timeout) {
+  if (ShouldCallNextTimer(remainder_reset_deadline_)) {
+    if (next_timer_deadline_ > now) {
+      Err("Spurious callback. now: %f, next deadline: %f",
+          now, next_timer_deadline_);
+      return;
+    }
+
+    stime_t next_timeout = -1.0;
+    next_->HandleTimer(now, &next_timeout);
+    *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
+                                                  remainder_reset_deadline_,
+                                                  next_timeout);
+  } else {
+    if (remainder_reset_deadline_ > now) {
+      Err("Spurious callback. now: %f, remainder reset deadline: %f",
+          now, remainder_reset_deadline_);
+      return;
+    }
+    if (can_clear_remainders_)
+      hscroll_ordinal_remainder_ = vscroll_ordinal_remainder_ =
+          hscroll_remainder_ = vscroll_remainder_ = 0.0;
+
+    remainder_reset_deadline_ = -1.0;
+    stime_t next_timeout = next_timer_deadline_ <= 0.0 ? -1.0 :
+      std::max(0.0, next_timer_deadline_ - now);
+    *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
+                                                  remainder_reset_deadline_,
+                                                  next_timeout);
+  }
 }
 
 namespace {
@@ -69,6 +105,7 @@ void IntegralGestureFilterInterpreter::ConsumeGesture(const Gesture& gesture) {
         ProduceGesture(Gesture(kGestureFling, copy.start_time, copy.end_time,
                                0, 0, GESTURES_FLING_TAP_DOWN));
       }
+      remainder_reset_deadline_ = copy.end_time + 1.0;
       break;
     default:
       ProduceGesture(gesture);

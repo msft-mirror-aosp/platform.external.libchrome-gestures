@@ -38,7 +38,7 @@ class IntegralGestureFilterInterpreterTestInterpreter : public Interpreter {
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
-    EXPECT_TRUE(false);
+    ADD_FAILURE() << "HandleTimer on the next interpreter shouldn't be called";
   }
 
   Gesture return_value_;
@@ -88,7 +88,8 @@ TEST(IntegralGestureFilterInterpreterTestInterpreter, OverflowTest) {
   ASSERT_EQ(arraysize(expected_types), arraysize(expected_y));
 
   for (size_t i = 0; i < arraysize(expected_x); i++) {
-    Gesture* out = wrapper.SyncInterpret(&hs, NULL);
+    stime_t timeout;
+    Gesture* out = wrapper.SyncInterpret(&hs, &timeout);
     if (out)
       EXPECT_EQ(expected_types[i], out->type) << "i = " << i;
     if (out == NULL) {
@@ -116,26 +117,30 @@ TEST(IntegralGestureFilterInterpreterTest, ResetTest) {
 
   // causing finger, dx, dy, fingers, buttons down, buttons mask, hwstate:
   base_interpreter->return_values_.push_back(
-      Gesture(kGestureScroll, 0, 0, 3.9, 0.0));
+      Gesture(kGestureScroll, 10000.00, 10000.00, 3.9, 0.0));
+  Gesture empty_gesture = Gesture();
+  empty_gesture.start_time = 10000.01;
+  empty_gesture.end_time = 10000.01;
+  base_interpreter->return_values_.push_back(empty_gesture);
   base_interpreter->return_values_.push_back(
-      Gesture());
-  base_interpreter->return_values_.push_back(
-      Gesture(kGestureScroll, 0, 0, .2, 0.0));
+      Gesture(kGestureScroll, 10001.02, 10001.02, .2, 0.0));
 
   FingerState fs = { 0, 0, 0, 0, 1, 0, 0, 0, 1, 0 };
   HardwareState hs[] = {
     make_hwstate(10000.00, 0, 1, 1, &fs),
     make_hwstate(10000.01, 0, 0, 0, NULL),
-    make_hwstate(10000.02, 0, 1, 1, &fs),
+    make_hwstate(10001.02, 0, 1, 1, &fs),
   };
 
   size_t iter = 0;
-  Gesture* out = wrapper.SyncInterpret(&hs[iter++], NULL);
+  stime_t timeout;
+  Gesture* out = wrapper.SyncInterpret(&hs[iter++], &timeout);
   ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
   EXPECT_EQ(kGestureTypeScroll, out->type);
-  out = wrapper.SyncInterpret(&hs[iter++], NULL);
+  out = wrapper.SyncInterpret(&hs[iter++], &timeout);
   EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
-  out = wrapper.SyncInterpret(&hs[iter++], NULL);
+  wrapper.HandleTimer(10001.02, &timeout);
+  out = wrapper.SyncInterpret(&hs[iter++], &timeout);
   EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
 }
 
@@ -159,10 +164,60 @@ TEST(IntegralGestureFilterInterpreterTest, ZeroGestureTest) {
   };
 
   size_t iter = 0;
-  Gesture* out = wrapper.SyncInterpret(&hs[iter++], NULL);
+  stime_t timeout;
+  Gesture* out = wrapper.SyncInterpret(&hs[iter++], &timeout);
   EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
-  out = wrapper.SyncInterpret(&hs[iter++], NULL);
+  out = wrapper.SyncInterpret(&hs[iter++], &timeout);
   EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
+}
+
+// A bunch of scroll gestures with dy < 1 (such as the MS Surface Precision
+// mouse produces) should be combined into a smaller number of gestures.
+TEST(IntegralGestureFilterInterpreterTest, SlowScrollTest) {
+  IntegralGestureFilterInterpreterTestInterpreter* base_interpreter =
+      new IntegralGestureFilterInterpreterTestInterpreter;
+  IntegralGestureFilterInterpreter interpreter(base_interpreter, NULL);
+  TestInterpreterWrapper wrapper(&interpreter);
+
+  base_interpreter->return_values_.push_back(
+      Gesture(kGestureScroll, 10000.00, 10000.00, 0.0, 0.4));
+  base_interpreter->return_values_.push_back(
+      Gesture(kGestureScroll, 10000.05, 10000.05, 0.0, 0.4));
+  base_interpreter->return_values_.push_back(
+      Gesture(kGestureScroll, 10000.10, 10000.10, 0.0, 0.4));
+  base_interpreter->return_values_.push_back(
+      Gesture(kGestureScroll, 10000.15, 10000.15, 0.0, 0.4));
+  base_interpreter->return_values_.push_back(
+      Gesture(kGestureScroll, 10000.20, 10000.20, 0.0, 0.4));
+
+  HardwareState hs[] = {
+    make_hwstate(10000.00, 0, 0, 0, NULL),
+    make_hwstate(10000.05, 0, 0, 0, NULL),
+    make_hwstate(10000.10, 0, 0, 0, NULL),
+    make_hwstate(10000.15, 0, 0, 0, NULL),
+    make_hwstate(10000.20, 0, 0, 0, NULL),
+  };
+
+  size_t iter = 0;
+  stime_t timeout;
+  // The first two gestures should just add to the vertical scroll remainder.
+  Gesture* out = wrapper.SyncInterpret(&hs[iter++], &timeout);
+  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
+  out = wrapper.SyncInterpret(&hs[iter++], &timeout);
+  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
+  // Then the remainder exceeds 1 so we should get a gesture.
+  out = wrapper.SyncInterpret(&hs[iter++], &timeout);
+  EXPECT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeScroll, out->type);
+  EXPECT_FLOAT_EQ(1.0, out->details.scroll.dy);
+  // The next event just adds to the remainder again.
+  out = wrapper.SyncInterpret(&hs[iter++], &timeout);
+  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
+  // Then the remainder exceeds 1 again.
+  out = wrapper.SyncInterpret(&hs[iter++], &timeout);
+  EXPECT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeScroll, out->type);
+  EXPECT_FLOAT_EQ(1.0, out->details.scroll.dy);
 }
 
 }  // namespace gestures

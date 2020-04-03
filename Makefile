@@ -50,6 +50,7 @@ TEST_OBJECTS=\
 	$(OBJDIR)/box_filter_interpreter_unittest.o \
 	$(OBJDIR)/click_wiggle_filter_interpreter_unittest.o \
 	$(OBJDIR)/command_line.o \
+	$(OBJDIR)/filter_interpreter_unittest.o \
 	$(OBJDIR)/fling_stop_filter_interpreter_unittest.o \
 	$(OBJDIR)/gestures_unittest.o \
 	$(OBJDIR)/iir_filter_interpreter_unittest.o \

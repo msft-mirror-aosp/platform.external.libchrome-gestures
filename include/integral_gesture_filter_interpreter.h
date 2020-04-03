@@ -32,6 +32,10 @@ class IntegralGestureFilterInterpreter : public FilterInterpreter {
 
   float hscroll_remainder_, vscroll_remainder_;
   float hscroll_ordinal_remainder_, vscroll_ordinal_remainder_;
+  bool can_clear_remainders_;
+
+  stime_t remainder_reset_deadline_;
+  virtual void HandleTimerImpl(stime_t now, stime_t *timeout);
 };
 
 }  // namespace gestures

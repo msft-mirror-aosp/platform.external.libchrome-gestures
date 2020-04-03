@@ -17,7 +17,6 @@ FlingStopFilterInterpreter::FlingStopFilterInterpreter(
       prev_gesture_type_(kGestureTypeNull),
       fling_stop_already_sent_(false),
       fling_stop_deadline_(0.0),
-      next_timer_deadline_(0.0),
       devclass_(devclass),
       fling_stop_timeout_(prop_reg, "Fling Stop Timeout", 0.03),
       fling_stop_extra_delay_(prop_reg, "Fling Stop Extra Delay", 0.055) {
@@ -49,6 +48,7 @@ void FlingStopFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   }
   next_->SyncInterpret(hwstate, &next_timeout);
   *timeout = SetNextDeadlineAndReturnTimeoutVal(hwstate->timestamp,
+                                                fling_stop_deadline_,
                                                 next_timeout);
 }
 
@@ -114,31 +114,9 @@ void FlingStopFilterInterpreter::UpdateFlingStopDeadline(
   prev_touch_cnt_ = hwstate.touch_cnt;
 }
 
-stime_t FlingStopFilterInterpreter::SetNextDeadlineAndReturnTimeoutVal(
-    stime_t now,
-    stime_t next_timeout) {
-  next_timer_deadline_ = next_timeout >= 0.0 ? now + next_timeout : 0.0;
-  stime_t local_timeout = fling_stop_deadline_ == 0.0 ? -1.0 :
-      std::max(fling_stop_deadline_ - now, 0.0);
-
-  if (next_timeout < 0.0 && local_timeout < 0.0)
-    return -1.0;
-  if (next_timeout < 0.0)
-    return local_timeout;
-  if (local_timeout < 0.0)
-    return next_timeout;
-  return std::min(next_timeout, local_timeout);
-}
-
 void FlingStopFilterInterpreter::HandleTimerImpl(stime_t now,
                                                      stime_t* timeout) {
-  bool call_next = false;
-  if (fling_stop_deadline_ > 0.0 && next_timer_deadline_ > 0.0)
-    call_next = fling_stop_deadline_ > next_timer_deadline_;
-  else
-    call_next = next_timer_deadline_ > 0.0;
-
-  if (!call_next) {
+  if (!ShouldCallNextTimer(fling_stop_deadline_)) {
     if (fling_stop_deadline_ > now) {
       Err("Spurious callback. now: %f, fs deadline: %f, next deadline: %f",
           now, fling_stop_deadline_, next_timer_deadline_);
@@ -151,7 +129,8 @@ void FlingStopFilterInterpreter::HandleTimerImpl(stime_t now,
     fling_stop_already_sent_ = true;
     stime_t next_timeout = next_timer_deadline_ == 0.0 ? -1.0 :
         std::max(0.0, next_timer_deadline_ - now);
-    *timeout = SetNextDeadlineAndReturnTimeoutVal(now, next_timeout);
+    *timeout = SetNextDeadlineAndReturnTimeoutVal(now, fling_stop_deadline_,
+                                                  next_timeout);
     return;
   }
   // Call next_
@@ -162,7 +141,8 @@ void FlingStopFilterInterpreter::HandleTimerImpl(stime_t now,
   }
   stime_t next_timeout = -1.0;
   next_->HandleTimer(now, &next_timeout);
-  *timeout = SetNextDeadlineAndReturnTimeoutVal(now, next_timeout);
+  *timeout = SetNextDeadlineAndReturnTimeoutVal(now, fling_stop_deadline_,
+                                                next_timeout);
 }
 
 }  // namespace gestures
