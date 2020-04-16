@@ -62,7 +62,7 @@ class FlingStopFilterInterpreter : public FilterInterpreter {
   // Whether a fling stop has been sent since the last gesture.
   bool fling_stop_already_sent_;
 
-  // When we should send fling-stop, or 0.0 if not set.
+  // When we should send fling-stop, or NO_DEADLINE if not set.
   stime_t fling_stop_deadline_;
 
   // Device class (e.g. touchpad, mouse).

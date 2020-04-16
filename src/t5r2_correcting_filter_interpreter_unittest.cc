@@ -116,7 +116,7 @@ TEST(T5R2CorrectingFilterInterpreterTest, SimpleTest) {
     if (hse[i].modified)
       expected_hs.touch_cnt = 0;
     base_interpreter->expected_hardware_state_ = &expected_hs;
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     EXPECT_EQ(NULL, wrapper.SyncInterpret(&hse[i].hs, &timeout));
     base_interpreter->expected_hardware_state_ = NULL;
     EXPECT_LT(timeout, 0.0);

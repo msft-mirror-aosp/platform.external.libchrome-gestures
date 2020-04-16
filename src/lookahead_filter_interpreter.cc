@@ -68,7 +68,7 @@ void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   if (!queue_.Empty() &&
       (queue_.Tail()->due_ - node->due_ > ExtraVariableDelay())) {
     Err("Clock changed backwards. Flushing queue.");
-    stime_t next_timeout = -1.0;
+    stime_t next_timeout = NO_DEADLINE;
     QState* q_node = queue_.Head();
     do {
       if (!q_node->completed_)
@@ -415,7 +415,7 @@ void LookaheadFilterInterpreter::AttemptInterpolation() {
 void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
                                                  stime_t* timeout) {
   TapDownOccurringGesture(now);
-  stime_t next_timeout = -1.0;
+  stime_t next_timeout = NO_DEADLINE;
 
   while (true) {
     if (interpreter_due_ > 0.0) {
@@ -423,7 +423,7 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
         next_timeout = interpreter_due_ - now;
         break;  // Spurious callback
       }
-      next_timeout = -1.0;
+      next_timeout = NO_DEADLINE;
       last_interpreted_time_ = now;
       next_->HandleTimer(now, &next_timeout);
     } else {
@@ -435,7 +435,7 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
         node = node->next_;
       if (node->completed_ || node->due_ > now)
         break;
-      next_timeout = -1.0;
+      next_timeout = NO_DEADLINE;
       last_interpreted_time_ = node->state_.timestamp;
       const size_t finger_cnt = node->state_.finger_cnt;
       FingerState fs_copy[finger_cnt];
@@ -529,7 +529,7 @@ void LookaheadFilterInterpreter::UpdateInterpreterDue(
     interpreter_due_ = new_interpreter_timeout + now;
     *timeout = new_interpreter_timeout;
   } else if (next_hwstate_timeout > -DBL_MAX) {
-    *timeout = next_hwstate_timeout;
+    *timeout = next_hwstate_timeout <= 0.0 ? NO_DEADLINE : next_hwstate_timeout;
   }
 }
 

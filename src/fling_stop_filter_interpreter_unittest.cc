@@ -20,7 +20,7 @@ class FlingStopFilterInterpreterTestInterpreter : public Interpreter {
   FlingStopFilterInterpreterTestInterpreter()
       : Interpreter(NULL, NULL, false),
         sync_interpret_called_(false), handle_timer_called_(true),
-        next_timeout_(-1) {}
+        next_timeout_(NO_DEADLINE) {}
 
   virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
     sync_interpret_called_ = true;
@@ -43,7 +43,7 @@ struct SimpleTestInputs {
   short touch_cnt;  // -1 for timer callback
 
   bool expected_call_next;
-  stime_t next_timeout;  // -1 for none
+  stime_t next_timeout;  // NO_DEADLINE for none (similarly for below)
   stime_t expected_local_deadline;
   stime_t expected_next_deadline;
   stime_t expected_timeout;
@@ -61,44 +61,45 @@ TEST(FlingStopFilterInterpreterTest, SimpleTest) {
 
   const stime_t kTO = interpreter.fling_stop_timeout_.val_ = 0.03;
   const stime_t kED= interpreter.fling_stop_extra_delay_.val_ = 0.055;
+  const stime_t kND = NO_DEADLINE;
 
   SimpleTestInputs inputs[] = {
     // timeout case
-    { 0.01,        1,  true, -1, 0.01 + kTO, 0.0,        kTO, false },
-    { 0.02,        1,  true, -1, 0.01 + kTO, 0.0, kTO - 0.01, false },
-    { 0.03,        0,  true, -1, 0.01 + kTO, 0.0, kTO - 0.02, false },
-    { 0.01 + kTO, -1, false, -1,        0.0, 0.0,       -1.0, true },
+    { 0.01,        1,  true, kND, 0.01 + kTO, kND,        kTO, false },
+    { 0.02,        1,  true, kND, 0.01 + kTO, kND, kTO - 0.01, false },
+    { 0.03,        0,  true, kND, 0.01 + kTO, kND, kTO - 0.02, false },
+    { 0.01 + kTO, -1, false, kND,        kND, kND,        kND, true },
 
     // multiple fingers come down, timeout
-    { 3.01,      1,  true, -1, 3.01 + kTO, 0.0,        kTO, false },
-    { 3.02,      2,  true, -1, 3.01 + kTO + kED, 0.0, kTO + kED - 0.01, false },
-    { 3.03,      0,  true, -1, 3.01 + kTO + kED, 0.0, kTO + kED - 0.02, false },
-    { 3.01 + kTO + kED, -1, false, -1,        0.0, 0.0,       -1.0, true },
+    { 3.01,      1, true, kND, 3.01 + kTO,       kND,              kTO, false },
+    { 3.02,      2, true, kND, 3.01 + kTO + kED, kND, kTO + kED - 0.01, false },
+    { 3.03,      0, true, kND, 3.01 + kTO + kED, kND, kTO + kED - 0.02, false },
+    { 3.01 + kTO + kED, -1, false, kND,     kND, kND,              kND, true },
 
     // Dual timeouts, local is shorter
-    { 6.01,        1,  true, -1.0, 6.01 + kTO,        0.0,        kTO, false },
+    { 6.01,        1,  true,  kND, 6.01 + kTO,        kND,        kTO, false },
     { 6.02,        0,  true,  0.1, 6.01 + kTO, 6.02 + 0.1, kTO - 0.01, false },
-    { 6.01 + kTO, -1, false, -1.0,        0.0, 6.02 + 0.1,       0.08, true },
-    { 6.02 + 0.1, -1,  true, -1.0,        0.0,        0.0,       -1.0, false },
+    { 6.01 + kTO, -1, false,  kND,        kND, 6.02 + 0.1,       0.08, true },
+    { 6.02 + 0.1, -1,  true,  kND,        kND,        kND,        kND, false },
 
     // Dual timeouts, local is longer
-    { 9.01,        1,  true, -1.0, 9.01 + kTO,        0.0,       kTO, false },
+    { 9.01,        1,  true,  kND, 9.01 + kTO,        kND,       kTO, false },
     { 9.02,        0,  true,  .01, 9.01 + kTO, 9.02 + .01,       .01, false },
-    { 9.02 + .01, -1,  true, -1.0, 9.01 + kTO, 0.0, kTO - .01 - 0.01, false },
-    { 9.01 + kTO, -1, false, -1.0,        0.0,        0.0,      -1.0, true },
+    { 9.02 + .01, -1,  true,  kND, 9.01 + kTO, kND, kTO - .01 - 0.01, false },
+    { 9.01 + kTO, -1, false,  kND,        kND,        kND,       kND, true },
 
     // Dual timeouts, new timeout on handling timeout
-    { 12.01,      1,  true, -1.0, 12.01 + kTO,         0.0,        kTO, false },
-    { 12.02,      0,  true,  0.1, 12.01 + kTO, 12.02 + 0.1, kTO - 0.01, false },
-    { 12.01 + kTO, -1, false, -1.0,       0.0, 12.02 + 0.1,       0.08, true },
-    { 12.02 + 0.1, -1,  true, 0.1, 0.0, 12.22, 0.1, false },
-    { 12.22, -1, true, -1.0, 0.0, 0.0, -1.0, false },
+    { 12.01,        1, true, kND, 12.01 + kTO,         kND,        kTO, false },
+    { 12.02,        0, true, 0.1, 12.01 + kTO, 12.02 + 0.1, kTO - 0.01, false },
+    { 12.01 + kTO, -1, false, kND,        kND, 12.02 + 0.1,       0.08, true },
+    { 12.02 + 0.1, -1,  true, 0.1,        kND,       12.22,        0.1, false },
+    { 12.22,       -1,  true, kND,        kND,         kND,        kND, false },
 
     // Overrun deadline
-    { 15.01,        1,  true, -1, 15.01 + kTO, 0.0,        kTO, false },
-    { 15.02,        1,  true, -1, 15.01 + kTO, 0.0, kTO - 0.01, false },
-    { 15.03,        0,  true, -1, 15.01 + kTO, 0.0, kTO - 0.02, false },
-    { 15.02 + kTO,  0,  true, -1,         0.0, 0.0,       -1.0, true },
+    { 15.01,        1,  true, kND, 15.01 + kTO, kND,        kTO, false },
+    { 15.02,        1,  true, kND, 15.01 + kTO, kND, kTO - 0.01, false },
+    { 15.03,        0,  true, kND, 15.01 + kTO, kND, kTO - 0.02, false },
+    { 15.02 + kTO,  0,  true, kND,         kND, kND,        kND, true },
   };
 
   for (size_t i = 0; i < arraysize(inputs); i++) {
@@ -108,7 +109,7 @@ TEST(FlingStopFilterInterpreterTest, SimpleTest) {
     base_interpreter->handle_timer_called_ = false;
     base_interpreter->next_timeout_ = input.next_timeout;
 
-    stime_t timeout = -1.0;
+    stime_t timeout = kND;
 
     Gesture* ret = NULL;
     if (input.touch_cnt >= 0) {

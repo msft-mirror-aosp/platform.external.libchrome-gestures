@@ -54,7 +54,7 @@ TEST(LoggingFilterInterpreterTest, LogResetHandlerTest) {
     0, 0, 0, 0, 10, 0, 50, 50, 1, 0
   };
   HardwareState hardware_state = make_hwstate(200000, 0, 1, 1, &finger_state);
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   wrapper.SyncInterpret(&hardware_state, &timeout);
   EXPECT_EQ(interpreter.log_->size(), 1);
 

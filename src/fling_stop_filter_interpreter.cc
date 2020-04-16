@@ -16,7 +16,7 @@ FlingStopFilterInterpreter::FlingStopFilterInterpreter(
       prev_touch_cnt_(0),
       prev_gesture_type_(kGestureTypeNull),
       fling_stop_already_sent_(false),
-      fling_stop_deadline_(0.0),
+      fling_stop_deadline_(NO_DEADLINE),
       devclass_(devclass),
       fling_stop_timeout_(prop_reg, "Fling Stop Timeout", 0.03),
       fling_stop_extra_delay_(prop_reg, "Fling Stop Extra Delay", 0.055) {
@@ -31,8 +31,8 @@ void FlingStopFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
 
   UpdateFlingStopDeadline(*hwstate);
 
-  stime_t next_timeout = -1.0;
-  if (fling_stop_deadline_ != 0.0) {
+  stime_t next_timeout = NO_DEADLINE;
+  if (fling_stop_deadline_ != NO_DEADLINE) {
     if (!already_extended_ && NeedsExtraTime(*hwstate)) {
       fling_stop_deadline_ += fling_stop_extra_delay_.val_;
       already_extended_ = true;
@@ -43,7 +43,7 @@ void FlingStopFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
                              hwstate->timestamp, 0.0, 0.0,
                              GESTURES_FLING_TAP_DOWN));
       fling_stop_already_sent_ = true;
-      fling_stop_deadline_ = 0.0;
+      fling_stop_deadline_ = NO_DEADLINE;
     }
   }
   next_->SyncInterpret(hwstate, &next_timeout);
@@ -91,7 +91,7 @@ void FlingStopFilterInterpreter::ConsumeGesture(const Gesture& gesture) {
                            GESTURES_FLING_TAP_DOWN));
   }
   ProduceGesture(gesture);
-  fling_stop_deadline_ = 0.0;
+  fling_stop_deadline_ = NO_DEADLINE;
   prev_gesture_type_ = gesture.type;
   fling_stop_already_sent_ = false;
 }
@@ -104,7 +104,7 @@ void FlingStopFilterInterpreter::UpdateFlingStopDeadline(
   stime_t now = hwstate.timestamp;
   bool finger_added = hwstate.touch_cnt > prev_touch_cnt_;
 
-  if (finger_added && fling_stop_deadline_ == 0.0) {
+  if (finger_added && fling_stop_deadline_ == NO_DEADLINE) {
     // first finger added in a while. Note it.
     fling_stop_deadline_ = now + fling_stop_timeout_.val_;
     return;
@@ -122,13 +122,14 @@ void FlingStopFilterInterpreter::HandleTimerImpl(stime_t now,
           now, fling_stop_deadline_, next_timer_deadline_);
       return;
     }
-    fling_stop_deadline_ = 0.0;
+    fling_stop_deadline_ = NO_DEADLINE;
     ProduceGesture(Gesture(kGestureFling, prev_timestamp_,
                            now, 0.0, 0.0,
                            GESTURES_FLING_TAP_DOWN));
     fling_stop_already_sent_ = true;
-    stime_t next_timeout = next_timer_deadline_ == 0.0 ? -1.0 :
-        std::max(0.0, next_timer_deadline_ - now);
+    stime_t next_timeout =
+      next_timer_deadline_ == NO_DEADLINE || next_timer_deadline_ <= now ?
+      NO_DEADLINE : next_timer_deadline_ - now;
     *timeout = SetNextDeadlineAndReturnTimeoutVal(now, fling_stop_deadline_,
                                                   next_timeout);
     return;
@@ -139,7 +140,7 @@ void FlingStopFilterInterpreter::HandleTimerImpl(stime_t now,
         now, fling_stop_deadline_, next_timer_deadline_);
     return;
   }
-  stime_t next_timeout = -1.0;
+  stime_t next_timeout = NO_DEADLINE;
   next_->HandleTimer(now, &next_timeout);
   *timeout = SetNextDeadlineAndReturnTimeoutVal(now, fling_stop_deadline_,
                                                 next_timeout);

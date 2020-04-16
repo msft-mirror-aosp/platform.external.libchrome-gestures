@@ -438,7 +438,7 @@ namespace {
 stime_t InternalTimerCallback(stime_t now, void* callback_data) {
   Log("TimerCallback called");
   GestureInterpreter* gi = reinterpret_cast<GestureInterpreter*>(callback_data);
-  stime_t next = -1.0;
+  stime_t next = NO_DEADLINE;
   gi->TimerCallback(now, &next);
   return next;
 }
@@ -449,10 +449,10 @@ void GestureInterpreter::PushHardwareState(HardwareState* hwstate) {
     Err("Filters are not composed yet!");
     return;
   }
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   interpreter_->SyncInterpret(hwstate, &timeout);
   if (timer_provider_ && interpret_timer_) {
-    if (timeout <= 0.0) {
+    if (timeout == NO_DEADLINE) {
       timer_provider_->cancel_fn(timer_provider_data_, interpret_timer_);
     } else {
       timer_provider_->set_fn(timer_provider_data_,

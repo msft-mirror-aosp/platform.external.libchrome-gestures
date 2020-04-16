@@ -29,6 +29,9 @@ void gestures_log(int verb, const char* format, ...)
 
 typedef double stime_t;  // seconds
 
+// Represents "unset" when stime_t is used for timeouts or deadlines.
+#define NO_DEADLINE -1.0
+
 enum GestureInterpreterDeviceClass {
   GESTURES_DEVCLASS_UNKNOWN,
   GESTURES_DEVCLASS_MOUSE,

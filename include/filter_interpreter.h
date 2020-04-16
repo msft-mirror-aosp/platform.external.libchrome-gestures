@@ -46,8 +46,9 @@ class FilterInterpreter : public Interpreter, public GestureConsumer {
   virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
 
-  // When we need to call HandlerTimer on next_, or 0.0 if no outstanding timer.
-  stime_t next_timer_deadline_ = 0.0;
+  // When we need to call HandlerTimer on next_, or NO_DEADLINE if there's no
+  // outstanding timer for next_.
+  stime_t next_timer_deadline_ = NO_DEADLINE;
   // Sets the next timer deadline, taking into account the deadline needed for
   // this interpreter and the one from the next in the chain.
   stime_t SetNextDeadlineAndReturnTimeoutVal(stime_t now,

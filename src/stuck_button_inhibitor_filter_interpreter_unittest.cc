@@ -129,29 +129,30 @@ TEST(StuckButtonInhibitorFilterInterpreterTest, SimpleTest) {
                          GESTURES_BUTTON_LEFT | GESTURES_BUTTON_RIGHT);  // up
 
   FingerState fs = { 0, 0, 0, 0, 1, 0, 150, 4000, 1, 0 };
+  const stime_t kND = NO_DEADLINE;
   Record recs[] = {
     // Simple move. Nothing button related
-    { -1.0, make_hwstate(1.0, 0, 1, 1, &fs),  true,  -1.0, null, -1.0, null },
-    { -1.0, make_hwstate(1.1, 0, 1, 1, &fs),  true,  -1.0, move, -1.0, move },
+    { -1.0, make_hwstate(1.0, 0, 1, 1, &fs),  true,   kND, null,  kND, null },
+    { -1.0, make_hwstate(1.1, 0, 1, 1, &fs),  true,   kND, move,  kND, move },
     // Button down, followed by nothing, so we timeout and send button up
-    { -1.0, make_hwstate(1.2, 0, 1, 1, &fs),  true,  -1.0, down, -1.0, down },
-    { -1.0, make_hwstate(1.3, 0, 0, 0, NULL), true,   1.0, null, -1.0, null },
-    {  2.3, make_hwstate(0.0, 0, 0, 0, NULL), false, -1.0, up,   -1.0, null },
+    { -1.0, make_hwstate(1.2, 0, 1, 1, &fs),  true,   kND, down,  kND, down },
+    { -1.0, make_hwstate(1.3, 0, 0, 0, NULL), true,   1.0, null,  kND, null },
+    {  2.3, make_hwstate(0.0, 0, 0, 0, NULL), false,  kND, up,    kND, null },
     // Next sends button up in timeout
-    { -1.0, make_hwstate(3.2, 0, 1, 1, &fs),  true,  -1.0, down, -1.0, down },
+    { -1.0, make_hwstate(3.2, 0, 1, 1, &fs),  true,   kND, down,  kND, down },
     { -1.0, make_hwstate(3.3, 0, 0, 0, NULL), true,   0.5, null,  0.5, null },
-    {  3.8, make_hwstate(0.0, 0, 0, 0, NULL), true,  -1.0, up,   -1.0, up   },
+    {  3.8, make_hwstate(0.0, 0, 0, 0, NULL), true,   kND, up,    kND, up   },
     // Double down/up squash
-    { -1.0, make_hwstate(4.2, 0, 1, 1, &fs),  true,  -1.0, down, -1.0, down },
-    { -1.0, make_hwstate(4.3, 0, 1, 1, &fs),  true,  -1.0, null, -1.0, down },
-    { -1.0, make_hwstate(4.4, 0, 0, 0, NULL), true,  -1.0, up,   -1.0, up   },
-    { -1.0, make_hwstate(4.5, 0, 0, 0, NULL), true,  -1.0, null, -1.0, up   },
+    { -1.0, make_hwstate(4.2, 0, 1, 1, &fs),  true,   kND, down,  kND, down },
+    { -1.0, make_hwstate(4.3, 0, 1, 1, &fs),  true,   kND, null,  kND, down },
+    { -1.0, make_hwstate(4.4, 0, 0, 0, NULL), true,   kND, up,    kND, up   },
+    { -1.0, make_hwstate(4.5, 0, 0, 0, NULL), true,   kND, null,  kND, up   },
     // Right down, left double up/down squash
-    { -1.0, make_hwstate(5.1, 0, 1, 1, &fs),  true,  -1.0, rdwn, -1.0, rdwn },
-    { -1.0, make_hwstate(5.2, 0, 1, 1, &fs),  true,  -1.0, down, -1.0, rldn },
-    { -1.0, make_hwstate(5.3, 0, 1, 1, &fs),  true,  -1.0, null, -1.0, down },
-    { -1.0, make_hwstate(5.4, 0, 0, 0, NULL), true,   1.0, rup,  -1.0, rup  },
-    { -1.0, make_hwstate(5.5, 0, 0, 0, NULL), true,  -1.0, up,   -1.0, rlup },
+    { -1.0, make_hwstate(5.1, 0, 1, 1, &fs),  true,   kND, rdwn,  kND, rdwn },
+    { -1.0, make_hwstate(5.2, 0, 1, 1, &fs),  true,   kND, down,  kND, rldn },
+    { -1.0, make_hwstate(5.3, 0, 1, 1, &fs),  true,   kND, null,  kND, down },
+    { -1.0, make_hwstate(5.4, 0, 0, 0, NULL), true,   1.0, rup,   kND, rup  },
+    { -1.0, make_hwstate(5.5, 0, 0, 0, NULL), true,   kND, up,    kND, rlup },
   };
 
   for (size_t i = 0; i < arraysize(recs); ++i) {
@@ -161,7 +162,7 @@ TEST(StuckButtonInhibitorFilterInterpreterTest, SimpleTest) {
       base_interpreter->return_values_.push_back(
           make_pair(rec.next_gs_, rec.next_timeout_));
     }
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     Gesture* result = NULL;
     if (rec.now_ < 0.0) {
       result = wrapper.SyncInterpret(&rec.hs_, &timeout);

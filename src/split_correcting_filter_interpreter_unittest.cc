@@ -371,7 +371,7 @@ TEST(SplitCorrectingFilterInterpreterTest, LumpyThumbSplitTest) {
     unsigned short finger_cnt = input.id1 ? 2 : 1;
     HardwareState hs =
         make_hwstate(input.now, input.buttons_down, finger_cnt, finger_cnt, fs);
-    stime_t timeout = -1;
+    stime_t timeout = NO_DEADLINE;
     wrapper.SyncInterpret(&hs, &timeout);
   }
   EXPECT_EQ(arraysize(inputs), base_interpreter->iteration_);

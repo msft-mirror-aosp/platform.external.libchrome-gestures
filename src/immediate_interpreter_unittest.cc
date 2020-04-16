@@ -341,7 +341,7 @@ TEST(ImmediateInterpreterTest, ScrollThenFalseTapTest) {
   EXPECT_EQ(kGestureTypeFling, gs->type);
   gs = wrapper.SyncInterpret(&hardware_states[4], NULL);
   ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), gs);
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   gs = wrapper.SyncInterpret(&hardware_states[5], &timeout);
   ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), gs);
   // If it were a tap, timeout would be > 0, but this shouldn't be a tap,
@@ -824,7 +824,7 @@ TEST(ImmediateInterpreterTest, OneFatFingerScrollTest) {
     HardwareState hs =
         make_hwstate(inputs[i].now, 0, finger_cnt, finger_cnt, fs);
 
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     Gesture* gs = wrapper.SyncInterpret(&hs, &timeout);
     switch (inputs[i].expectation) {
       case kAnything:
@@ -970,7 +970,7 @@ TEST(ImmediateInterpreterTest, NoLiftoffScrollTest) {
     };
     HardwareState hs = make_hwstate(inputs[i].now, 0, 2, 2, fs);
 
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     Gesture* gs = wrapper.SyncInterpret(&hs, &timeout);
     if (gs) {
       EXPECT_EQ(kGestureTypeScroll, gs->type);
@@ -2075,7 +2075,7 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
 
     unsigned bdown = 0;
     unsigned bup = 0;
-    stime_t tm = -1.0;
+    stime_t tm = NO_DEADLINE;
     bool same_fingers = false;
     HardwareState* hwstate = &hwsgs_full[i].hws;
     stime_t now = hwsgs_full[i].callback_now;
@@ -2119,7 +2119,7 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
     if (hwsgs_full[i].timeout)
       EXPECT_GT(tm, 0.0) << desc;
     else
-      EXPECT_DOUBLE_EQ(-1.0, tm) << desc;
+      EXPECT_DOUBLE_EQ(NO_DEADLINE, tm) << desc;
     EXPECT_EQ(hwsgs_full[i].expected_state, ii->tap_to_click_state_)
         << desc;
   }
@@ -2212,7 +2212,7 @@ TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest) {
     unsigned short finger_cnt = fs[0].tracking_id == -1 ? 0 :
         (fs[1].tracking_id == -1 ? 1 : 2);
     HardwareState hs = make_hwstate(input.now, 0, finger_cnt, finger_cnt, fs);
-    stime_t timeout = -1;
+    stime_t timeout = NO_DEADLINE;
     Gesture* gs = wrapper.SyncInterpret(&hs, &timeout);
     if (finger_cnt > 0) {
       // Expect no timeout
@@ -2284,7 +2284,7 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
     for (size_t i = 0; i < arraysize(hwstates); i++) {
       down = 0;
       up = 0;
-      stime_t timeout = -1.0;
+      stime_t timeout = NO_DEADLINE;
       set<short, kMaxGesturingFingers> gs =
           hwstates[i].finger_cnt == 1 ? MkSet(91) : MkSet();
       ii->UpdateTapState(
@@ -2426,7 +2426,7 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
         ii->state_buffer_.PushState(*hwstate);
       unsigned bdown = 0;
       unsigned bup = 0;
-      stime_t tm = -1.0;
+      stime_t tm = NO_DEADLINE;
       ii->UpdateTapState(
           hwstate, hwsgs.gs, same_fingers, now, &bdown, &bup, &tm);
       ii->prev_gs_fingers_ = hwsgs.gs;
@@ -2440,14 +2440,14 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
           if (hwsgs.timeout)
             EXPECT_GT(tm, 0.0) << desc;
           else
-            EXPECT_DOUBLE_EQ(-1.0, tm) << desc;
+            EXPECT_DOUBLE_EQ(NO_DEADLINE, tm) << desc;
           EXPECT_EQ(hwsgs.expected_state, ii->tap_to_click_state_) << desc;
           break;
         case 2:  // tap should be disabled
         case 4:
           EXPECT_EQ(0, bdown) << desc;
           EXPECT_EQ(0, bup) << desc;
-          EXPECT_DOUBLE_EQ(-1.0, tm) << desc;
+          EXPECT_DOUBLE_EQ(NO_DEADLINE, tm) << desc;
           EXPECT_EQ(kIdl, ii->tap_to_click_state_) << desc;
           break;
       }
@@ -2499,34 +2499,35 @@ TEST(ImmediateInterpreterTest, ClickTest) {
   };
   ClickTestHardwareStateAndExpectations records[] = {
     // reset
-    {make_hwstate(0,0,0,0,NULL),-1,0,0},
+    {make_hwstate(0,0,0,0,NULL),NO_DEADLINE,0,0},
 
     // button down, 2 fingers touch, button up, 2 fingers lift
-    {make_hwstate(1,1,0,0,NULL),-1,0,0},
-    {make_hwstate(1.01,1,2,2,&finger_states[0]),-1,0,0},
+    {make_hwstate(1,1,0,0,NULL),NO_DEADLINE,0,0},
+    {make_hwstate(1.01,1,2,2,&finger_states[0]), NO_DEADLINE, 0, 0},
     {make_hwstate(2,0,2,2,&finger_states[0]),
-     -1,GESTURES_BUTTON_RIGHT,GESTURES_BUTTON_RIGHT},
-    {make_hwstate(3,0,0,0,NULL),-1,0,0},
+     NO_DEADLINE, GESTURES_BUTTON_RIGHT, GESTURES_BUTTON_RIGHT},
+    {make_hwstate(3,0,0,0,NULL), NO_DEADLINE, 0, 0},
 
     // button down, 2 close fingers touch, fingers lift
-    {make_hwstate(7,1,0,0,NULL),-1,0,0},
-    {make_hwstate(7.01,1,2,2,&finger_states[2]),-1,0,0},
+    {make_hwstate(7,1,0,0,NULL), NO_DEADLINE, 0, 0},
+    {make_hwstate(7.01,1,2,2,&finger_states[2]), NO_DEADLINE, 0, 0},
     {make_hwstate(7.02,0,2,2,&finger_states[2]),
-     -1,GESTURES_BUTTON_LEFT,GESTURES_BUTTON_LEFT},
-    {make_hwstate(8,0,0,0,NULL),-1,0,0},
+     NO_DEADLINE, GESTURES_BUTTON_LEFT,GESTURES_BUTTON_LEFT},
+    {make_hwstate(8,0,0,0,NULL), NO_DEADLINE, 0, 0},
 
     // button down with 2 fingers, button up, fingers lift
-    {make_hwstate(9.01,1,2,2,&finger_states[4]),-1,0,0},
-    {make_hwstate(9.02,1,2,2,&finger_states[4]),-1,0,0},
+    {make_hwstate(9.01,1,2,2,&finger_states[4]),NO_DEADLINE,0,0},
+    {make_hwstate(9.02,1,2,2,&finger_states[4]),NO_DEADLINE,0,0},
     {make_hwstate(9.5,0,2,2,&finger_states[4]),
-     -1,GESTURES_BUTTON_RIGHT,GESTURES_BUTTON_RIGHT},
-    {make_hwstate(10,0,0,0,NULL),-1,0,0},
+     NO_DEADLINE, GESTURES_BUTTON_RIGHT,GESTURES_BUTTON_RIGHT},
+    {make_hwstate(10,0,0,0,NULL), NO_DEADLINE, 0, 0},
 
     // button down with 2 fingers, timeout, button up, fingers lift
-    {make_hwstate(11,1,2,2,&finger_states[4]),-1,0,0},
+    {make_hwstate(11,1,2,2,&finger_states[4]), NO_DEADLINE, 0, 0},
     {make_hwstate(0,0,0,0,NULL),11.5,GESTURES_BUTTON_RIGHT,0},
-    {make_hwstate(12,0,2,2,&finger_states[4]),-1,0,GESTURES_BUTTON_RIGHT},
-    {make_hwstate(10,0,0,0,NULL),-1,0,0}
+    {make_hwstate(12,0,2,2,&finger_states[4]), NO_DEADLINE, 0,
+     GESTURES_BUTTON_RIGHT},
+    {make_hwstate(10,0,0,0,NULL), NO_DEADLINE, 0, 0}
   };
 
   for (size_t i = 0; i < arraysize(records); ++i) {
@@ -3098,7 +3099,7 @@ TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest) {
       { 0, 0, 0, 0, input.p1, 0, input.x1, input.y1, 2, 0 },
     };
     HardwareState hs = make_hwstate(input.now, 0, 2, 2, fs);
-    stime_t timeout = -1;
+    stime_t timeout = NO_DEADLINE;
     Gesture* gs = wrapper.SyncInterpret(&hs, &timeout);
     if (input.expected_gesture != kAny) {
       if (gs)

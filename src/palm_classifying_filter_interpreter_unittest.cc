@@ -377,7 +377,7 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmReevaluateTest) {
           inputs[i].x_, inputs[i].y_, 1, 0 };
     HardwareState hs = make_hwstate(inputs[i].now_, 0, 1, 1, &fs);
 
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     wrapper.SyncInterpret(&hs, &timeout);
     // Allow movement at first:
     stime_t age = inputs[i].now_ - inputs[0].now_;

@@ -113,13 +113,13 @@ TEST(InterpreterTest, SimpleTest) {
   };
   HardwareState hardware_state = make_hwstate(200000, 0, 1, 1, &finger_state);
 
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   base_interpreter->expected_hwstate_ = &hardware_state;
   Gesture* result = wrapper.SyncInterpret(&hardware_state, &timeout);
   EXPECT_TRUE(base_interpreter->return_value_ == *result);
   ASSERT_GT(timeout, 0);
   stime_t now = hardware_state.timestamp + timeout;
-  timeout = -1.0;
+  timeout = NO_DEADLINE;
   result = wrapper.HandleTimer(now, &timeout);
   EXPECT_TRUE(base_interpreter->return_value_ == *result);
   ASSERT_LT(timeout, 0);
@@ -171,7 +171,7 @@ TEST(InterpreterTest, ResetLogTest) {
     0, 0, 0, 0, 10, 0, 50, 50, 1, 0
   };
   HardwareState hardware_state = make_hwstate(200000, 0, 1, 1, &finger_state);
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   wrapper.SyncInterpret(&hardware_state, &timeout);
   EXPECT_EQ(base_interpreter->log_->size(), 1);
 

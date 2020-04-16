@@ -46,15 +46,16 @@ void FilterInterpreter::Clear() {
 
 stime_t FilterInterpreter::SetNextDeadlineAndReturnTimeoutVal(
     stime_t now, stime_t local_deadline, stime_t next_timeout) {
-  next_timer_deadline_ = next_timeout > 0.0 ? now + next_timeout : 0.0;
+  next_timer_deadline_ = next_timeout > 0.0 ? now + next_timeout : NO_DEADLINE;
   stime_t local_timeout =
-    local_deadline <= 0.0 ? -1.0 : std::max(local_deadline - now, 0.0);
+    local_deadline == NO_DEADLINE || local_deadline <= now ? NO_DEADLINE :
+    local_deadline - now;
 
-  if (next_timeout <= 0.0 && local_timeout <= 0.0)
-    return -1.0;
-  if (next_timeout <= 0.0)
+  if (next_timeout == NO_DEADLINE && local_timeout == NO_DEADLINE)
+    return NO_DEADLINE;
+  if (next_timeout == NO_DEADLINE)
     return local_timeout;
-  if (local_timeout <= 0.0)
+  if (local_timeout == NO_DEADLINE)
     return next_timeout;
   return std::min(next_timeout, local_timeout);
 }

@@ -25,27 +25,29 @@ class FilterInterpreterTest : public ::testing::Test {
 
 TEST_F(FilterInterpreterTest, DeadlineSettingNoDeadlines) {
   stime_t timeout_val =
-    interpreter.SetNextDeadlineAndReturnTimeoutVal(10000.0, 0.0, 0.0);
-  EXPECT_FLOAT_EQ(-1.0, timeout_val);
-  EXPECT_FLOAT_EQ(0.0, interpreter.next_timer_deadline_);
+    interpreter.SetNextDeadlineAndReturnTimeoutVal(10000.0, NO_DEADLINE,
+                                                   NO_DEADLINE);
+  EXPECT_FLOAT_EQ(NO_DEADLINE, timeout_val);
+  EXPECT_FLOAT_EQ(NO_DEADLINE, interpreter.next_timer_deadline_);
 }
 
 TEST_F(FilterInterpreterTest, DeadlineSettingLocalOnly) {
   stime_t timeout_val =
-    interpreter.SetNextDeadlineAndReturnTimeoutVal(10000.0, 10001.0, 0.0);
+    interpreter.SetNextDeadlineAndReturnTimeoutVal(10000.0, 10001.0,
+                                                   NO_DEADLINE);
   EXPECT_FLOAT_EQ(1.0, timeout_val);
-  EXPECT_FLOAT_EQ(0.0, interpreter.next_timer_deadline_);
+  EXPECT_FLOAT_EQ(NO_DEADLINE, interpreter.next_timer_deadline_);
 
   EXPECT_FALSE(interpreter.ShouldCallNextTimer(10001.00));
 }
 
 TEST_F(FilterInterpreterTest, DeadlineSettingNextOnly) {
   stime_t timeout_val =
-    interpreter.SetNextDeadlineAndReturnTimeoutVal(10000.0, 0.0, 1.0);
+    interpreter.SetNextDeadlineAndReturnTimeoutVal(10000.0, NO_DEADLINE, 1.0);
   EXPECT_FLOAT_EQ(1.0, timeout_val);
   EXPECT_FLOAT_EQ(10001.0, interpreter.next_timer_deadline_);
 
-  EXPECT_TRUE(interpreter.ShouldCallNextTimer(0.0));
+  EXPECT_TRUE(interpreter.ShouldCallNextTimer(NO_DEADLINE));
 }
 
 TEST_F(FilterInterpreterTest, DeadlineSettingLocalBeforeNext) {

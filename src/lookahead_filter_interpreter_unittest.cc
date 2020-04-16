@@ -27,7 +27,7 @@ class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
  public:
   LookaheadFilterInterpreterTestInterpreter()
       : Interpreter(NULL, NULL, false),
-        timer_return_(-1.0),
+        timer_return_(NO_DEADLINE),
         clear_incoming_hwstates_(false), expected_id_(-1),
         expected_flags_(0), expected_flags_at_(-1),
         expected_flags_at_occurred_(false) {}
@@ -58,7 +58,7 @@ class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
       hwstate->finger_cnt = 0;
     if (timer_return_ >= 0.0) {
       *timeout = timer_return_;
-      timer_return_ = -1.0;
+      timer_return_ = NO_DEADLINE;
     }
     if (return_values_.empty())
       return;
@@ -159,7 +159,7 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
       interpreter->min_delay_.val_ = 0.05;
       expected_timeout = interpreter->min_delay_.val_;
     }
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     Gesture* out = wrapper.SyncInterpret(&hs[i], &timeout);
     if (out) {
       EXPECT_EQ(kGestureTypeFling, out->type);
@@ -169,10 +169,10 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
     if ((i % 3) != 2) {
       expected_timeout -= hs[i + 1].timestamp - hs[i].timestamp;
     } else {
-      stime_t newtimeout = -1.0;
+      stime_t newtimeout = NO_DEADLINE;
       out = wrapper.HandleTimer(hs[i].timestamp + timeout, &newtimeout);
       if (newtimeout < 0.0)
-        EXPECT_DOUBLE_EQ(-1.0, newtimeout);
+        EXPECT_DOUBLE_EQ(NO_DEADLINE, newtimeout);
       if (i == 5) {
         EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
       } else {
@@ -192,13 +192,13 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
         if (cnt++ == 10)
           break;
         timeout = newtimeout;
-        newtimeout = -1.0;
+        newtimeout = NO_DEADLINE;
         now += timeout;
         out = wrapper.HandleTimer(now, &newtimeout);
         if (newtimeout >= 0.0)
           EXPECT_LT(newtimeout, 1.0);
         else
-          EXPECT_DOUBLE_EQ(-1.0, newtimeout);
+          EXPECT_DOUBLE_EQ(NO_DEADLINE, newtimeout);
       }
     }
   }
@@ -260,14 +260,14 @@ TEST(LookaheadFilterInterpreterTest, VariableDelayTest) {
   interpreter.min_delay_.val_ = 0.0;
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     wrapper.SyncInterpret(&hs[i], &timeout);
     stime_t next_input = i < (arraysize(hs) - 1) ? hs[i + 1].timestamp :
         INFINITY;
     stime_t now = hs[i].timestamp;
     while (timeout >= 0 && (timeout + now) < next_input) {
       now += timeout;
-      timeout = -1.0;
+      timeout = NO_DEADLINE;
       wrapper.HandleTimer(now, &timeout);
     }
   }
@@ -340,14 +340,14 @@ TEST(LookaheadFilterInterpreterTest, NoTapSetTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     base_interpreter->expected_finger_cnts_.push_back(hs[i].finger_cnt);
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     interpreter.SyncInterpret(&hs[i], &timeout);
     stime_t next_input = i < (arraysize(hs) - 1) ? hs[i + 1].timestamp :
         INFINITY;
     stime_t now = hs[i].timestamp;
     while (timeout >= 0 && (timeout + now) < next_input) {
       now += timeout;
-      timeout = -1.0;
+      timeout = NO_DEADLINE;
       interpreter.HandleTimer(now, &timeout);
     }
   }
@@ -383,7 +383,7 @@ TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest) {
   wrapper.Reset(interpreter.get());
   interpreter->min_delay_.val_ = 0.05;
 
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   Gesture* out = wrapper.SyncInterpret(&hs, &timeout);
   EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
   EXPECT_FLOAT_EQ(interpreter->min_delay_.val_, timeout);
@@ -559,12 +559,12 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
     wrapper.Reset(interpreter.get());
     interpreter->min_delay_.val_ = 0.05;
 
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     Gesture* out = wrapper.SyncInterpret(&hs[0], &timeout);
     EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
     EXPECT_GT(timeout, 0);
     const size_t next_idx = should_interpolate ? 2 : 1;
-    timeout = -1.0;
+    timeout = NO_DEADLINE;
     out = wrapper.SyncInterpret(&hs[next_idx], &timeout);
     EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
     EXPECT_GT(timeout, 0);
@@ -573,7 +573,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
     size_t gs_count = 0;
     stime_t now = hs[next_idx].timestamp + timeout;
     do {
-      timeout = -1.0;
+      timeout = NO_DEADLINE;
       out = wrapper.HandleTimer(now, &timeout);
       EXPECT_NE(reinterpret_cast<Gesture*>(NULL), out);
       gs_count++;
@@ -631,20 +631,20 @@ TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
   interpreter->min_delay_.val_ = 0.017;
   wrapper.Reset(interpreter.get());
 
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   Gesture* out = wrapper.SyncInterpret(&hs[0], &timeout);
   EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
   EXPECT_FLOAT_EQ(timeout, interpreter->min_delay_.val_);
 
   stime_t now = hs[0].timestamp + timeout;
-  timeout = -1.0;
+  timeout = NO_DEADLINE;
   out = wrapper.HandleTimer(now, &timeout);
   ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   EXPECT_EQ(1, out->details.move.dy);
   EXPECT_DOUBLE_EQ(timeout, 0.700);
 
-  timeout = -1.0;
+  timeout = NO_DEADLINE;
   out = wrapper.SyncInterpret(&hs[1], &timeout);
   ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
   EXPECT_EQ(kGestureTypeMove, out->type);
@@ -721,7 +721,7 @@ TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
   wrapper.Reset(interpreter.get());
 
   for (size_t i = 0; i < arraysize(hsid); i++) {
-    stime_t timeout = -1.0;
+    stime_t timeout = NO_DEADLINE;
     Gesture* out = wrapper.SyncInterpret(&hsid[i].hs, &timeout);
     if (out) {
       EXPECT_EQ(kGestureTypeFling, out->type);
@@ -778,7 +778,7 @@ TEST(LookaheadFilterInterpreterTest, QuickMoveTest) {
       NULL, base_interpreter, NULL));
   wrapper.Reset(interpreter.get());
 
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   List<LookaheadFilterInterpreter::QState>* queue = &interpreter->queue_;
 
   // Pushing the first event
@@ -875,7 +875,7 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
   interpreter->max_delay_.val_ = 0.026;
 
   // Prime it w/ a dummy hardware state
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   HardwareState temp_hs = make_hwstate(0.000001, 0, 0, 0, NULL);
   wrapper.SyncInterpret(&temp_hs, &timeout);
   wrapper.HandleTimer(temp_hs.timestamp + timeout, NULL);
@@ -895,7 +895,7 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
     for (size_t idx = 0; idx < finger_cnt; idx++)
       input_ids.insert(fs[idx].tracking_id);
 
-    stime_t timeout = -1;
+    stime_t timeout = NO_DEADLINE;
     wrapper.SyncInterpret(&hs, &timeout);
     if (timeout >= 0) {
       stime_t next_timestamp = INFINITY;
@@ -904,7 +904,7 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
       stime_t now = in.now;
       while (timeout >= 0 && (now + timeout) < next_timestamp) {
         now += timeout;
-        timeout = -1;
+        timeout = NO_DEADLINE;
         wrapper.HandleTimer(now, &timeout);
       }
     }
@@ -1102,7 +1102,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaDrumrollTest) {
           GESTURES_FINGER_WARP_X | GESTURES_FINGER_WARP_Y;
       base_interpreter->expected_flags_at_ = input.now_;
     }
-    stime_t timeout = -1;
+    stime_t timeout = NO_DEADLINE;
     wrapper.SyncInterpret(&hs, &timeout);
     if (timeout >= 0) {
       stime_t next_timestamp = INFINITY;
@@ -1111,7 +1111,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaDrumrollTest) {
       stime_t now = input.now_;
       while (timeout >= 0 && (now + timeout) < next_timestamp) {
         now += timeout;
-        timeout = -1;
+        timeout = NO_DEADLINE;
         wrapper.HandleTimer(now, &timeout);
       }
     }
@@ -1163,7 +1163,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
     { 1.15980, 34.66, 31.60, 48.3, 53.58, 29.40, 40.5, 72.25, 29.10, 28.9 }
   };
   // Prime it w/ a dummy hardware state
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   HardwareState temp_hs = make_hwstate(0.000001, 0, 0, 0, NULL);
   interpreter.SyncInterpret(&temp_hs, &timeout);
 
@@ -1179,7 +1179,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
     };
     HardwareState hs =
         make_hwstate(input.now, 0, arraysize(fs), arraysize(fs), fs);
-    timeout = -1.0;
+    timeout = NO_DEADLINE;
     interpreter.SyncInterpret(&hs, &timeout);
     if (timeout >= 0) {
       stime_t next_timestamp = INFINITY;
@@ -1188,7 +1188,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
       stime_t now = input.now;
       while (timeout >= 0 && (now + timeout) < next_timestamp) {
         now += timeout;
-        timeout = -1;
+        timeout = NO_DEADLINE;
         fprintf(stderr, "calling handler timer: %f\n", now);
         interpreter.HandleTimer(now, &timeout);
       }
@@ -1249,7 +1249,7 @@ TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest) {
       NULL, base_interpreter, NULL));
   wrapper.Reset(interpreter.get());
 
-  stime_t timeout = -1.0;
+  stime_t timeout = NO_DEADLINE;
   List<LookaheadFilterInterpreter::QState>* queue = &interpreter->queue_;
 
   wrapper.SyncInterpret(&hs[0], &timeout);

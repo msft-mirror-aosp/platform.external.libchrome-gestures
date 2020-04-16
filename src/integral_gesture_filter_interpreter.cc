@@ -21,14 +21,14 @@ IntegralGestureFilterInterpreter::IntegralGestureFilterInterpreter(
       vscroll_remainder_(0.0),
       hscroll_ordinal_remainder_(0.0),
       vscroll_ordinal_remainder_(0.0),
-      remainder_reset_deadline_(-1.0) {
+      remainder_reset_deadline_(NO_DEADLINE) {
   InitName();
 }
 
 void IntegralGestureFilterInterpreter::SyncInterpretImpl(
     HardwareState* hwstate, stime_t* timeout) {
   can_clear_remainders_ = hwstate->finger_cnt == 0 && hwstate->touch_cnt == 0;
-  stime_t next_timeout = -1.0;
+  stime_t next_timeout = NO_DEADLINE;
   next_->SyncInterpret(hwstate, &next_timeout);
   *timeout = SetNextDeadlineAndReturnTimeoutVal(
       hwstate->timestamp, remainder_reset_deadline_, next_timeout);
@@ -43,7 +43,7 @@ void IntegralGestureFilterInterpreter::HandleTimerImpl(
       return;
     }
 
-    stime_t next_timeout = -1.0;
+    stime_t next_timeout = NO_DEADLINE;
     next_->HandleTimer(now, &next_timeout);
     *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
                                                   remainder_reset_deadline_,
@@ -58,9 +58,10 @@ void IntegralGestureFilterInterpreter::HandleTimerImpl(
       hscroll_ordinal_remainder_ = vscroll_ordinal_remainder_ =
           hscroll_remainder_ = vscroll_remainder_ = 0.0;
 
-    remainder_reset_deadline_ = -1.0;
-    stime_t next_timeout = next_timer_deadline_ <= 0.0 ? -1.0 :
-      std::max(0.0, next_timer_deadline_ - now);
+    remainder_reset_deadline_ = NO_DEADLINE;
+    stime_t next_timeout =
+      next_timer_deadline_ == NO_DEADLINE || next_timer_deadline_ <= now ?
+      NO_DEADLINE : next_timer_deadline_ - now;
     *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
                                                   remainder_reset_deadline_,
                                                   next_timeout);
