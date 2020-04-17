@@ -123,4 +123,40 @@ TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest) {
   EXPECT_NEAR(offset_of_high_res_scroll, gs->details.scroll.dy, 0.1);
 }
 
+TEST(MouseInterpreterTest, JankyScrollTest) {
+  HardwareProperties hwprops = make_hwprops_for_mouse(1, 0);
+  MouseInterpreter mi(NULL, NULL);
+  TestInterpreterWrapper wrapper(&mi, &hwprops);
+  Gesture* gs;
+
+  // Because we do not allow time deltas less than 8ms when calculating scroll
+  // acceleration, the last two scroll events should give the same dy
+  // (timestamp is in units of seconds)
+  HardwareState hwstates[] = {
+    { 200000,      0, 0, 0, NULL, 0, 0, -1, 0, 0, 0.0 },
+    { 200000.008,  0, 0, 0, NULL, 0, 0, -1, 0, 0, 0.0 },
+    { 200000.0085, 0, 0, 0, NULL, 0, 0, -1, 0, 0, 0.0 },
+  };
+
+  gs = wrapper.SyncInterpret(&hwstates[0], NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  EXPECT_EQ(kGestureTypeScroll, gs->type);
+  EXPECT_EQ(0, gs->details.scroll.dx);
+  // Ignore the dy from the first scroll event, as the gesture interpreter
+  // hardcodes that time delta to 1 second, making it invalid for this test.
+
+  gs = wrapper.SyncInterpret(&hwstates[1], NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  EXPECT_EQ(kGestureTypeScroll, gs->type);
+  EXPECT_EQ(0, gs->details.scroll.dx);
+  float scroll_offset = gs->details.scroll.dy;
+
+  gs = wrapper.SyncInterpret(&hwstates[2], NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  EXPECT_EQ(kGestureTypeScroll, gs->type);
+  EXPECT_EQ(0, gs->details.scroll.dx);
+
+  EXPECT_NEAR(scroll_offset, gs->details.scroll.dy, 0.1);
+}
+
 }  // namespace gestures

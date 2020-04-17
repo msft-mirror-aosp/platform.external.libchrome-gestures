@@ -142,6 +142,7 @@ bool MouseInterpreter::EmulateScrollWheel(const HardwareState& hwstate) {
 
 void MouseInterpreter::InterpretScrollWheelEvent(const HardwareState& hwstate,
                                                  bool is_vertical) {
+  const float scroll_wheel_event_time_delta_min = 0.008;
   bool use_high_resolution =
       is_vertical && hwprops_->wheel_is_hi_res
       && hi_res_scrolling_.val_;
@@ -171,7 +172,16 @@ void MouseInterpreter::InterpretScrollWheelEvent(const HardwareState& hwstate,
     }
 
     // If start_time == end_time, compute velocity using dt = 1 second.
+    // (this happens when the user initially starts scrolling)
     stime_t dt = (end_time - start_time) ?: 1.0;
+    if (dt < scroll_wheel_event_time_delta_min) {
+      // the first packet received after BT wakeup may be delayed, causing the
+      // time delta between that and the subsequent packet to be very small.
+      // Prevent small time deltas from triggering large amounts of acceleration
+      // by enforcing a minimum time delta.
+      dt = scroll_wheel_event_time_delta_min;
+    }
+
     float velocity = current_wheel_value / dt;
     float offset = current_wheel_value * ComputeScrollAccelFactor(velocity);
     last_wheel_record->timestamp = hwstate.timestamp;

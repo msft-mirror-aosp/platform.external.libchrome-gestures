@@ -17,6 +17,7 @@ namespace gestures {
 class MouseInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(MouseInterpreterTest, SimpleTest);
   FRIEND_TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest);
+  FRIEND_TEST(MouseInterpreterTest, JankyScrollTest);
  public:
   MouseInterpreter(PropRegistry* prop_reg, Tracer* tracer);
   virtual ~MouseInterpreter() {};
