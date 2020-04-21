@@ -38,11 +38,9 @@ install_regression_test_suite() {
 }
 
 run_regression_tests() {
-  info "Run regression tests..."
-
-  touchtests run all | egrep "failure|error"
-  if [[ $? -eq 0 ]]; then
-    die_notrace "Regression Tests failed, please check your patch again."
+  info "Running regression tests..."
+  if ! touchtests --presubmit --ref tools/touchtests-report.json; then
+    die_notrace "Regression tests failed."
   fi
 }
 
