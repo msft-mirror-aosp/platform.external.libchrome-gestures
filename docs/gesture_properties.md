@@ -36,8 +36,10 @@ Properties Service.
 ### Enabling the Gesture Properties Service
 
 First, enable the service by going to
-chrome://flags/#gesture-properties-dbus-service, set the flag to "Enabled", and
-restart Chromium. You should only have to do this once per Chromium profile.
+`chrome://flags/#gesture-properties-dbus-service` (which has to be typed or
+pasted into the address bar for security reasons), set the "Enable gesture
+properties service" flag to "Enabled", and restart Chromium. You should only
+have to do this once per Chromium profile.
 
 ### From crosh
 
