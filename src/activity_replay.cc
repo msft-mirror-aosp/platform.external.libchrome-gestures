@@ -39,8 +39,12 @@ bool ActivityReplay::Parse(const string& data,
   string error_msg;
   Json::Value root;
   {
-    Json::Reader reader;
-    if (!reader.parse(data, root, false)) {  // root modified in parse()
+    Json::CharReaderBuilder builder;
+    std::unique_ptr<Json::CharReader> const reader(builder.newCharReader());
+    const char * const data_str = data.c_str();
+
+    if (!reader->parse(data_str, data_str + data.size(),
+                       &root, &error_msg)) {  // root modified in parse()
       Err("Parse failed: %s", error_msg.c_str());
       return false;
     }
