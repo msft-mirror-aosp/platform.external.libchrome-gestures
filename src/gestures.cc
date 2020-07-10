@@ -279,52 +279,44 @@ string Gesture::String() const {
 bool Gesture::operator==(const Gesture& that) const {
   if (type != that.type)
     return false;
+  bool times_equal = gestures::DoubleEq(start_time, that.start_time) &&
+                     gestures::DoubleEq(end_time, that.end_time);
   switch (type) {
     case kGestureTypeNull:  // fall through
     case kGestureTypeContactInitiated:
       return true;
     case kGestureTypeMove:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time) &&
+      return times_equal &&
           gestures::FloatEq(details.move.dx, that.details.move.dx) &&
           gestures::FloatEq(details.move.dy, that.details.move.dy);
     case kGestureTypeScroll:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time) &&
+      return times_equal &&
           gestures::FloatEq(details.scroll.dx, that.details.scroll.dx) &&
           gestures::FloatEq(details.scroll.dy, that.details.scroll.dy);
     case kGestureTypePinch:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time) &&
+      return times_equal &&
           gestures::FloatEq(details.pinch.dz, that.details.pinch.dz);
     case kGestureTypeButtonsChange:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time) &&
+      return times_equal &&
           details.buttons.down == that.details.buttons.down &&
           details.buttons.up == that.details.buttons.up;
     case kGestureTypeFling:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time) &&
+      return times_equal &&
           gestures::FloatEq(details.fling.vx, that.details.fling.vx) &&
           gestures::FloatEq(details.fling.vy, that.details.fling.vy);
     case kGestureTypeSwipe:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time) &&
+      return times_equal &&
           gestures::FloatEq(details.swipe.dx, that.details.swipe.dx);
     case kGestureTypeSwipeLift:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time);
+      return times_equal;
     case kGestureTypeFourFingerSwipe:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time) &&
+      return times_equal &&
           gestures::FloatEq(details.four_finger_swipe.dx,
               that.details.four_finger_swipe.dx);
     case kGestureTypeFourFingerSwipeLift:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time);
+      return times_equal;
     case kGestureTypeMetrics:
-      return gestures::DoubleEq(start_time, that.start_time) &&
-          gestures::DoubleEq(end_time, that.end_time) &&
+      return times_equal &&
           details.metrics.type == that.details.metrics.type &&
           gestures::FloatEq(details.metrics.data[0],
               that.details.metrics.data[0]) &&
