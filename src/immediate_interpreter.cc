@@ -1743,6 +1743,7 @@ void ImmediateInterpreter::UpdateCurrentGestureType(
   switch (current_gesture_type_) {
     case kGestureTypeContactInitiated:
     case kGestureTypeButtonsChange:
+    case kGestureTypeMouseWheel:
       break;
 
     case kGestureTypeScroll:

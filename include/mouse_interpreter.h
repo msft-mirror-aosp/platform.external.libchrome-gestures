@@ -18,6 +18,8 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(MouseInterpreterTest, SimpleTest);
   FRIEND_TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest);
   FRIEND_TEST(MouseInterpreterTest, JankyScrollTest);
+  FRIEND_TEST(MouseInterpreterTest, WheelTickReportingHighResTest);
+  FRIEND_TEST(MouseInterpreterTest, WheelTickReportingLowResTest);
  public:
   MouseInterpreter(PropRegistry* prop_reg, Tracer* tracer);
   virtual ~MouseInterpreter() {};
@@ -50,6 +52,9 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
   // Accelerate mouse scroll offsets so that it is larger when the user scroll
   // the mouse wheel faster.
   double ComputeScrollAccelFactor(double input_speed);
+
+  Gesture CreateWheelGesture(stime_t start, stime_t end, float dx, float dy,
+                             int tick_120ths_dx, int tick_120ths_dy);
 
   HardwareState prev_state_;
 
@@ -111,6 +116,10 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
 
   // Movement distance after which to start scroll wheel emulation [in mm]
   DoubleProperty scroll_wheel_emulation_thresh_;
+
+  // Whether to output GestureMouseWheel or GestureScroll structs from scrolls.
+  // TODO(chromium:1077644): remove once Chrome is migrated to the new structs.
+  BoolProperty output_mouse_wheel_gestures_;
 };
 
 }  // namespace gestures

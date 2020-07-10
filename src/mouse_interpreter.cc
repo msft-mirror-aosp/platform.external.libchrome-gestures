@@ -39,7 +39,9 @@ MouseInterpreter::MouseInterpreter(PropRegistry* prop_reg, Tracer* tracer)
                                     100.0),
       scroll_wheel_emulation_thresh_(prop_reg,
                                     "Scroll Wheel Emulation Threshold",
-                                    1.0) {
+                                    1.0),
+      output_mouse_wheel_gestures_(prop_reg,
+                                   "Output Mouse Wheel Gestures", false) {
   InitName();
   memset(&prev_state_, 0, sizeof(prev_state_));
   memset(&last_wheel_, 0, sizeof(last_wheel_));
@@ -148,14 +150,17 @@ void MouseInterpreter::InterpretScrollWheelEvent(const HardwareState& hwstate,
       && hi_res_scrolling_.val_;
   // Vertical wheel or horizontal wheel.
   float current_wheel_value = hwstate.rel_hwheel;
+  int ticks = hwstate.rel_hwheel * REL_WHEEL_HI_RES_UNITS_PER_NOTCH;
   WheelRecord* last_wheel_record = &last_hwheel_;
   if (is_vertical) {
     // Only vertical high-res scrolling is supported for now.
     if (use_high_resolution) {
       current_wheel_value = hwstate.rel_wheel_hi_res
           / REL_WHEEL_HI_RES_UNITS_PER_NOTCH;
+      ticks = hwstate.rel_wheel_hi_res;
     } else {
       current_wheel_value = hwstate.rel_wheel;
+      ticks = hwstate.rel_wheel * REL_WHEEL_HI_RES_UNITS_PER_NOTCH;
     }
     last_wheel_record = &last_wheel_;
   }
@@ -191,11 +196,25 @@ void MouseInterpreter::InterpretScrollWheelEvent(const HardwareState& hwstate,
       // For historical reasons the vertical wheel (REL_WHEEL) is inverted
       if (!reverse_scrolling_.val_) {
         offset = -offset;
+        ticks = -ticks;
       }
-      ProduceGesture(Gesture(kGestureScroll, start_time, end_time, 0, offset));
+      ProduceGesture(
+          CreateWheelGesture(start_time, end_time, 0, offset, 0, ticks));
     } else {
-      ProduceGesture(Gesture(kGestureScroll, start_time, end_time, offset, 0));
+      ProduceGesture(
+          CreateWheelGesture(start_time, end_time, offset, 0, ticks, 0));
     }
+  }
+}
+
+Gesture MouseInterpreter::CreateWheelGesture(
+    stime_t start_time, stime_t end_time, float dx, float dy,
+    int tick_120ths_dx, int tick_120ths_dy) {
+  if (output_mouse_wheel_gestures_.val_) {
+    return Gesture(kGestureMouseWheel, start_time, end_time, dx, dy,
+                   tick_120ths_dx, tick_120ths_dy);
+  } else {
+    return Gesture(kGestureScroll, start_time, end_time, dx, dy);
   }
 }
 

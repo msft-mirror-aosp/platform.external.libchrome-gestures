@@ -108,6 +108,18 @@ void IntegralGestureFilterInterpreter::ConsumeGesture(const Gesture& gesture) {
       }
       remainder_reset_deadline_ = copy.end_time + 1.0;
       break;
+    case kGestureTypeMouseWheel:
+      copy.details.wheel.dx = Truncate(copy.details.wheel.dx,
+                                       &hscroll_remainder_);
+      copy.details.wheel.dy = Truncate(copy.details.wheel.dy,
+                                       &vscroll_remainder_);
+      if (copy.details.wheel.dx != 0.0 || copy.details.wheel.dy != 0.0 ||
+          copy.details.wheel.tick_120ths_dx != 0.0 ||
+          copy.details.wheel.tick_120ths_dy != 0.0) {
+        ProduceGesture(copy);
+      }
+      remainder_reset_deadline_ = copy.end_time + 1.0;
+      break;
     default:
       ProduceGesture(gesture);
       break;

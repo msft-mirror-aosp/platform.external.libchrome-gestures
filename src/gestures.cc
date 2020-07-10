@@ -230,6 +230,14 @@ string Gesture::String() const {
                           start_time, end_time,
                           details.scroll.dx, details.scroll.dy,
                           details.scroll.ordinal_dx, details.scroll.ordinal_dy);
+    case kGestureTypeMouseWheel:
+      return StringPrintf("(Gesture type: wheel start: %f stop %f "
+                          "dx: %f dy: %f "
+                          "tick_120ths_dx: %d tick_120ths_dy: %d)",
+                          start_time, end_time,
+                          details.wheel.dx, details.wheel.dy,
+                          details.wheel.tick_120ths_dx,
+                          details.wheel.tick_120ths_dy);
     case kGestureTypePinch:
       return StringPrintf("(Gesture type: pinch start: %f stop: %f "
                           "dz: %f ordinal_dz: %f, state: %d)", start_time,
@@ -293,6 +301,12 @@ bool Gesture::operator==(const Gesture& that) const {
       return times_equal &&
           gestures::FloatEq(details.scroll.dx, that.details.scroll.dx) &&
           gestures::FloatEq(details.scroll.dy, that.details.scroll.dy);
+    case kGestureTypeMouseWheel:
+      return times_equal &&
+          gestures::FloatEq(details.wheel.dx, that.details.wheel.dx) &&
+          gestures::FloatEq(details.wheel.dy, that.details.wheel.dy) &&
+          details.wheel.tick_120ths_dx == that.details.wheel.tick_120ths_dx &&
+          details.wheel.tick_120ths_dy == that.details.wheel.tick_120ths_dy;
     case kGestureTypePinch:
       return times_equal &&
           gestures::FloatEq(details.pinch.dz, that.details.pinch.dz);
@@ -639,6 +653,7 @@ std::string GestureInterpreter::EncodeActivityLog() {
 
 const GestureMove kGestureMove = { 0, 0, 0, 0 };
 const GestureScroll kGestureScroll = { 0, 0, 0, 0, 0 };
+const GestureMouseWheel kGestureMouseWheel = { 0, 0, 0, 0 };
 const GestureButtonsChange kGestureButtonsChange = { 0, 0 };
 const GestureFling kGestureFling = { 0, 0, 0, 0, 0 };
 const GestureSwipe kGestureSwipe = { 0, 0, 0, 0 };

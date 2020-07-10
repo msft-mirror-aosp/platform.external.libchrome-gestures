@@ -121,6 +121,7 @@ class ActivityLog {
   static const char kValueGestureTypeContactInitiated[];
   static const char kValueGestureTypeMove[];
   static const char kValueGestureTypeScroll[];
+  static const char kValueGestureTypeMouseWheel[];
   static const char kValueGestureTypePinch[];
   static const char kValueGestureTypeButtonsChange[];
   static const char kValueGestureTypeFling[];
@@ -139,6 +140,10 @@ class ActivityLog {
   static const char kKeyGestureScrollDY[];
   static const char kKeyGestureScrollOrdinalDX[];
   static const char kKeyGestureScrollOrdinalDY[];
+  static const char kKeyGestureMouseWheelDX[];
+  static const char kKeyGestureMouseWheelDY[];
+  static const char kKeyGestureMouseWheelTicksDX[];
+  static const char kKeyGestureMouseWheelTicksDY[];
   static const char kKeyGesturePinchDZ[];
   static const char kKeyGesturePinchOrdinalDZ[];
   static const char kKeyGesturePinchZoomState[];

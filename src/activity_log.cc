@@ -250,6 +250,19 @@ Json::Value ActivityLog::EncodeGesture(const Gesture& gesture) {
       ret[kKeyGestureScrollOrdinalDY] =
           Json::Value(gesture.details.scroll.ordinal_dy);
       break;
+    case kGestureTypeMouseWheel:
+      handled = true;
+      ret[kKeyGestureType] =
+          Json::Value(kValueGestureTypeMouseWheel);
+      ret[kKeyGestureMouseWheelDX] =
+          Json::Value(gesture.details.wheel.dx);
+      ret[kKeyGestureMouseWheelDY] =
+          Json::Value(gesture.details.wheel.dy);
+      ret[kKeyGestureMouseWheelTicksDX] =
+          Json::Value(gesture.details.wheel.tick_120ths_dx);
+      ret[kKeyGestureMouseWheelTicksDY] =
+          Json::Value(gesture.details.wheel.tick_120ths_dy);
+      break;
     case kGestureTypePinch:
       handled = true;
       ret[kKeyGestureType] =
@@ -468,6 +481,7 @@ const char ActivityLog::kValueGestureTypeContactInitiated[] =
     "contactInitiated";
 const char ActivityLog::kValueGestureTypeMove[] = "move";
 const char ActivityLog::kValueGestureTypeScroll[] = "scroll";
+const char ActivityLog::kValueGestureTypeMouseWheel[] = "mouseWheel";
 const char ActivityLog::kValueGestureTypePinch[] = "pinch";
 const char ActivityLog::kValueGestureTypeButtonsChange[] = "buttonsChange";
 const char ActivityLog::kValueGestureTypeFling[] = "fling";
@@ -487,6 +501,10 @@ const char ActivityLog::kKeyGestureScrollDX[] = "dx";
 const char ActivityLog::kKeyGestureScrollDY[] = "dy";
 const char ActivityLog::kKeyGestureScrollOrdinalDX[] = "ordinalDx";
 const char ActivityLog::kKeyGestureScrollOrdinalDY[] = "ordinalDy";
+const char ActivityLog::kKeyGestureMouseWheelDX[] = "dx";
+const char ActivityLog::kKeyGestureMouseWheelDY[] = "dy";
+const char ActivityLog::kKeyGestureMouseWheelTicksDX[] = "ticksDx";
+const char ActivityLog::kKeyGestureMouseWheelTicksDY[] = "ticksDy";
 const char ActivityLog::kKeyGesturePinchDZ[] = "dz";
 const char ActivityLog::kKeyGesturePinchOrdinalDZ[] = "ordinalDz";
 const char ActivityLog::kKeyGesturePinchZoomState[] = "zoomState";

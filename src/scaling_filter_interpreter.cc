@@ -238,7 +238,7 @@ void ScalingFilterInterpreter::ConsumeGesture(const Gesture& gs) {
       break;
     }
     case kGestureTypeScroll:
-      if (!(device_mouse_.val_ && !device_touchpad_.val_)) {
+      if (device_touchpad_.val_) {
         copy.details.scroll.dx *= screen_x_scale_;
         copy.details.scroll.dy *= screen_y_scale_;
         copy.details.scroll.ordinal_dx *= screen_x_scale_;
@@ -249,6 +249,14 @@ void ScalingFilterInterpreter::ConsumeGesture(const Gesture& gs) {
         copy.details.scroll.dy *= -1;
         copy.details.scroll.ordinal_dx *= -1;
         copy.details.scroll.ordinal_dy *= -1;
+      }
+      break;
+    case kGestureTypeMouseWheel:
+      if (!australian_scrolling_.val_) {
+        copy.details.wheel.dx *= -1;
+        copy.details.wheel.dy *= -1;
+        copy.details.wheel.tick_120ths_dx *= -1;
+        copy.details.wheel.tick_120ths_dy *= -1;
       }
       break;
     case kGestureTypeFling:

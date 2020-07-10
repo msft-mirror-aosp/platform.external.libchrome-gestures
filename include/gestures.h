@@ -205,6 +205,7 @@ typedef struct {
   float ordinal_dx, ordinal_dy;
 } GestureMove;
 
+// Represents scroll gestures on a touch device.
 typedef struct{
   float dx, dy;
   float ordinal_dx, ordinal_dy;
@@ -214,6 +215,15 @@ typedef struct{
   // TAP_DOWN gesture
   unsigned stop_fling:1;
 } GestureScroll;
+
+// Represents mouse wheel movements.
+typedef struct {
+  // The amount to scroll by, after acceleration and scaling have been applied.
+  float dx, dy;
+  // The amount the wheel actually moved. A change of 120 represents moving the
+  // wheel one whole tick (a.k.a. notch).
+  int tick_120ths_dx, tick_120ths_dy;
+} GestureMouseWheel;
 
 typedef struct {
   // If a bit is set in both down and up, client should process down first
@@ -288,12 +298,14 @@ enum GestureType {
   kGestureTypeMetrics,
   kGestureTypeFourFingerSwipe,
   kGestureTypeFourFingerSwipeLift,
+  kGestureTypeMouseWheel,
 };
 
 #ifdef __cplusplus
 // Pass these into Gesture() ctor as first arg
 extern const GestureMove kGestureMove;
 extern const GestureScroll kGestureScroll;
+extern const GestureMouseWheel kGestureMouseWheel;
 extern const GestureButtonsChange kGestureButtonsChange;
 extern const GestureFling kGestureFling;
 extern const GestureSwipe kGestureSwipe;
@@ -324,6 +336,15 @@ struct Gesture {
     details.scroll.ordinal_dx = details.scroll.dx = dx;
     details.scroll.ordinal_dy = details.scroll.dy = dy;
     details.scroll.stop_fling = 0;
+  }
+  Gesture(const GestureMouseWheel&,
+          stime_t start, stime_t end, float dx, float dy, int tick_120ths_dx,
+          int tick_120ths_dy)
+      : start_time(start), end_time(end), type(kGestureTypeMouseWheel) {
+    details.wheel.dx = dx;
+    details.wheel.dy = dy;
+    details.wheel.tick_120ths_dx = tick_120ths_dx;
+    details.wheel.tick_120ths_dy = tick_120ths_dy;
   }
   Gesture(const GestureButtonsChange&,
           stime_t start, stime_t end, unsigned down, unsigned up)
@@ -389,6 +410,7 @@ struct Gesture {
   union {
     GestureMove move;
     GestureScroll scroll;
+    GestureMouseWheel wheel;
     GestureButtonsChange buttons;
     GestureFling fling;
     GestureSwipe swipe;
