@@ -40,7 +40,6 @@ SO_OBJECTS=\
 	$(OBJDIR)/trace_marker.o \
 	$(OBJDIR)/tracer.o \
 	$(OBJDIR)/trend_classifying_filter_interpreter.o \
-	$(OBJDIR)/util.o
 
 # Objects for unittests
 TEST_OBJECTS=\
