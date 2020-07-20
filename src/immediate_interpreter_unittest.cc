@@ -1799,13 +1799,14 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
     {C,make_hwstate(0.14,0,1,1,&fs[6]),-1,MkSet(95),0,0,kDrg,false},
     {C,make_hwstate(0.15,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
     {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,kBL,kIdl,false},
-    // 1-finger tap + move
+    // 1-finger tap + move (drag expected)
     {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
     {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
     {C,make_hwstate(0.02,0,1,1,&fs[4]),-1,MkSet(95),0,0,kSTB,false},
-    {C,make_hwstate(0.03,0,1,1,&fs[5]),-1,MkSet(95),kBL,kBL,kIdl,false},
-    {C,make_hwstate(0.04,0,1,1,&fs[6]),-1,MkSet(95),0,0,kIdl,false},
-    {C,make_hwstate(0.05,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
+    {C,make_hwstate(0.03,0,1,1,&fs[5]),-1,MkSet(95),kBL,0,kDrg,false},
+    {C,make_hwstate(0.04,0,1,1,&fs[6]),-1,MkSet(95),0,0,kDrg,false},
+    {C,make_hwstate(0.05,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
+    {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,kBL,kIdl,false},
     // 1-finger tap, move, release, move again (drag lock)
     {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
     {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
@@ -2022,13 +2023,13 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
     {C,make_hwstate(1.02,0,0,2,NULL),-1,MkSet(),0,0,kIdl,false},
     {C,make_hwstate(1.03,0,2,2,&fs[10]),-1,MkSet(97,98),0,0,kIdl,false},
     {C,make_hwstate(1.04,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // tap then move. no drag expected
+    // tap then move with delay between touches. no drag expected
     {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
     {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[4]),-1,MkSet(95),0,0,kSTB,false},
-    {C,make_hwstate(0.03,0,1,1,&fs[5]),-1,MkSet(95),kBL,kBL,kIdl,false},
-    {C,make_hwstate(0.05,0,1,1,&fs[6]),-1,MkSet(95),0,0,kIdl,false},
-    {C,make_hwstate(0.06,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
+    {C,make_hwstate(0.22,0,1,1,&fs[4]),-1,MkSet(95),kBL,kBL,kIdl,false},
+    {C,make_hwstate(0.23,0,1,1,&fs[5]),-1,MkSet(95),0,0,kIdl,false},
+    {C,make_hwstate(0.25,0,1,1,&fs[6]),-1,MkSet(95),0,0,kIdl,false},
+    {C,make_hwstate(0.26,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
     {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,0,kIdl,false},
   };
   const size_t kT5R2TestFirstIndex = NonT5R2States(hwsgs, arraysize(hwsgs));

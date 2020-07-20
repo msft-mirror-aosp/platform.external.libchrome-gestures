@@ -1008,7 +1008,7 @@ ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
       tap_paused_(prop_reg, "Tap Paused", false),
       tap_timeout_(prop_reg, "Tap Timeout", 0.2),
       inter_tap_timeout_(prop_reg, "Inter-Tap Timeout", 0.15),
-      tap_drag_delay_(prop_reg, "Tap Drag Delay", 0.05),
+      tap_drag_delay_(prop_reg, "Tap Drag Delay", 0),
       tap_drag_timeout_(prop_reg, "Tap Drag Timeout", 0.3),
       tap_drag_enable_(prop_reg, "Tap Drag Enable", 0),
       drag_lock_enable_(prop_reg, "Tap Drag Lock Enable", 0),
@@ -2775,7 +2775,7 @@ void ImmediateInterpreter::UpdateTapState(
         tap_drag_last_motion_time_ = now;
       }
       if (tap_record_.TapType() == GESTURES_BUTTON_LEFT &&
-          now - tap_drag_last_motion_time_ > tap_drag_stationary_time_.val_) {
+          now - tap_drag_last_motion_time_ >= tap_drag_stationary_time_.val_) {
         tap_drag_finger_was_stationary_ = true;
       }
 
@@ -2787,7 +2787,7 @@ void ImmediateInterpreter::UpdateTapState(
             SetTapToClickState(kTtcDrag, now);
           } else {
             bool drag_delay_met = (now - tap_to_click_state_entered_
-                                   > tap_drag_delay_.val_);
+                                   >= tap_drag_delay_.val_);
             if (drag_delay_met && tap_drag_finger_was_stationary_) {
               *buttons_down = GESTURES_BUTTON_LEFT;
               SetTapToClickState(kTtcDrag, now);
