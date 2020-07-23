@@ -31,7 +31,7 @@ mouse). However, since most of the time these are things you want to tweak many
 times or toggle quickly, it's easiest to change them using the Gesture
 Properties Service.
 
-[xorg-conf]: https://chromium.googlesource.com/chromiumos/platform/xorg-conf/+/refs/heads/master
+[xorg-conf]: https://chromium.googlesource.com/chromiumos/platform/xorg-conf/
 
 ### Enabling the Gesture Properties Service
 
@@ -147,8 +147,8 @@ acceleration curves, which would be tedious to modify manually. See the
 [`gesture_properties_service_provider.cc`][service-provider] as references for
 the D-Bus API.
 
-[crosh]: https://source.chromium.org/chromiumos/chromiumos/codesearch/+/master:src/platform2/crosh/crosh?q=cmd_gesture_prop
-[service-provider]: https://source.chromium.org/chromium/chromium/src/+/master:ash/dbus/gesture_properties_service_provider.cc
+[crosh]: https://source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:src/platform2/crosh/crosh?q=cmd_gesture_prop
+[service-provider]: https://source.chromium.org/chromium/chromium/src/+/HEAD:ash/dbus/gesture_properties_service_provider.cc
 
 ## Pointer acceleration curves
 
@@ -191,4 +191,4 @@ crosh> gesture_prop set 12 "Use Custom Mouse Pointer Accel Curve" array:boolean:
 (Of course, really only the first four values of the curve matter here, as the
 maximum *x* of the first segment is infinite.)
 
-[struct-curvesegment]: https://source.chromium.org/chromium/chromium/src/+/master:third_party/gestures/gestures/include/accel_filter_interpreter.h?q="struct%20CurveSegment"
+[struct-curvesegment]: https://source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:src/platform/gestures/include/accel_filter_interpreter.h?q=%22struct%20CurveSegment%22
