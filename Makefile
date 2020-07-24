@@ -124,8 +124,6 @@ CXXFLAGS+=\
 	-DGESTURES_INTERNAL=1 \
 	-I..
 
-LID_TOUCHPAD_HELPER=lid_touchpad_helper
-
 # Local compilation needs these flags, esp for code coverage testing
 ifeq (g++,$(CXX))
 CXXFLAGS+=\
@@ -157,14 +155,6 @@ TEST_LINK_FLAGS=\
 
 all: $(SONAME)
 
-ifneq ($(USE_X11),0)
-all: lid_touchpad_helper_all
-install: lid_touchpad_helper_install
-endif
-
-lid_touchpad_helper_all:
-	$(MAKE) -C $(LID_TOUCHPAD_HELPER)
-
 $(SONAME): $(SO_OBJECTS)
 	$(CXX) -shared -o $@ $(SO_OBJECTS) -Wl,-h$(SONAME:$(OBJDIR)/%=%) \
 		$(LINK_FLAGS)
@@ -179,9 +169,6 @@ $(OBJDIR)/%.o : src/%.cc
 
 LIBDIR = /usr/lib
 
-lid_touchpad_helper_install:
-	$(MAKE) -C $(LID_TOUCHPAD_HELPER) install
-
 install: $(SONAME)
 	install -D -m 0755 $(SONAME) \
 		$(DESTDIR)$(LIBDIR)/$(SONAME:$(OBJDIR)/%=%)
@@ -193,7 +180,6 @@ install: $(SONAME)
 		include/gestures.h $(DESTDIR)/usr/include/gestures/gestures.h
 
 clean:
-	$(MAKE) -C $(LID_TOUCHPAD_HELPER) clean
 	rm -rf $(OBJDIR) $(DEPDIR) $(TEST_EXE) html app.info app.info.orig
 
 setup-in-place:
@@ -225,6 +211,6 @@ cov: $(TEST_EXE) $(LCOV_EXE)
 		genhtml -o html $(OBJDIR)/app.info
 	./tools/local_coverage_rate.sh $(OBJDIR)/app.info
 
-.PHONY : clean cov all lid_touchpad_helper_all lid_touchpad_helper_install
+.PHONY : clean cov all
 
 -include $(ALL_OBJECT_FILES:$(OBJDIR)/%.o=$(DEPDIR)/%.d)
