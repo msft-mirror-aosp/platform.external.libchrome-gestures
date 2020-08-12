@@ -24,7 +24,7 @@ MouseInterpreter::MouseInterpreter(PropRegistry* prop_reg, Tracer* tracer)
       wheel_emulation_accu_y_(0.0),
       wheel_emulation_active_(false),
       reverse_scrolling_(prop_reg, "Mouse Reverse Scrolling", false),
-      hi_res_scrolling_(prop_reg, "Mouse High Resolution Scrolling", false),
+      hi_res_scrolling_(prop_reg, "Mouse High Resolution Scrolling", true),
       scroll_accel_curve_prop_(prop_reg, "Mouse Scroll Accel Curve",
           scroll_accel_curve_, sizeof(scroll_accel_curve_) / sizeof(double)),
       scroll_max_allowed_input_speed_(prop_reg,
