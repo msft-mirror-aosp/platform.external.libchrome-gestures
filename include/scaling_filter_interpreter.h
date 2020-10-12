@@ -68,6 +68,7 @@ class ScalingFilterInterpreter : public FilterInterpreter {
   void FilterLowPressure(HardwareState* hwstate);
   void FilterZeroArea(HardwareState* hwstate);
   bool IsMouseDevice(GestureInterpreterDeviceClass devclass);
+  bool IsPointingStick(GestureInterpreterDeviceClass devclass);
   bool IsTouchpadDevice(GestureInterpreterDeviceClass devclass);
 
   float tp_x_scale_, tp_y_scale_;
@@ -121,6 +122,9 @@ class ScalingFilterInterpreter : public FilterInterpreter {
   // If the device is mouse. Note that a device can both be a mouse and a
   // touchpad at the same time (e.g. a multi-touch mouse).
   BoolProperty device_mouse_;
+
+  // If the device is a pointing stick (e.g. a TrackPoint).
+  BoolProperty device_pointing_stick_;
 
   // If the device is touchpad. It would be false if it is a regular mouse
   // running the CMT driver.

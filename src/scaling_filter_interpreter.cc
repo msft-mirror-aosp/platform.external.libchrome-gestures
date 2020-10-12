@@ -40,6 +40,8 @@ ScalingFilterInterpreter::ScalingFilterInterpreter(
           0),
       mouse_cpi_(prop_reg, "Mouse CPI", 1000.0),
       device_mouse_(prop_reg, "Device Mouse", IsMouseDevice(devclass)),
+      device_pointing_stick_(prop_reg, "Device Pointing Stick",
+                             IsPointingStick(devclass)),
       device_touchpad_(prop_reg,
                        "Device Touchpad",
                        IsTouchpadDevice(devclass)) {
@@ -101,6 +103,11 @@ bool ScalingFilterInterpreter::IsMouseDevice(
           devclass == GESTURES_DEVCLASS_MULTITOUCH_MOUSE);
 }
 
+bool ScalingFilterInterpreter::IsPointingStick(
+    GestureInterpreterDeviceClass devclass) {
+  return devclass == GESTURES_DEVCLASS_POINTING_STICK;
+}
+
 bool ScalingFilterInterpreter::IsTouchpadDevice(
     GestureInterpreterDeviceClass devclass) {
   return (devclass == GESTURES_DEVCLASS_TOUCHPAD ||
@@ -111,7 +118,7 @@ bool ScalingFilterInterpreter::IsTouchpadDevice(
 void ScalingFilterInterpreter::ScaleHardwareState(HardwareState* hwstate) {
   if (device_touchpad_.val_)
     ScaleTouchpadHardwareState(hwstate);
-  if (device_mouse_.val_)
+  if (device_mouse_.val_ || device_pointing_stick_.val_)
     ScaleMouseHardwareState(hwstate);
 }
 

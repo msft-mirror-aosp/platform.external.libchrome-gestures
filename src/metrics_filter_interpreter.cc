@@ -59,7 +59,8 @@ void MetricsFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
     // as well after gaining access to the UMA log.
     UpdateFingerState(*hwstate);
   } else if (devclass_ == GESTURES_DEVCLASS_MOUSE ||
-             devclass_ == GESTURES_DEVCLASS_MULTITOUCH_MOUSE) {
+             devclass_ == GESTURES_DEVCLASS_MULTITOUCH_MOUSE ||
+             devclass_ == GESTURES_DEVCLASS_POINTING_STICK) {
     UpdateMouseMovementState(*hwstate);
   }
   next_->SyncInterpret(hwstate, timeout);

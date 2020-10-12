@@ -38,6 +38,7 @@ enum GestureInterpreterDeviceClass {
   GESTURES_DEVCLASS_MULTITOUCH_MOUSE,
   GESTURES_DEVCLASS_TOUCHPAD,
   GESTURES_DEVCLASS_TOUCHSCREEN,
+  GESTURES_DEVCLASS_POINTING_STICK,
 };
 
 stime_t StimeFromTimeval(const struct timeval*);
@@ -563,7 +564,7 @@ struct GestureInterpreter {
  private:
   void InitializeTouchpad(void);
   void InitializeTouchpad2(void);
-  void InitializeMouse(void);
+  void InitializeMouse(GestureInterpreterDeviceClass cls);
   void InitializeMultitouchMouse(void);
 
   GestureReadyFunction callback_;

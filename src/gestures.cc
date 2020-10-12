@@ -592,14 +592,14 @@ void GestureInterpreter::InitializeTouchpad2(void) {
   temp = NULL;
 }
 
-void GestureInterpreter::InitializeMouse(void) {
+void GestureInterpreter::InitializeMouse(GestureInterpreterDeviceClass cls) {
   Interpreter* temp = new MouseInterpreter(prop_reg_.get(), tracer_.get());
   // TODO(clchiou;chromium-os:36321): Use mouse acceleration algorithm for mice
   temp = new AccelFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new ScalingFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
-                                      GESTURES_DEVCLASS_MOUSE);
+                                      cls);
   temp = new MetricsFilterInterpreter(prop_reg_.get(), temp, tracer_.get(),
-                                      GESTURES_DEVCLASS_MOUSE);
+                                      cls);
   temp = new IntegralGestureFilterInterpreter(temp, tracer_.get());
   temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
                                                        tracer_.get());
@@ -635,8 +635,9 @@ void GestureInterpreter::Initialize(GestureInterpreterDeviceClass cls) {
   if (cls == GESTURES_DEVCLASS_TOUCHPAD ||
       cls == GESTURES_DEVCLASS_TOUCHSCREEN)
     InitializeTouchpad();
-  else if (cls == GESTURES_DEVCLASS_MOUSE)
-    InitializeMouse();
+  else if (cls == GESTURES_DEVCLASS_MOUSE ||
+           cls == GESTURES_DEVCLASS_POINTING_STICK)
+    InitializeMouse(cls);
   else if (cls == GESTURES_DEVCLASS_MULTITOUCH_MOUSE)
     InitializeMultitouchMouse();
   else
