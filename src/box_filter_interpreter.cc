@@ -14,8 +14,8 @@ BoxFilterInterpreter::BoxFilterInterpreter(PropRegistry* prop_reg,
                                            Interpreter* next,
                                            Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
-      box_width_(prop_reg, "Box Width", 0.0),
-      box_height_(prop_reg, "Box Height", 0.0) {
+      box_width_(prop_reg, "Box Width", 1.0),
+      box_height_(prop_reg, "Box Height", 1.0) {
   InitName();
 }
 

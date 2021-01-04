@@ -2102,6 +2102,7 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
       ii->tap_timeout_.val_ = ii->inter_tap_timeout_.val_ = 0.05;
       ii->three_finger_click_enable_.val_ = 1;
       ii->t5r2_three_finger_click_enable_.val_ = 1;
+      ii->zero_finger_click_enable_.val_ = 1;
       // For the slow tap case, we need to make tap_timeout_ bigger
       if (hwsgs_full[i].line_number_and_flags & HWStateFlagStartDoubleTap)
         ii->tap_timeout_.val_ = 0.11;
@@ -3515,68 +3516,4 @@ TEST(ImmediateInterpreterTest, ScrollResetTapTest) {
   }
 }
 
-TEST(ImmediateInterpreterTest, BasicButtonTest) {
-  ImmediateInterpreter ii(NULL, NULL);
-
-  HardwareProperties hwprops = {
-    0,  // left edge
-    0,  // top edge
-    96.085106,  // right edge
-    57.492310,  // bottom edge
-    1,  // pixels/TP width
-    1,  // pixels/TP height
-    25.4,  // screen DPI x
-    25.4,  // screen DPI y
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    2,  // max fingers
-    3,  // max touch
-    0,  // t5r2
-    1,  // semi-mt
-    1,  // is button pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-  };
-
-  HardwareState hardware_states[] = {
-    // time, buttons down, finger count, touch count, finger states pointer
-    make_hwstate(0.1, 0, 0, 0, NULL),
-    make_hwstate(0.3, GESTURES_BUTTON_LEFT, 0, 0, NULL),   // delay left
-    // button down
-    make_hwstate(0.5, GESTURES_BUTTON_LEFT, 0, 0, NULL),
-    make_hwstate(0.9, 0, 0, 0, NULL),                      // left up
-    make_hwstate(1.1, GESTURES_BUTTON_RIGHT, 0, 0, NULL),  // delay right
-    // button down
-    make_hwstate(1.3, GESTURES_BUTTON_RIGHT, 0, 0, NULL),
-    make_hwstate(1.5, 0, 0, 0, NULL),                      // right up
-    make_hwstate(1.6, GESTURES_BUTTON_LEFT, 0, 0, NULL),   // left down
-    make_hwstate(1.7, 0, 0, 0, NULL),  // short left button up (<.3s)
-  };
-
-  TestInterpreterWrapper wrapper(&ii, &hwprops);
-
-  for (size_t idx = 0; idx < arraysize(hardware_states); ++idx) {
-    Gesture* gs = wrapper.SyncInterpret(&hardware_states[idx], NULL);
-    if (idx < 2 || idx == 4 || idx == 7) {
-      EXPECT_EQ(NULL, gs);
-    } else {
-      EXPECT_TRUE(gs != NULL);
-      if (gs == NULL)  /* Avoid SEGV on test failure */
-        continue;
-      EXPECT_EQ(kGestureTypeButtonsChange, gs->type);
-      if (idx == 2)
-        EXPECT_EQ(GESTURES_BUTTON_LEFT, gs->details.buttons.down);
-      else if (idx == 3)
-        EXPECT_EQ(GESTURES_BUTTON_LEFT, gs->details.buttons.up);
-      else if (idx == 5)
-        EXPECT_EQ(GESTURES_BUTTON_RIGHT, gs->details.buttons.down);
-      else if (idx == 6)
-        EXPECT_EQ(GESTURES_BUTTON_RIGHT, gs->details.buttons.up);
-      else if (idx == 8) {
-        EXPECT_EQ(GESTURES_BUTTON_LEFT, gs->details.buttons.up);
-        EXPECT_EQ(GESTURES_BUTTON_LEFT, gs->details.buttons.down);
-      }
-    }
-  }
-}
 }  // namespace gestures
