@@ -358,6 +358,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(ImmediateInterpreterTest, ThumbRetainReevaluateTest);
   FRIEND_TEST(ImmediateInterpreterTest, ThumbRetainTest);
   FRIEND_TEST(ImmediateInterpreterTest, WarpedFingersTappingTest);
+  FRIEND_TEST(ImmediateInterpreterTest, ZeroClickInitializationTest);
   friend class TapRecord;
   friend class FingerButtonClick;
 

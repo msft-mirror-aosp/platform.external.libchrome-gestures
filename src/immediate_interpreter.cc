@@ -3377,6 +3377,10 @@ void ImmediateInterpreter::Initialize(const HardwareProperties* hwprops,
                                       GestureConsumer* consumer) {
   Interpreter::Initialize(hwprops, metrics, mprops, consumer);
   state_buffer_.Reset(hwprops_->max_finger_cnt);
+  // Zero finger click needs to be disabled for touchpads that
+  // integrate their buttons into the pad itself but enabled
+  // for any other touchpad in case they have separate buttons.
+  zero_finger_click_enable_.val_ = !hwprops_->is_button_pad;
 }
 
 bool AnyGesturingFingerLeft(const HardwareState& state,

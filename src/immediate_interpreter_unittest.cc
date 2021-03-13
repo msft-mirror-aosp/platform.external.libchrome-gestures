@@ -3516,4 +3516,36 @@ TEST(ImmediateInterpreterTest, ScrollResetTapTest) {
   }
 }
 
+TEST(ImmediateInterpreterTest, ZeroClickInitializationTest) {
+  ImmediateInterpreter ii(NULL, NULL);
+
+  HardwareProperties hwprops = {
+    0,  // left edge
+    0,  // top edge
+    1000,  // right edge
+    1000,  // bottom edge
+    500,  // pixels/TP width
+    500,  // pixels/TP height
+    96,  // screen DPI x
+    96,  // screen DPI y
+    -1,  // orientation minimum
+    2,   // orientation maximum
+    2,  // max fingers
+    5,  // max touch
+    0,  // tripletap
+    0,  // semi-mt
+    1,  // is button pad
+    0,  // has_wheel
+    0,  // wheel_is_hi_res
+  };
+  TestInterpreterWrapper wrapper(&ii, &hwprops);
+
+  // Test touchpad with intergrated button switch.
+  EXPECT_EQ(0, ii.zero_finger_click_enable_.val_);
+  // Test touchpad with separate buttons.
+  hwprops.is_button_pad = 0;
+  wrapper.Reset(&ii, &hwprops);
+  EXPECT_EQ(1, ii.zero_finger_click_enable_.val_);
+}
+
 }  // namespace gestures
