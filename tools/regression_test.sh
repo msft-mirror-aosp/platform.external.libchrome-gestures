@@ -39,6 +39,11 @@ install_regression_test_suite() {
 
 run_regression_tests() {
   info "Running regression tests..."
+  if ! type touchtests > /dev/null; then
+    die_notrace \
+      "The touchtests aren't installed in your chroot. Please install them: "\
+      "https://chromium.googlesource.com/chromiumos/platform/touchpad-tests/+/HEAD/README.md#Setting-up"
+  fi
   if ! touchtests --presubmit --ref tools/touchtests-report.json; then
     die_notrace "Regression tests failed."
   fi
