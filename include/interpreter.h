@@ -91,7 +91,6 @@ class Interpreter {
  private:
   const char* name_;
   Tracer* tracer_;
-  void LogOutputs(const Gesture* result, stime_t* timeout, const char* action);
 };
 }  // namespace gestures
 

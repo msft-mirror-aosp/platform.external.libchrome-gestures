@@ -49,36 +49,23 @@ void Interpreter::Trace(const char* message, const char* name) {
 void Interpreter::SyncInterpret(HardwareState* hwstate,
                                     stime_t* timeout) {
   AssertWithReturn(initialized_);
-  if (log_.get() && hwstate) {
-    Trace("log: start: ", "LogHardwareState");
-    log_->LogHardwareState(*hwstate);
-    Trace("log: end: ", "LogHardwareState");
-  }
   if (own_metrics_)
     own_metrics_->Update(*hwstate);
 
   Trace("SyncInterpret: start: ", name());
   SyncInterpretImpl(hwstate, timeout);
   Trace("SyncInterpret: end: ", name());
-  LogOutputs(NULL, timeout, "SyncLogOutputs");
 }
 
 void Interpreter::HandleTimer(stime_t now, stime_t* timeout) {
   AssertWithReturn(initialized_);
-  if (log_.get()) {
-    Trace("log: start: ", "LogTimerCallback");
-    log_->LogTimerCallback(now);
-    Trace("log: end: ", "LogTimerCallback");
-  }
   Trace("HandleTimer: start: ", name());
   HandleTimerImpl(now, timeout);
   Trace("HandleTimer: end: ", name());
-  LogOutputs(NULL, timeout, "TimerLogOutputs");
 }
 
 void Interpreter::ProduceGesture(const Gesture& gesture) {
   AssertWithReturn(initialized_);
-  LogOutputs(&gesture, NULL, "ProduceGesture");
   consumer_->ConsumeGesture(gesture);
 }
 
@@ -142,18 +129,5 @@ void Interpreter::InitName() {
     name_ = strdup(class_name);
     free(full_name);
   }
-}
-
-void Interpreter::LogOutputs(const Gesture* result,
-                             stime_t* timeout,
-                             const char* action) {
-  if (!log_.get())
-    return;
-  Trace("log: start: ", action);
-  if (result)
-    log_->LogGesture(*result);
-  if (timeout && *timeout >= 0.0)
-    log_->LogCallbackRequest(*timeout);
-  Trace("log: end: ", action);
 }
 }  // namespace gestures
