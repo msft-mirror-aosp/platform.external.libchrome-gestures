@@ -75,6 +75,7 @@ TEST(InterpreterTest, SimpleTest) {
   PropRegistry prop_reg;
   InterpreterTestInterpreter* base_interpreter =
       new InterpreterTestInterpreter(&prop_reg);
+  base_interpreter->SetEventLoggingEnabled(true);
   MetricsProperties mprops(&prop_reg);
 
   HardwareProperties hwprops = {
@@ -125,5 +126,85 @@ TEST(InterpreterTest, SimpleTest) {
   ASSERT_LT(timeout, 0);
   EXPECT_EQ(1, base_interpreter->interpret_call_count_);
   EXPECT_EQ(1, base_interpreter->handle_timer_call_count_);
+
+  // Now, get the log
+  string initial_log = base_interpreter->Encode();
+  // Make a new interpreter and push the log through it
+  PropRegistry prop_reg2;
+  InterpreterTestInterpreter* base_interpreter2 =
+      new InterpreterTestInterpreter(&prop_reg2);
+  base_interpreter2->SetEventLoggingEnabled(true);
+  base_interpreter2->return_value_ = base_interpreter->return_value_;
+  base_interpreter2->expected_interpreter_name_ = interpreter_name;
+  MetricsProperties mprops2(&prop_reg2);
+
+  ActivityReplay replay(&prop_reg2);
+  replay.Parse(initial_log);
+
+  base_interpreter2->expected_hwstate_ = &hardware_state;
+
+  replay.Replay(base_interpreter2, &mprops2);
+  string final_log = base_interpreter2->Encode();
+  EXPECT_EQ(initial_log, final_log);
+  EXPECT_EQ(1, base_interpreter2->interpret_call_count_);
+  EXPECT_EQ(1, base_interpreter2->handle_timer_call_count_);
+}
+
+class InterpreterResetLogTestInterpreter : public Interpreter {
+ public:
+  InterpreterResetLogTestInterpreter() : Interpreter(NULL, NULL, true) {
+    log_.reset(new ActivityLog(NULL));
+  }
+ protected:
+  virtual void SyncInterpretImpl(HardwareState* hwstate,
+                                     stime_t* timeout) {}
+
+  virtual void HandleTimerImpl(stime_t now, stime_t* timeout) {}
+};
+
+TEST(InterpreterTest, ResetLogTest) {
+  PropRegistry prop_reg;
+  InterpreterResetLogTestInterpreter* base_interpreter =
+      new InterpreterResetLogTestInterpreter();
+  base_interpreter->SetEventLoggingEnabled(true);
+  TestInterpreterWrapper wrapper(base_interpreter);
+
+  FingerState finger_state = {
+    // TM, Tm, WM, Wm, Press, Orientation, X, Y, TrID
+    0, 0, 0, 0, 10, 0, 50, 50, 1, 0
+  };
+  HardwareState hardware_state = make_hwstate(200000, 0, 1, 1, &finger_state);
+  stime_t timeout = NO_DEADLINE;
+  wrapper.SyncInterpret(&hardware_state, &timeout);
+  EXPECT_EQ(base_interpreter->log_->size(), 1);
+
+  wrapper.SyncInterpret(&hardware_state, &timeout);
+  EXPECT_EQ(base_interpreter->log_->size(), 2);
+
+  // Assume the ResetLog property is set.
+  base_interpreter->Clear();
+  EXPECT_EQ(base_interpreter->log_->size(), 0);
+
+  wrapper.SyncInterpret(&hardware_state, &timeout);
+  EXPECT_EQ(base_interpreter->log_->size(), 1);
+}
+
+TEST(InterpreterTest, LoggingDisabledByDefault) {
+  PropRegistry prop_reg;
+  InterpreterResetLogTestInterpreter* base_interpreter =
+      new InterpreterResetLogTestInterpreter();
+  TestInterpreterWrapper wrapper(base_interpreter);
+
+  FingerState finger_state = {
+    // TM, Tm, WM, Wm, Press, Orientation, X, Y, TrID
+    0, 0, 0, 0, 10, 0, 50, 50, 1, 0
+  };
+  HardwareState hardware_state = make_hwstate(200000, 0, 1, 1, &finger_state);
+  stime_t timeout = NO_DEADLINE;
+  wrapper.SyncInterpret(&hardware_state, &timeout);
+  EXPECT_EQ(base_interpreter->log_->size(), 0);
+
+  wrapper.SyncInterpret(&hardware_state, &timeout);
+  EXPECT_EQ(base_interpreter->log_->size(), 0);
 }
 }  // namespace gestures

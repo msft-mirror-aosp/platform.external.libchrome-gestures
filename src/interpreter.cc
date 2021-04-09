@@ -22,7 +22,7 @@ namespace gestures {
 
 Interpreter::Interpreter(PropRegistry* prop_reg,
                          Tracer* tracer,
-                         bool force_logging)
+                         bool force_log_creation)
     : requires_metrics_(false),
       initialized_(false),
       name_(NULL),
@@ -30,7 +30,7 @@ Interpreter::Interpreter(PropRegistry* prop_reg,
 #ifdef DEEP_LOGS
   bool logging_enabled = true;
 #else
-  bool logging_enabled = force_logging;
+  bool logging_enabled = force_log_creation;
 #endif
   if (logging_enabled)
     log_.reset(new ActivityLog(prop_reg));
@@ -49,23 +49,36 @@ void Interpreter::Trace(const char* message, const char* name) {
 void Interpreter::SyncInterpret(HardwareState* hwstate,
                                     stime_t* timeout) {
   AssertWithReturn(initialized_);
+  if (enable_event_logging_ && log_.get() && hwstate) {
+    Trace("log: start: ", "LogHardwareState");
+    log_->LogHardwareState(*hwstate);
+    Trace("log: end: ", "LogHardwareState");
+  }
   if (own_metrics_)
     own_metrics_->Update(*hwstate);
 
   Trace("SyncInterpret: start: ", name());
   SyncInterpretImpl(hwstate, timeout);
   Trace("SyncInterpret: end: ", name());
+  LogOutputs(NULL, timeout, "SyncLogOutputs");
 }
 
 void Interpreter::HandleTimer(stime_t now, stime_t* timeout) {
   AssertWithReturn(initialized_);
+  if (enable_event_logging_ && log_.get()) {
+    Trace("log: start: ", "LogTimerCallback");
+    log_->LogTimerCallback(now);
+    Trace("log: end: ", "LogTimerCallback");
+  }
   Trace("HandleTimer: start: ", name());
   HandleTimerImpl(now, timeout);
   Trace("HandleTimer: end: ", name());
+  LogOutputs(NULL, timeout, "TimerLogOutputs");
 }
 
 void Interpreter::ProduceGesture(const Gesture& gesture) {
   AssertWithReturn(initialized_);
+  LogOutputs(&gesture, NULL, "ProduceGesture");
   consumer_->ConsumeGesture(gesture);
 }
 
@@ -129,5 +142,23 @@ void Interpreter::InitName() {
     name_ = strdup(class_name);
     free(full_name);
   }
+}
+
+void Interpreter::SetEventLoggingEnabled(bool enabled) {
+  // TODO(b/185844310): log an event when touch logging is enabled or disabled.
+  enable_event_logging_ = enabled;
+}
+
+void Interpreter::LogOutputs(const Gesture* result,
+                             stime_t* timeout,
+                             const char* action) {
+  if (!enable_event_logging_ || !log_.get())
+    return;
+  Trace("log: start: ", action);
+  if (result)
+    log_->LogGesture(*result);
+  if (timeout && *timeout >= 0.0)
+    log_->LogCallbackRequest(*timeout);
+  Trace("log: end: ", action);
 }
 }  // namespace gestures

@@ -29,8 +29,8 @@ class FilterInterpreter : public Interpreter, public GestureConsumer {
   FilterInterpreter(PropRegistry* prop_reg,
                     Interpreter* next,
                     Tracer* tracer,
-                    bool force_logging)
-      : Interpreter(prop_reg, tracer, force_logging) { next_.reset(next); }
+                    bool force_log_creation)
+      : Interpreter(prop_reg, tracer, force_log_creation) { next_.reset(next); }
   virtual ~FilterInterpreter() {}
 
   Json::Value EncodeCommonInfo();

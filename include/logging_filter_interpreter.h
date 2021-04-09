@@ -28,6 +28,7 @@ class LoggingFilterInterpreter : public FilterInterpreter,
                            Tracer* tracer);
   virtual ~LoggingFilterInterpreter() {}
 
+  virtual void BoolWasWritten(BoolProperty* prop);
   virtual void IntWasWritten(IntProperty* prop);
 
   std::string EncodeActivityLog();
@@ -35,6 +36,7 @@ class LoggingFilterInterpreter : public FilterInterpreter,
  private:
   void Dump(const char* filename);
 
+  BoolProperty event_logging_enable_;
   IntProperty logging_notify_;
   // Reset the log by setting the property value.
   IntProperty logging_reset_;

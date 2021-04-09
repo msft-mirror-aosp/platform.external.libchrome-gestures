@@ -17,6 +17,7 @@ LoggingFilterInterpreter::LoggingFilterInterpreter(PropRegistry* prop_reg,
                                                    Interpreter* next,
                                                    Tracer* tracer)
     : FilterInterpreter(prop_reg, next, tracer, true),
+      event_logging_enable_(prop_reg, "Event Logging Enable", false, this),
       logging_notify_(prop_reg, "Logging Notify", 0, this),
       logging_reset_(prop_reg, "Logging Reset", 0, this),
       log_location_(prop_reg, "Log Path",
@@ -33,6 +34,14 @@ void LoggingFilterInterpreter::IntWasWritten(IntProperty* prop) {
   if (prop == &logging_reset_)
     Clear();
 };
+
+void LoggingFilterInterpreter::BoolWasWritten(BoolProperty* prop) {
+  if (prop == &event_logging_enable_) {
+    Log("Event logging %s",
+        event_logging_enable_.val_ ? "enabled" : "disabled");
+    SetEventLoggingEnabled(event_logging_enable_.val_);
+  }
+}
 
 std::string LoggingFilterInterpreter::EncodeActivityLog() {
   return Encode();

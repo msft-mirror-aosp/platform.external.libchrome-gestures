@@ -34,10 +34,12 @@ class MetricsProperties;
 // A synchronous interpreter will return  0 or 1 Gestures for each passed in
 // HardwareState.
 class Interpreter {
+  FRIEND_TEST(InterpreterTest, SimpleTest);
   FRIEND_TEST(InterpreterTest, ResetLogTest);
+  FRIEND_TEST(InterpreterTest, LoggingDisabledByDefault);
   FRIEND_TEST(LoggingFilterInterpreterTest, LogResetHandlerTest);
  public:
-  Interpreter(PropRegistry* prop_reg, Tracer* tracer, bool force_logging);
+  Interpreter(PropRegistry* prop_reg, Tracer* tracer, bool force_log_creation);
   virtual ~Interpreter();
 
   // Called to interpret the current state.
@@ -88,9 +90,14 @@ class Interpreter {
                                  stime_t* timeout) {}
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout) {}
 
+  void SetEventLoggingEnabled(bool enabled);
+
  private:
   const char* name_;
   Tracer* tracer_;
+  bool enable_event_logging_ = false;
+
+  void LogOutputs(const Gesture* result, stime_t* timeout, const char* action);
 };
 }  // namespace gestures
 
