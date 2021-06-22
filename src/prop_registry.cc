@@ -140,7 +140,7 @@ bool BoolArrayProperty::SetValue(const Json::Value& list) {
 }
 
 void BoolArrayProperty::HandleGesturesPropWritten() {
-  // TODO(adlr): Log array property changes
+  // TODO(b/191802713): Log array property changes
   if (delegate_)
     delegate_->BoolArrayWasWritten(this);
 }
@@ -222,7 +222,7 @@ bool DoubleArrayProperty::SetValue(const Json::Value& list) {
 }
 
 void DoubleArrayProperty::HandleGesturesPropWritten() {
-  // TODO(adlr): Log array property changes
+  // TODO(b/191802713): Log array property changes
   if (delegate_)
     delegate_->DoubleArrayWasWritten(this);
 }
@@ -300,7 +300,7 @@ bool IntArrayProperty::SetValue(const Json::Value& list) {
 }
 
 void IntArrayProperty::HandleGesturesPropWritten() {
-  // TODO(adlr): Log array property changes
+  // TODO(b/191802713): Log array property changes
   if (delegate_)
     delegate_->IntArrayWasWritten(this);
 }
