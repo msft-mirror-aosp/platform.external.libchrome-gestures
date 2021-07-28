@@ -30,7 +30,7 @@ update_chroot_library() {
 
 install_regression_test_suite() {
   info "Install regression test suite first..."
-  sudo emerge -q gestures libevdev utouch-evemu -j3
+  sudo emerge -q gestures libevdev-cros utouch-evemu -j3
   pushd ~/trunk/src/platform/touchpad-tests >/dev/null
   make -j${NUM_JOBS} -s all
   sudo make -s local-install
@@ -54,7 +54,7 @@ check_test_setup() {
     install_regression_test_suite
   else
     update_chroot_library libgestures.so ${libgestures_head_hash} gestures
-    update_chroot_library libevdev.so ${libevdev_head_hash} libevdev
+    update_chroot_library libevdev-cros.so ${libevdev_head_hash} libevdev-cros
   fi
 }
 
