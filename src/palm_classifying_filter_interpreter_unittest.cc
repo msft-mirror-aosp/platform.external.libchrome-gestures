@@ -62,6 +62,7 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -141,6 +142,7 @@ TEST(PalmClassifyingFilterInterpreterTest, StationaryPalmTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -201,6 +203,7 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmAtEdgeTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(pci.get(), &hwprops);
 
@@ -326,6 +329,7 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmReevaluateTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -416,6 +420,7 @@ TEST(PalmClassifyingFilterInterpreterTest, LargeTouchMajorTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 

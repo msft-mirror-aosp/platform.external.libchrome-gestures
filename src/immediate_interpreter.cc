@@ -2546,7 +2546,8 @@ void ImmediateInterpreter::UpdateTapGesture(
                     state_buffer_.Get(1)->timestamp,
                     now,
                     down,
-                    up);
+                    up,
+                    true); // is_tap
 }
 
 void ImmediateInterpreter::UpdateTapState(
@@ -3066,7 +3067,8 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
                         state_buffer_.Get(1)->timestamp,
                         hwstate.timestamp,
                         button_type_,
-                        0);
+                        0,
+                        false); // is_tap
       sent_button_down_ = true;
     } else if (timeout) {
       *timeout = button_down_timeout_ - hwstate.timestamp;
@@ -3079,7 +3081,8 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
                         state_buffer_.Get(1)->timestamp,
                         hwstate.timestamp,
                         0,
-                        button_type_);
+                        button_type_,
+                        false); // is_tap
     else
       result_.details.buttons.up = button_type_;
     // Reset button state
@@ -3105,7 +3108,8 @@ void ImmediateInterpreter::UpdateButtonsTimeout(stime_t now) {
                     state_buffer_.Get(1)->timestamp,
                     now,
                     button_type_,
-                    0);
+                    0,
+                    false); // is_tap
 }
 
 void ImmediateInterpreter::FillResultGesture(

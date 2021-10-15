@@ -141,6 +141,7 @@ TEST(ScalingFilterInterpreterTest, SimpleTest) {
     2, 5,  // max fingers, max_touch
     0, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   HardwareProperties expected_hwprops = {
     0, 0, 100, 60,  // left, top, right, bottom
@@ -149,6 +150,7 @@ TEST(ScalingFilterInterpreterTest, SimpleTest) {
     M_PI_2,   // orientation maximum
     2, 5, 0, 0, 0,  // max_fingers, max_touch, t5r2, semi_mt, is button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // is haptic pad
   };
   base_interpreter->expected_hwprops_ = expected_hwprops;
 
@@ -395,6 +397,7 @@ TEST(ScalingFilterInterpreterTest, TouchMajorAndMinorTest) {
     2, 5,  // max fingers, max_touch
     0, 0, 0,  // t5r2, semi, button pad
     1, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   HardwareProperties expected_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -403,6 +406,7 @@ TEST(ScalingFilterInterpreterTest, TouchMajorAndMinorTest) {
     M_PI_2,   // orientation maximum
     2, 5, 0, 0, 0,  // max_fingers, max_touch, t5r2, semi_mt, button pad
     1, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
 
   // Test 1: Touch major and touch minor scaling with orientation

@@ -35,7 +35,8 @@ void StuckButtonInhibitorFilterInterpreter::HandleTimerImpl(
     } else {
       Err("Mouse button seems stuck down. Sending button-up.");
       ProduceGesture(Gesture(kGestureButtonsChange,
-                             now, now, 0, sent_buttons_down_));
+                             now, now, 0, sent_buttons_down_,
+                             false)); // is_tap
       sent_buttons_down_ = 0;
     }
   }

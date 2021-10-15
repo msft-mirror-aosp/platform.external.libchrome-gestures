@@ -82,6 +82,7 @@ void DoTest(InputEventWithExpectations* events, size_t events_len, bool t5r2) {
     1,  // is_button_pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is_haptic_pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -177,6 +178,7 @@ TEST(SplitCorrectingFilterInterpreterTest, FalseMergeTest) {
     1,  // is_button_pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is_haptic_pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -334,6 +336,7 @@ TEST(SplitCorrectingFilterInterpreterTest, LumpyThumbSplitTest) {
     1,  // is button pad,
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 

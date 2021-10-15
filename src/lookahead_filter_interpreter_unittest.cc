@@ -102,6 +102,7 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
     2, 5,  // max fingers, max_touch
     1, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -241,6 +242,7 @@ TEST(LookaheadFilterInterpreterTest, VariableDelayTest) {
     5, 5,  // max fingers, max_touch,
     0, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &initial_hwprops);
 
@@ -317,6 +319,7 @@ TEST(LookaheadFilterInterpreterTest, NoTapSetTest) {
     5, 5,  // max fingers, max_touch
     0, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
 
   FingerState fs[] = {
@@ -371,6 +374,7 @@ TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest) {
     2, 5,  // max fingers, max_touch
     1, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -423,6 +427,7 @@ TEST(LookaheadFilterInterpreterTest, TimeGoesBackwardsTest) {
     2, 5,  // max fingers, max_touch
     1, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &initial_hwprops);
 
@@ -517,6 +522,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
     2, 5,  // max fingers, max_touch
     1, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -597,6 +603,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
     2, 5,  // max fingers, max_touch
     1, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -671,6 +678,7 @@ TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
     2, 5,  // max fingers, max_touch
     1, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -746,6 +754,7 @@ TEST(LookaheadFilterInterpreterTest, QuickMoveTest) {
     2, 5,  // max fingers, max_touch
     1, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -849,6 +858,7 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
     1,   // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -945,6 +955,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaDrumrollTest) {
     0,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
@@ -1154,6 +1165,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
     0,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &initial_hwprops);
 
@@ -1210,6 +1222,7 @@ TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest) {
     2, 5,  // max fingers, max_touch
     1, 1, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &hwprops);
 

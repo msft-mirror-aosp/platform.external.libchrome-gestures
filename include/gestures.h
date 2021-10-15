@@ -62,6 +62,8 @@ struct HardwareProperties {
   // Mouse properties
   unsigned has_wheel:1;
   unsigned wheel_is_hi_res:1;
+
+  unsigned is_haptic_pad:1;
 #ifdef __cplusplus
   std::string String() const;
 #endif  // __cplusplus
@@ -230,6 +232,7 @@ typedef struct {
   // If a bit is set in both down and up, client should process down first
   unsigned down;  // bit field, use GESTURES_BUTTON_*
   unsigned up;  // bit field, use GESTURES_BUTTON_*
+  bool is_tap; // was the gesture generated with tap-to-click?
 } GestureButtonsChange;
 
 typedef struct {
@@ -348,12 +351,13 @@ struct Gesture {
     details.wheel.tick_120ths_dy = tick_120ths_dy;
   }
   Gesture(const GestureButtonsChange&,
-          stime_t start, stime_t end, unsigned down, unsigned up)
+          stime_t start, stime_t end, unsigned down, unsigned up, bool is_tap)
       : start_time(start),
         end_time(end),
         type(kGestureTypeButtonsChange) {
     details.buttons.down = down;
     details.buttons.up = up;
+    details.buttons.is_tap = is_tap;
   }
   Gesture(const GestureFling&,
           stime_t start, stime_t end, float vx, float vy, unsigned state)

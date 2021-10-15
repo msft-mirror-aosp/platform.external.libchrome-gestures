@@ -17,6 +17,7 @@ HardwareProperties make_hwprops_for_mouse(
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // touch-specific properties
     has_wheel,
     wheel_is_hi_res,
+    0,  // is_haptic_pad
   };
 }
 

@@ -50,6 +50,7 @@ TEST(ActivityLogTest, SimpleTest) {
     1,  // is button pad,
     0,  // has wheel
     0,  // vertical wheel is high resolution
+    0,  // is haptic pad
   };
 
   log.SetHardwareProperties(hwprops);
@@ -88,7 +89,7 @@ TEST(ActivityLogTest, SimpleTest) {
   Gesture null;
   Gesture move(kGestureMove, 1.0, 2.0, 773, 4.0);
   Gesture scroll(kGestureScroll, 1.0, 2.0, 312, 4.0);
-  Gesture buttons(kGestureButtonsChange, 1.0, 847, 3, 4);
+  Gesture buttons(kGestureButtonsChange, 1.0, 847, 3, 4, false);
   Gesture contact_initiated;
   contact_initiated.type = kGestureTypeContactInitiated;
 

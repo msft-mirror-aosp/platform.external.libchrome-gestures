@@ -17,6 +17,7 @@ SO_OBJECTS=\
 	$(OBJDIR)/finger_metrics.o \
 	$(OBJDIR)/fling_stop_filter_interpreter.o \
 	$(OBJDIR)/gestures.o \
+	$(OBJDIR)/haptic_button_generator_filter_interpreter.o \
 	$(OBJDIR)/iir_filter_interpreter.o \
 	$(OBJDIR)/immediate_interpreter.o \
 	$(OBJDIR)/integral_gesture_filter_interpreter.o \
@@ -52,6 +53,7 @@ TEST_OBJECTS=\
 	$(OBJDIR)/filter_interpreter_unittest.o \
 	$(OBJDIR)/fling_stop_filter_interpreter_unittest.o \
 	$(OBJDIR)/gestures_unittest.o \
+	$(OBJDIR)/haptic_button_generator_filter_interpreter_unittest.o \
 	$(OBJDIR)/iir_filter_interpreter_unittest.o \
 	$(OBJDIR)/immediate_interpreter_unittest.o \
 	$(OBJDIR)/integral_gesture_filter_interpreter_unittest.o \

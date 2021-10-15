@@ -111,7 +111,8 @@ bool MouseInterpreter::EmulateScrollWheel(const HardwareState& hwstate) {
                            prev_state_.timestamp,
                            hwstate.timestamp,
                            GESTURES_BUTTON_MIDDLE,
-                           GESTURES_BUTTON_MIDDLE));
+                           GESTURES_BUTTON_MIDDLE,
+                           false)); // is_tap
   }
 
   if (down) {
@@ -243,7 +244,8 @@ void MouseInterpreter::InterpretMouseButtonEvent(
                            prev_state.timestamp,
                            hwstate.timestamp,
                            down,
-                           up));
+                           up,
+                           false)); // is_tap
   }
 }
 

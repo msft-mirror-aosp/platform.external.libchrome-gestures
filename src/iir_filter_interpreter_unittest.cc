@@ -115,6 +115,7 @@ TEST(IirFilterInterpreterTest, SemiMTIIRTest) {
     2,   // orientation maximum
     2, 3, 0, 0, 0,  // max_fingers, max_touch, t5r2, semi_mt, is_button_pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // is_haptic_pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 

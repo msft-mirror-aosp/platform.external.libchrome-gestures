@@ -13,6 +13,7 @@
 #include "gestures/include/finger_merge_filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/fling_stop_filter_interpreter.h"
+#include "gestures/include/haptic_button_generator_filter_interpreter.h"
 #include "gestures/include/iir_filter_interpreter.h"
 #include "gestures/include/immediate_interpreter.h"
 #include "gestures/include/integral_gesture_filter_interpreter.h"
@@ -554,6 +555,8 @@ void GestureInterpreter::InitializeTouchpad(void) {
                                       GESTURES_DEVCLASS_TOUCHPAD);
   temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
+  temp = new HapticButtonGeneratorFilterInterpreter(prop_reg_.get(), temp,
+                                                    tracer_.get());
   temp = new T5R2CorrectingFilterInterpreter(prop_reg_.get(), temp,
                                              tracer_.get());
   temp = new NonLinearityFilterInterpreter(prop_reg_.get(), temp,
@@ -585,6 +588,8 @@ void GestureInterpreter::InitializeTouchpad2(void) {
                                       GESTURES_DEVCLASS_TOUCHPAD);
   temp = new FingerMergeFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = new StuckButtonInhibitorFilterInterpreter(temp, tracer_.get());
+  temp = new HapticButtonGeneratorFilterInterpreter(prop_reg_.get(), temp,
+                                                    tracer_.get());
   temp = new TimestampFilterInterpreter(prop_reg_.get(), temp, tracer_.get());
   temp = loggingFilter_ = new LoggingFilterInterpreter(prop_reg_.get(), temp,
                                                        tracer_.get());
@@ -655,7 +660,7 @@ std::string GestureInterpreter::EncodeActivityLog() {
 const GestureMove kGestureMove = { 0, 0, 0, 0 };
 const GestureScroll kGestureScroll = { 0, 0, 0, 0, 0 };
 const GestureMouseWheel kGestureMouseWheel = { 0, 0, 0, 0 };
-const GestureButtonsChange kGestureButtonsChange = { 0, 0 };
+const GestureButtonsChange kGestureButtonsChange = { 0, 0, 0 };
 const GestureFling kGestureFling = { 0, 0, 0, 0, 0 };
 const GestureSwipe kGestureSwipe = { 0, 0, 0, 0 };
 const GestureFourFingerSwipe kGestureFourFingerSwipe = { 0, 0, 0, 0 };

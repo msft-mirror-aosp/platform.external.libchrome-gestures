@@ -40,6 +40,7 @@ TEST(ImmediateInterpreterTest, MoveDownTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -103,6 +104,7 @@ TEST(ImmediateInterpreterTest, MoveUpWithRestingThumbTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -168,6 +170,7 @@ TEST(ImmediateInterpreterTest, SemiMtScrollUpWithRestingThumbTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -228,6 +231,7 @@ void ScrollUpTest(float pressure_a, float pressure_b) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -301,6 +305,7 @@ TEST(ImmediateInterpreterTest, ScrollThenFalseTapTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -371,6 +376,7 @@ TEST(ImmediateInterpreterTest, FlingTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -484,6 +490,7 @@ TEST(ImmediateInterpreterTest, DelayedStartScrollTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -544,6 +551,7 @@ TEST(ImmediateInterpreterTest, ScrollReevaluateTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   FingerState finger_states[] = {
@@ -618,6 +626,7 @@ TEST(ImmediateInterpreterTest, OneFingerThenTwoDelayedStartScrollTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   FingerState finger_states[] = {
@@ -699,6 +708,7 @@ TEST(ImmediateInterpreterTest, OneFatFingerScrollTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
   // 4 runs that were failing, but now pass:
@@ -868,6 +878,7 @@ TEST(ImmediateInterpreterTest, NoLiftoffScrollTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -1005,6 +1016,7 @@ TEST(ImmediateInterpreterTest, DiagonalSnapTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -1118,6 +1130,7 @@ TEST(ImmediateInterpreterTest, RestingFingerTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -1187,6 +1200,7 @@ TEST(ImmediateInterpreterTest, ThumbRetainTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   FingerState finger_states[] = {
@@ -1240,6 +1254,7 @@ TEST(ImmediateInterpreterTest, ThumbRetainReevaluateTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   FingerState finger_states[] = {
@@ -1290,6 +1305,7 @@ TEST(ImmediateInterpreterTest, SetHardwarePropertiesTwiceTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   hwprops.max_finger_cnt = 3;
   TestInterpreterWrapper wrapper(&ii, &hwprops);
@@ -1331,6 +1347,7 @@ TEST(ImmediateInterpreterTest, AmbiguousPalmCoScrollTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -1415,6 +1432,7 @@ TEST(ImmediateInterpreterTest, PressureChangeMoveTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -1477,6 +1495,7 @@ TEST(ImmediateInterpreterTest, GetGesturingFingersTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
@@ -1710,6 +1729,7 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -2163,6 +2183,7 @@ TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -2252,6 +2273,7 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -2327,6 +2349,7 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -2484,6 +2507,7 @@ TEST(ImmediateInterpreterTest, ClickTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
   EXPECT_FLOAT_EQ(10.0, ii.tapping_finger_min_separation_.val_);
@@ -2577,6 +2601,7 @@ TEST(ImmediateInterpreterTest, BigHandsRightClickTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
   BigHandsRightClickInputAndExpectations records[] = {
     { make_hwstate(1329527921.327647, 0, 2, 2, NULL), 0, 0,
@@ -2729,6 +2754,7 @@ TEST(ImmediateInterpreterTest, ChangeTimeoutTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   FingerState finger_states[] = {
@@ -2834,6 +2860,7 @@ TEST(ImmediateInterpreterTest, DISABLED_PinchTests) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   FingerState finger_states[] = {
@@ -2976,6 +3003,7 @@ TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(ii.get(), &hwprops);
 
@@ -3131,6 +3159,7 @@ TEST(ImmediateInterpreterTest, SemiMtActiveAreaTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
 
   const unsigned kNonPalmFlags = GESTURES_FINGER_WARP_X |
@@ -3180,6 +3209,7 @@ TEST(ImmediateInterpreterTest, SemiMtActiveAreaTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
 
   FingerState new_finger_states[] = {
@@ -3231,6 +3261,7 @@ TEST(ImmediateInterpreterTest, SemiMtNoPinchTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
 
   FingerState finger_state[] = {
@@ -3308,6 +3339,7 @@ TEST(ImmediateInterpreterTest, WarpedFingersTappingTest) {
     true,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    false,  // is haptic pad
   };
 
   unsigned flags = GESTURES_FINGER_WARP_X_NON_MOVE |
@@ -3369,6 +3401,7 @@ TEST(ImmediateInterpreterTest, FlingDepthTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   FingerState finger_states[] = {
@@ -3467,6 +3500,7 @@ TEST(ImmediateInterpreterTest, ScrollResetTapTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   FingerState finger_state[] = {
@@ -3537,6 +3571,7 @@ TEST(ImmediateInterpreterTest, ZeroClickInitializationTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 

@@ -337,6 +337,11 @@ void ScalingFilterInterpreter::Initialize(const HardwareProperties* hwprops,
     friendly_orientation_maximum = 0.0;
   }
 
+  // For haptic touchpads, the pressure field is actual force in grams, not an
+  // estimate of surface area.
+  if (hwprops->is_haptic_pad)
+    surface_area_from_pressure_.val_ = false;
+
   // Make fake idealized hardware properties to report to next_.
   friendly_props_ = {
     0.0,  // left
@@ -356,6 +361,7 @@ void ScalingFilterInterpreter::Initialize(const HardwareProperties* hwprops,
     hwprops->is_button_pad,
     hwprops->has_wheel,
     hwprops->wheel_is_hi_res,
+    hwprops->is_haptic_pad,
   };
   // current metrics is no longer valid, pass metrics=NULL
   FilterInterpreter::Initialize(&friendly_props_, NULL, mprops, consumer);

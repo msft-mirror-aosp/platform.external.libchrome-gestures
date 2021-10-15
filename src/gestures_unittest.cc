@@ -56,7 +56,7 @@ TEST(GesturesTest, GestureStringTest) {
   EXPECT_TRUE(strstr(scroll.String().c_str(), "3"));
   EXPECT_TRUE(strstr(scroll.String().c_str(), "4"));
 
-  Gesture buttons(kGestureButtonsChange, 1.0, 2.0, 3, 4);
+  Gesture buttons(kGestureButtonsChange, 1.0, 2.0, 3, 4, false);
   EXPECT_TRUE(strstr(buttons.String().c_str(), "1"));
   EXPECT_TRUE(strstr(buttons.String().c_str(), "2"));
   EXPECT_TRUE(strstr(buttons.String().c_str(), "3"));
@@ -107,12 +107,12 @@ TEST(GesturesTest, GestureEqTest) {
   EXPECT_TRUE(scroll != scroll_ne2);
   EXPECT_TRUE(scroll != scroll_ne3);
 
-  Gesture buttons(kGestureButtonsChange, 1.0, 2.0, 3, 4);
-  Gesture buttons2(kGestureButtonsChange, 1.0, 2.0, 3, 4);
-  Gesture buttons_ne0(kGestureButtonsChange, 9.0, 2.0, 3, 4);
-  Gesture buttons_ne1(kGestureButtonsChange, 1.0, 9.0, 3, 4);
-  Gesture buttons_ne2(kGestureButtonsChange, 1.0, 2.0, 9, 4);
-  Gesture buttons_ne3(kGestureButtonsChange, 1.0, 2.0, 3, 9);
+  Gesture buttons(kGestureButtonsChange, 1.0, 2.0, 3, 4, false);
+  Gesture buttons2(kGestureButtonsChange, 1.0, 2.0, 3, 4, false);
+  Gesture buttons_ne0(kGestureButtonsChange, 9.0, 2.0, 3, 4, false);
+  Gesture buttons_ne1(kGestureButtonsChange, 1.0, 9.0, 3, 4, false);
+  Gesture buttons_ne2(kGestureButtonsChange, 1.0, 2.0, 9, 4, false);
+  Gesture buttons_ne3(kGestureButtonsChange, 1.0, 2.0, 3, 9, false);
   EXPECT_TRUE(buttons == buttons2);
   EXPECT_FALSE(buttons == buttons_ne0);
   EXPECT_FALSE(buttons == buttons_ne1);
@@ -182,14 +182,14 @@ TEST(GesturesTest, CtorTest) {
   EXPECT_EQ(scroll_gs.details.scroll.dx, 4.0);
   EXPECT_EQ(scroll_gs.details.scroll.dy, 5.0);
 
-  Gesture bdown_gs(kGestureButtonsChange, 2, 3, GESTURES_BUTTON_LEFT, 0);
+  Gesture bdown_gs(kGestureButtonsChange, 2, 3, GESTURES_BUTTON_LEFT, 0, false);
   EXPECT_EQ(bdown_gs.type, kGestureTypeButtonsChange);
   EXPECT_EQ(bdown_gs.start_time, 2);
   EXPECT_EQ(bdown_gs.end_time, 3);
   EXPECT_EQ(bdown_gs.details.buttons.down, GESTURES_BUTTON_LEFT);
   EXPECT_EQ(bdown_gs.details.buttons.up, 0);
 
-  Gesture bup_gs(kGestureButtonsChange, 2, 3, 0, GESTURES_BUTTON_LEFT);
+  Gesture bup_gs(kGestureButtonsChange, 2, 3, 0, GESTURES_BUTTON_LEFT, false);
   EXPECT_EQ(bup_gs.type, kGestureTypeButtonsChange);
   EXPECT_EQ(bup_gs.start_time, 2);
   EXPECT_EQ(bup_gs.end_time, 3);
@@ -197,7 +197,8 @@ TEST(GesturesTest, CtorTest) {
   EXPECT_EQ(bup_gs.details.buttons.up, GESTURES_BUTTON_LEFT);
 
   Gesture bdownup_gs(
-      kGestureButtonsChange, 2, 3, GESTURES_BUTTON_LEFT, GESTURES_BUTTON_LEFT);
+      kGestureButtonsChange, 2, 3,
+      GESTURES_BUTTON_LEFT, GESTURES_BUTTON_LEFT, false);
   EXPECT_EQ(bdownup_gs.type, kGestureTypeButtonsChange);
   EXPECT_EQ(bdownup_gs.start_time, 2);
   EXPECT_EQ(bdownup_gs.end_time, 3);
@@ -255,6 +256,7 @@ TEST(GesturesTest, HardwarePropertiesToStringTest) {
     11,  // max touches
     0, 1, 1,  // t5r2, semi-mt, is_button_pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // is_haptic_pad
   };
   string str = hp.String();
   fprintf(stderr, "str: %s\n", str.c_str());

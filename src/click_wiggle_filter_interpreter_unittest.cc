@@ -63,6 +63,7 @@ TEST(ClickWiggleFilterInterpreterTest, WiggleSuppressTest) {
     0,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -138,6 +139,7 @@ TEST(ClickWiggleFilterInterpreterTest, OneFingerClickSuppressTest) {
     0,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -208,6 +210,7 @@ TEST(ClickWiggleFilterInterpreter, ThumbClickTest) {
     0,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -263,6 +266,7 @@ TEST(ClickWiggleFilterInterpreter, TimeBackwardsTest) {
     0,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
@@ -330,6 +334,7 @@ TEST(ClickWiggleFilterInterpreter, ThumbClickWiggleWithPalmTest) {
     1,  // is button pad
     0,  // has_wheel
     0,  // wheel_is_hi_res
+    0,  // is haptic pad
   };
 
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);

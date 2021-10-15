@@ -65,6 +65,7 @@ TEST(BoxFilterInterpreterTest, SimpleTest) {
     5, 5,  // max fingers, max_touch,
     0, 0, 1,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 

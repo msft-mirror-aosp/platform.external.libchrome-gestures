@@ -88,6 +88,7 @@ TEST(StuckButtonInhibitorFilterInterpreterTest, SimpleTest) {
     2, 5,  // max fingers, max_touch
     0, 0, 0,  // t5r2, semi, button pad
     0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -101,32 +102,38 @@ TEST(StuckButtonInhibitorFilterInterpreterTest, SimpleTest) {
                          0,  // start time
                          0,  // end time
                          GESTURES_BUTTON_LEFT,  // down
-                         0);  // up
+                         0,  // up
+                         false);  // is_tap
   Gesture up = Gesture(kGestureButtonsChange,
                        0,  // start time
                        0,  // end time
                        0,  // down
-                       GESTURES_BUTTON_LEFT);  // up
+                       GESTURES_BUTTON_LEFT,  // up
+                       false);  // is_tap
   Gesture rdwn = Gesture(kGestureButtonsChange,
                          0,  // start time
                          0,  // end time
                          GESTURES_BUTTON_RIGHT,  // down
-                         0);  // up
+                         0,  // up
+                         false);  // is_tap
   Gesture rup = Gesture(kGestureButtonsChange,
                         0,  // start time
                         0,  // end time
                         0,  // down
-                        GESTURES_BUTTON_RIGHT);  // up
+                        GESTURES_BUTTON_RIGHT,  // up
+                        false);  // is_tap
   Gesture rldn = Gesture(kGestureButtonsChange,
                          0,  // start time
                          0,  // end time
                          GESTURES_BUTTON_LEFT | GESTURES_BUTTON_RIGHT,  // down
-                         0);  // up
+                         0,  // up
+                         false);  // is_tap
   Gesture rlup = Gesture(kGestureButtonsChange,
                          0,  // start time
                          0,  // end time
                          0,  // down
-                         GESTURES_BUTTON_LEFT | GESTURES_BUTTON_RIGHT);  // up
+                         GESTURES_BUTTON_LEFT | GESTURES_BUTTON_RIGHT,  // up
+                         false);  // is_tap
 
   FingerState fs = { 0, 0, 0, 0, 1, 0, 150, 4000, 1, 0 };
   const stime_t kND = NO_DEADLINE;
