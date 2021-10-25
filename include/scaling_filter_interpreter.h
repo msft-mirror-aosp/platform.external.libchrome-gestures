@@ -94,6 +94,8 @@ class ScalingFilterInterpreter : public FilterInterpreter {
   //     0
   BoolProperty surface_area_from_pressure_;
 
+  BoolProperty use_touch_size_for_haptic_pad_;
+
   // Touchpad device output bias (pixels).
   DoubleProperty tp_x_bias_;
   DoubleProperty tp_y_bias_;

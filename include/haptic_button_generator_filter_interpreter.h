@@ -20,6 +20,8 @@
 namespace gestures {
 
 class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
+  FRIEND_TEST(HapticButtonGeneratorFilterInterpreterTest, SimpleTest);
+  FRIEND_TEST(HapticButtonGeneratorFilterInterpreterTest, NotHapticTest);
  public:
   // Takes ownership of |next|:
   explicit HapticButtonGeneratorFilterInterpreter(PropRegistry* prop_reg,
@@ -49,6 +51,8 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
   BoolProperty use_custom_thresholds_;
   DoubleProperty custom_down_threshold_;
   DoubleProperty custom_up_threshold_;
+
+  BoolProperty enabled_;
 
   DoubleProperty force_scale_;
   DoubleProperty force_translate_;

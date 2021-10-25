@@ -37,6 +37,8 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, SimpleTest) {
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
+  interpreter.enabled_.val_ = true;
+
   FingerState fs[] = {
     // TM, Tm, WM, Wm, pr, orient, x, y, id, flag
     { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
@@ -113,6 +115,8 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, NotHapticTest) {
     0,  // haptic pad
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
+
+  interpreter.enabled_.val_ = true;
 
   FingerState fs[] = {
     // TM, Tm, WM, Wm, pr, orient, x, y, id, flag

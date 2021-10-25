@@ -28,6 +28,10 @@ ScalingFilterInterpreter::ScalingFilterInterpreter(
       australian_scrolling_(prop_reg, "Australian Scrolling", false),
       surface_area_from_pressure_(prop_reg,
                                   "Compute Surface Area from Pressure", true),
+      use_touch_size_for_haptic_pad_(
+          prop_reg,
+          "Compute Surface Area from Touch Size for Haptic Pads",
+          false),
       tp_x_bias_(prop_reg, "Touchpad Device Output Bias on X-Axis", 0.0),
       tp_y_bias_(prop_reg, "Touchpad Device Output Bias on Y-Axis", 0.0),
       pressure_scale_(prop_reg, "Pressure Calibration Slope", 1.0),
@@ -339,7 +343,7 @@ void ScalingFilterInterpreter::Initialize(const HardwareProperties* hwprops,
 
   // For haptic touchpads, the pressure field is actual force in grams, not an
   // estimate of surface area.
-  if (hwprops->is_haptic_pad)
+  if (hwprops->is_haptic_pad && use_touch_size_for_haptic_pad_.val_)
     surface_area_from_pressure_.val_ = false;
 
   // Make fake idealized hardware properties to report to next_.
