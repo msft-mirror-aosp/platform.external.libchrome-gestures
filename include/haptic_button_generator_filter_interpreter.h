@@ -13,9 +13,8 @@
 #define GESTURES_INCLUDE_HAPTIC_BUTTON_GENERATOR_FILTER_INTERPRETER_H_
 
 // For haptic touchpads, the gesture library is responsible for determining the
-// state of the "physical" button. This class determines the total force applied
-// to the touchpad and sets the button state based on the user's force threshold
-// preferences.
+// state of the "physical" button. This class sets the button state based on the
+// user's force threshold preferences.
 
 namespace gestures {
 

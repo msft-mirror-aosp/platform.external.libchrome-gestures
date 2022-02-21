@@ -71,7 +71,7 @@ void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
   // Determine total force on touchpad in grams
   double force = 0.0;
   for (short i = 0; i < hwstate->finger_cnt; i++) {
-    force += hwstate->fingers[i].pressure;
+    force = fmax(force, hwstate->fingers[i].pressure);
   }
   force *= force_scale_.val_;
   force += force_translate_.val_;
