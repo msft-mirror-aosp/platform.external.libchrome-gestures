@@ -29,6 +29,9 @@ HapticButtonGeneratorFilterInterpreter::HapticButtonGeneratorFilterInterpreter(
       enabled_(prop_reg, "Enable Haptic Button Generation", false),
       force_scale_(prop_reg, "Force Calibration Slope", 1.0),
       force_translate_(prop_reg, "Force Calibration Offset", 0.0),
+      active_gesture_(false),
+      active_gesture_timeout_(0.1),
+      active_gesture_deadline_(NO_DEADLINE),
       button_down_(false) {
   InitName();
 }
@@ -45,7 +48,10 @@ void HapticButtonGeneratorFilterInterpreter::Initialize(
 void HapticButtonGeneratorFilterInterpreter::SyncInterpretImpl(
     HardwareState* hwstate, stime_t* timeout) {
   HandleHardwareState(hwstate);
-  next_->SyncInterpret(hwstate, timeout);
+  stime_t next_timeout = NO_DEADLINE;
+  next_->SyncInterpret(hwstate, &next_timeout);
+  *timeout = SetNextDeadlineAndReturnTimeoutVal(
+      hwstate->timestamp, active_gesture_deadline_, next_timeout);
 }
 
 void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
@@ -82,11 +88,75 @@ void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
       button_down_ = false;
     else
       hwstate->buttons_down = GESTURES_BUTTON_LEFT;
-  }
-  else if (force > down_threshold) {
+  } else if (force > down_threshold && !active_gesture_) {
     button_down_ = true;
     hwstate->buttons_down = GESTURES_BUTTON_LEFT;
   }
+}
+
+void HapticButtonGeneratorFilterInterpreter::HandleTimerImpl(
+    stime_t now, stime_t *timeout) {
+  stime_t next_timeout;
+  if (ShouldCallNextTimer(active_gesture_deadline_)) {
+    if (next_timer_deadline_ > now) {
+      Err("Spurious callback. now: %f, next deadline: %f",
+          now, next_timer_deadline_);
+      return;
+    }
+
+    next_timeout = NO_DEADLINE;
+    next_->HandleTimer(now, &next_timeout);
+  } else {
+    if (active_gesture_deadline_ > now) {
+      Err("Spurious callback. now: %f, active gesture deadline: %f",
+          now, active_gesture_deadline_);
+      return;
+    }
+    // If enough time has passed without an active gesture event assume that we
+    // missed the gesture ending event, to prevent a state where the button is
+    // stuck down.
+    active_gesture_ = false;
+
+    active_gesture_deadline_ = NO_DEADLINE;
+    next_timeout =
+      next_timer_deadline_ == NO_DEADLINE || next_timer_deadline_ <= now ?
+      NO_DEADLINE : next_timer_deadline_ - now;
+  }
+  *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
+                                                active_gesture_deadline_,
+                                                next_timeout);
+}
+
+void HapticButtonGeneratorFilterInterpreter::ConsumeGesture(
+    const Gesture& gesture) {
+  if (!enabled_.val_ || !is_haptic_pad_) {
+    ProduceGesture(gesture);
+    return;
+  }
+
+  // Determine if there is an active non-click multi-finger gesture.
+  switch (gesture.type) {
+    case kGestureTypeScroll:
+    case kGestureTypeSwipe:
+    case kGestureTypeFourFingerSwipe:
+      active_gesture_ = true;
+      break;
+    case kGestureTypeFling:
+    case kGestureTypeSwipeLift:
+    case kGestureTypeFourFingerSwipeLift:
+      active_gesture_ = false;
+      break;
+    case kGestureTypePinch:
+      active_gesture_ = (gesture.details.pinch.zoom_state != GESTURES_ZOOM_END);
+      break;
+    default:
+      break;
+  }
+  if (active_gesture_) {
+    active_gesture_deadline_ = gesture.end_time + active_gesture_timeout_;
+  }
+
+  ProduceGesture(gesture);
 }
 
 }  // namespace gestures

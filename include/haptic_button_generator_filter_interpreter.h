@@ -21,6 +21,8 @@ namespace gestures {
 class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(HapticButtonGeneratorFilterInterpreterTest, SimpleTest);
   FRIEND_TEST(HapticButtonGeneratorFilterInterpreterTest, NotHapticTest);
+  FRIEND_TEST(HapticButtonGeneratorFilterInterpreterTest,
+              GesturePreventsButtonDownTest);
  public:
   // Takes ownership of |next|:
   explicit HapticButtonGeneratorFilterInterpreter(PropRegistry* prop_reg,
@@ -30,12 +32,15 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
 
   virtual void Initialize(const HardwareProperties* hwprops,
                           Metrics* metrics, MetricsProperties* mprops,
-                          GestureConsumer* consumer);
+                          GestureConsumer* consumer) override;
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState* hwstate,
+                                 stime_t* timeout) override;
 
  private:
+  void ConsumeGesture(const Gesture& gesture) override;
   void HandleHardwareState(HardwareState* hwstate);
+  virtual void HandleTimerImpl(stime_t now, stime_t *timeout) override;
 
   static const size_t kMaxSensitivitySettings = 5;
 
@@ -55,6 +60,13 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
 
   DoubleProperty force_scale_;
   DoubleProperty force_translate_;
+
+
+  // We prevent button down events during an active non-click multi-finger
+  // gesture
+  bool active_gesture_;
+  double active_gesture_timeout_;
+  double active_gesture_deadline_;
 
   // Is the button currently down?
   bool button_down_;

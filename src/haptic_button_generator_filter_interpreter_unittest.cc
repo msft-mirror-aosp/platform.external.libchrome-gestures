@@ -9,6 +9,7 @@
 
 namespace gestures {
 
+namespace {
 class HapticButtonGeneratorFilterInterpreterTest : public ::testing::Test {};
 
 class HapticButtonGeneratorFilterInterpreterTestInterpreter :
@@ -16,7 +17,27 @@ class HapticButtonGeneratorFilterInterpreterTestInterpreter :
  public:
   HapticButtonGeneratorFilterInterpreterTestInterpreter()
       : Interpreter(NULL, NULL, false) {}
+  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+    if (return_value_.type != kGestureTypeNull)
+      ProduceGesture(return_value_);
+  }
+
+  virtual void HandleTimer(stime_t now, stime_t* timeout) {
+    ADD_FAILURE() << "HandleTimer on the next interpreter shouldn't be called";
+  }
+
+  Gesture return_value_;
 };
+
+struct GestureTestInputs {
+  stime_t time;
+  short touch_count; // -1 for timer callback
+  FingerState* fs;
+  Gesture gesture;
+  stime_t expected_button;
+};
+
+} // namespace {}
 
 TEST(HapticButtonGeneratorFilterInterpreterTest, SimpleTest) {
   HapticButtonGeneratorFilterInterpreterTestInterpreter* base_interpreter =
@@ -100,7 +121,8 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, SimpleTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], NULL);
+    stime_t timeout = NO_DEADLINE;
+    wrapper.SyncInterpret(&hs[i], &timeout);
     EXPECT_EQ(hs[i].buttons_down, expected_buttons[i]);
   }
 }
@@ -154,8 +176,86 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, NotHapticTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], NULL);
+    stime_t timeout = NO_DEADLINE;
+    wrapper.SyncInterpret(&hs[i], &timeout);
     EXPECT_EQ(hs[i].buttons_down, expected_buttons[i]);
+  }
+}
+
+TEST(HapticButtonGeneratorFilterInterpreterTest,
+     GesturePreventsButtonDownTest) {
+  HapticButtonGeneratorFilterInterpreterTestInterpreter* base_interpreter =
+      new HapticButtonGeneratorFilterInterpreterTestInterpreter;
+  HapticButtonGeneratorFilterInterpreter interpreter(
+      NULL, base_interpreter, NULL);
+  HardwareProperties hwprops = {
+    0, 0, 100, 100,  // left, top, right, bottom
+    10,  // x res (pixels/mm)
+    10,  // y res (pixels/mm)
+    133, 133,  // scrn DPI X, Y
+    -1,  // orientation minimum
+    2,   // orientation maximum
+    2, 5,  // max fingers, max_touch
+    0, 0, 0,  // t5r2, semi, button pad
+    0, 0,  // has wheel, vertical wheel is high resolution
+    1,  // haptic pad
+  };
+  TestInterpreterWrapper wrapper(&interpreter, &hwprops);
+
+  interpreter.enabled_.val_ = true;
+
+  // TM, Tm, WM, Wm, pr, orient, x, y, id, flag
+  FingerState fs_low_force[] = {
+    { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 50, 0, 10, 1, 2, 0 },
+  };
+  FingerState fs_high_force[] = {
+    { 0, 0, 0, 0, 160, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 160, 0, 10, 1, 2, 0 },
+  };
+
+  const Gesture kNull = Gesture();
+  const Gesture kScroll = Gesture(kGestureScroll, 0, 0, 20, 0);
+  const Gesture kFling = Gesture(kGestureFling, 0, 0, 20, 0,
+                                 GESTURES_FLING_START);
+
+  GestureTestInputs inputs[] = {
+    // Don't set the button down if a gesture is active.
+    {1.00, 2, fs_low_force,  kScroll, GESTURES_BUTTON_NONE},
+    {1.01, 2, fs_high_force, kFling,  GESTURES_BUTTON_NONE},
+
+    // If the button is down before a gesture starts, don't prevent the button
+    // from going back up.
+    {2.000, 2, fs_low_force,  kNull,   GESTURES_BUTTON_NONE},
+    {2.010, 2, fs_high_force, kNull,   GESTURES_BUTTON_LEFT},
+    {2.030, 2, fs_high_force, kScroll, GESTURES_BUTTON_LEFT},
+    {2.040, 2, fs_low_force,  kScroll, GESTURES_BUTTON_NONE},
+    {2.050, 2, fs_low_force,  kFling,  GESTURES_BUTTON_NONE},
+
+    // If there is no "ending" gesture event, allow button clicks after a short
+    // timeout.
+    {3.000, 2, fs_low_force,  kScroll, GESTURES_BUTTON_NONE},
+    {3.010, 2, fs_high_force, kNull,   GESTURES_BUTTON_NONE},
+    {3.011, 2, fs_high_force, kNull,   GESTURES_BUTTON_NONE},
+    {3.011 + interpreter.active_gesture_timeout_, -1, NULL, kNull, 0},
+    {3.200 + interpreter.active_gesture_timeout_,
+            2, fs_high_force, kNull,   GESTURES_BUTTON_LEFT},
+  };
+
+  for (size_t i = 0; i < arraysize(inputs); i++) {
+    GestureTestInputs input = inputs[i];
+    base_interpreter->return_value_ = input.gesture;
+    stime_t timeout = NO_DEADLINE;
+    if (input.touch_count == -1) {
+      wrapper.HandleTimer(input.time, &timeout);
+    } else {
+      unsigned short touch_count =
+          static_cast<unsigned short>(input.touch_count);
+      HardwareState hs = make_hwstate(input.time, 0, touch_count, touch_count,
+                                      input.fs);
+      wrapper.SyncInterpret(&hs, &timeout);
+      EXPECT_EQ(hs.buttons_down, input.expected_button);
+    }
   }
 }
 
