@@ -29,6 +29,9 @@ HapticButtonGeneratorFilterInterpreter::HapticButtonGeneratorFilterInterpreter(
       enabled_(prop_reg, "Enable Haptic Button Generation", false),
       force_scale_(prop_reg, "Force Calibration Slope", 1.0),
       force_translate_(prop_reg, "Force Calibration Offset", 0.0),
+      complete_release_suppress_speed_(
+          prop_reg, "Haptic Complete Release Suppression Speed", 200.0),
+      release_suppress_factor_(1.0),
       active_gesture_(false),
       active_gesture_timeout_(0.1),
       active_gesture_deadline_(NO_DEADLINE),
@@ -73,6 +76,7 @@ void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
     down_threshold = down_thresholds_[sensitivity_.val_ - 1];
     up_threshold = up_thresholds_[sensitivity_.val_ - 1];
   }
+  up_threshold *= release_suppress_factor_;
 
   // Determine total force on touchpad in grams
   double force = 0.0;
@@ -92,6 +96,7 @@ void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
     button_down_ = true;
     hwstate->buttons_down = GESTURES_BUTTON_LEFT;
   }
+  release_suppress_factor_ = 1.0;
 }
 
 void HapticButtonGeneratorFilterInterpreter::HandleTimerImpl(
@@ -154,6 +159,27 @@ void HapticButtonGeneratorFilterInterpreter::ConsumeGesture(
   }
   if (active_gesture_) {
     active_gesture_deadline_ = gesture.end_time + active_gesture_timeout_;
+  }
+
+  // When dragging while clicking, users often reduce the force applied, causing
+  // accidental release. So we calculate a scaling factor to reduce the "up"
+  // threshold which starts at 1.0 (normal threshold) for stationary fingers,
+  // and goes down to 0.0 at the complete_release_suppress_speed_.
+  if (gesture.type == kGestureTypeMove) {
+    float distance_sq = gesture.details.move.dx * gesture.details.move.dx +
+        gesture.details.move.dy * gesture.details.move.dy;
+    stime_t time_delta = gesture.end_time - gesture.start_time;
+    float complete_suppress_dist =
+        complete_release_suppress_speed_.val_ * time_delta;
+    float complete_suppress_dist_sq =
+        complete_suppress_dist * complete_suppress_dist;
+
+    release_suppress_factor_ =
+        time_delta <= 0.0 ? 1.0 : 1.0 - distance_sq / complete_suppress_dist_sq;
+
+    // Always allow release at very low force, to prevent a stuck button when
+    // the user lifts their finger while moving quickly.
+    release_suppress_factor_ = fmax(release_suppress_factor_, 0.1);
   }
 
   ProduceGesture(gesture);

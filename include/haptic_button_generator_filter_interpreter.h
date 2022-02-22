@@ -61,6 +61,10 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
   DoubleProperty force_scale_;
   DoubleProperty force_translate_;
 
+  DoubleProperty complete_release_suppress_speed_;
+
+  // Scaling factor for release force [0.0-1.0]
+  double release_suppress_factor_;
 
   // We prevent button down events during an active non-click multi-finger
   // gesture
