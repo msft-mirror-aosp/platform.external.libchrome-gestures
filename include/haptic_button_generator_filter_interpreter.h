@@ -46,9 +46,9 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
 
   // All threshold values are in grams.
   const double down_thresholds_[kMaxSensitivitySettings] =
-      {100.0, 125.0, 150.0, 175.0, 200.0};
+      {90.0, 110.0, 130.0, 145.0, 160.0};
   const double up_thresholds_[kMaxSensitivitySettings] =
-      {80.0, 105.0, 130.0, 155.0, 180.0};
+      {80.0, 95.0, 105.0, 120.0, 135.0};
 
   IntProperty sensitivity_;  // [1..5]
 

@@ -67,11 +67,11 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, SimpleTest) {
     { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
 
     { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
-    { 0, 0, 0, 0, 140, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 120, 0, 10, 1, 1, 0 },
     { 0, 0, 0, 0, 160, 0, 10, 1, 1, 0 },
 
     { 0, 0, 0, 0, 160, 0, 10, 1, 1, 0 },
-    { 0, 0, 0, 0, 140, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 120, 0, 10, 1, 1, 0 },
     { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
 
     { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
@@ -88,18 +88,18 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, SimpleTest) {
     make_hwstate(1.02, GESTURES_BUTTON_LEFT, 1, 1, &fs[1]),
     make_hwstate(1.03, 0, 1, 1, &fs[2]),
 
-    // Expect to set button down when going above 'down force threshold' (150)
+    // Expect to set button down when going above 'down force threshold' (130)
     make_hwstate(2.01, 0, 1, 1, &fs[3]),
     make_hwstate(2.03, 0, 1, 1, &fs[4]),
     make_hwstate(2.05, 0, 1, 1, &fs[5]),
 
-    // Expect to set button up when going below 'up force threshold' (130)
+    // Expect to set button up when going below 'up force threshold' (105)
     make_hwstate(3.01, 0, 1, 1, &fs[6]),
     make_hwstate(3.03, 0, 1, 1, &fs[7]),
     make_hwstate(3.05, 0, 1, 1, &fs[8]),
 
     // Expect not to set button down when no individual finger goes above the
-    // 'down force threshold' (150), even if multiple combined do
+    // 'down force threshold' (130), even if multiple combined do
     make_hwstate(4.01, 0, 2, 2, &fs[9]),
     make_hwstate(4.03, 0, 2, 2, &fs[11]),
 
@@ -155,7 +155,7 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, NotHapticTest) {
     { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
 
     { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
-    { 0, 0, 0, 0, 140, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 120, 0, 10, 1, 1, 0 },
     { 0, 0, 0, 0, 160, 0, 10, 1, 1, 0 },
   };
   HardwareState hs[] = {
