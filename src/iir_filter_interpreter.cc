@@ -47,7 +47,7 @@ IirFilterInterpreter::IirFilterInterpreter(PropRegistry* prop_reg,
 void IirFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
                                              stime_t* timeout) {
   // Delete old entries from map
-  short dead_ids[histories_.size()];
+  short dead_ids[histories_.size() + 1];
   size_t dead_ids_len = 0;
   for (map<short, IoHistory, kMaxFingers>::iterator it = histories_.begin(),
            e = histories_.end(); it != e; ++it)
