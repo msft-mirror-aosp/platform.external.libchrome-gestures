@@ -134,7 +134,7 @@ inline void SetRemoveMissing(ReducedSet* reduced, const RequiredSet& required) {
 template<size_t kSetSize>
 void RemoveMissingIdsFromSet(set<short, kSetSize>* the_set,
                              const HardwareState& hs) {
-  short old_ids[the_set->size()];
+  short old_ids[the_set->size() + 1];
   size_t old_ids_len = 0;
   for (typename set<short, kSetSize>::const_iterator it = the_set->begin();
        it != the_set->end(); ++it)
