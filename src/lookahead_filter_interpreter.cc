@@ -438,7 +438,7 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
       next_timeout = NO_DEADLINE;
       last_interpreted_time_ = node->state_.timestamp;
       const size_t finger_cnt = node->state_.finger_cnt;
-      FingerState fs_copy[finger_cnt];
+      FingerState fs_copy[std::max(finger_cnt,(size_t)1)];
       std::copy(&node->state_.fingers[0],
                 &node->state_.fingers[finger_cnt],
                 &fs_copy[0]);
