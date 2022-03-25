@@ -3027,12 +3027,19 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
   bool button_down = hwstate.buttons_down;
   if (!prev_button_down && !button_down)
     return;
+  // For haptic touchpads, we need to minimize latency for physical button
+  // events because they are used to signal the touchpad to perform haptic
+  // feedback.
+  double button_evaluation_timeout = is_haptic_pad_ ? 0.0 :
+      button_evaluation_timeout_.val_;
+  double button_finger_timeout = is_haptic_pad_ ? 0.0 :
+      button_finger_timeout_.val_;
   bool phys_down_edge = button_down && !prev_button_down;
   bool phys_up_edge = !button_down && prev_button_down;
   if (phys_down_edge) {
     finger_seen_shortly_after_button_down_ = false;
     sent_button_down_ = false;
-    button_down_timeout_ = hwstate.timestamp + button_evaluation_timeout_.val_;
+    button_down_timeout_ = hwstate.timestamp + button_evaluation_timeout;
   }
 
   // If we haven't seen a finger on the pad shortly after the click, do nothing
@@ -3045,15 +3052,15 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
 
   if (!sent_button_down_) {
     stime_t button_down_time = button_down_timeout_ -
-                               button_evaluation_timeout_.val_;
+                               button_evaluation_timeout;
     button_type_ = EvaluateButtonType(hwstate, button_down_time);
 
     if (!hwstate.SameFingersAs(*state_buffer_.Get(0))) {
       // Fingers have changed since last state, reset timeout
-      button_down_timeout_ = hwstate.timestamp + button_finger_timeout_.val_;
+      button_down_timeout_ = hwstate.timestamp + button_finger_timeout;
     }
 
-    // button_up before button_evaluation_timeout_ expired.
+    // button_up before button_evaluation_timeout expired.
     // Send up & down for button that was previously down, but not yet sent.
     if (button_type_ == GESTURES_BUTTON_NONE)
       button_type_ = prev_button_down;
@@ -3385,6 +3392,8 @@ void ImmediateInterpreter::Initialize(const HardwareProperties* hwprops,
   // integrate their buttons into the pad itself but enabled
   // for any other touchpad in case they have separate buttons.
   zero_finger_click_enable_.val_ = !hwprops_->is_button_pad;
+
+  is_haptic_pad_ = hwprops_->is_haptic_pad;
 }
 
 bool AnyGesturingFingerLeft(const HardwareState& state,

@@ -744,6 +744,8 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   // Keeps track of if there was a finger seen during a physical click
   bool finger_seen_shortly_after_button_down_;
 
+  bool is_haptic_pad_;
+
   ScrollManager scroll_manager_;
 
   // Properties
