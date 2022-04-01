@@ -259,4 +259,83 @@ TEST(HapticButtonGeneratorFilterInterpreterTest,
   }
 }
 
+TEST(HapticButtonGeneratorFilterInterpreterTest, DynamicThresholdTest) {
+  HapticButtonGeneratorFilterInterpreterTestInterpreter* base_interpreter =
+      new HapticButtonGeneratorFilterInterpreterTestInterpreter;
+  HapticButtonGeneratorFilterInterpreter interpreter(
+      NULL, base_interpreter, NULL);
+  HardwareProperties hwprops = {
+    0, 0, 100, 100,  // left, top, right, bottom
+    10,  // x res (pixels/mm)
+    10,  // y res (pixels/mm)
+    133, 133,  // scrn DPI X, Y
+    -1,  // orientation minimum
+    2,   // orientation maximum
+    2, 5,  // max fingers, max_touch
+    0, 0, 0,  // t5r2, semi, button pad
+    0, 0,  // has wheel, vertical wheel is high resolution
+    1,  // haptic pad
+  };
+  TestInterpreterWrapper wrapper(&interpreter, &hwprops);
+
+  interpreter.enabled_.val_ = true;
+
+  FingerState fs[] = {
+    // TM, Tm, WM, Wm, pr, orient, x, y, id, flag
+    { 0, 0, 0, 0, 50, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 120, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 160, 0, 10, 1, 1, 0 },
+
+    { 0, 0, 0, 0, 500, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 300, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 200, 0, 10, 1, 1, 0 },
+
+    { 0, 0, 0, 0, 220, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 250, 0, 10, 1, 1, 0 },
+
+    { 0, 0, 0, 0, 10, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 120, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 140, 0, 10, 1, 1, 0 },
+
+    { 0, 0, 0, 0, 110, 0, 10, 1, 1, 0 },
+    { 0, 0, 0, 0, 100, 0, 10, 1, 1, 0 },
+  };
+
+  std::pair<HardwareState, int> hs[] = {
+    // Expect to set button down when going above 'down force threshold' (130)
+    std::make_pair(make_hwstate(1.01, 0, 1, 1, &fs[0]), 0),
+    std::make_pair(make_hwstate(1.03, 0, 1, 1, &fs[1]), 0),
+    std::make_pair(make_hwstate(1.05, 0, 1, 1, &fs[2]), GESTURES_BUTTON_LEFT),
+
+    // Expect to increase button up threshold after seeing a very high force.
+    // Default 'up force threshold' is 105, but it increases to half of the max
+    // force seen.
+    std::make_pair(make_hwstate(2.01, 0, 1, 1, &fs[3]), GESTURES_BUTTON_LEFT),
+    std::make_pair(make_hwstate(2.03, 0, 1, 1, &fs[4]), GESTURES_BUTTON_LEFT),
+    std::make_pair(make_hwstate(2.05, 0, 1, 1, &fs[5]), 0),
+
+    // Expect to increase 'button down threshold' after seeing a very high
+    // force.
+    std::make_pair(make_hwstate(3.01, 0, 1, 1, &fs[6]), 0),
+    std::make_pair(make_hwstate(3.03, 0, 1, 1, &fs[7]), GESTURES_BUTTON_LEFT),
+
+    // Expect 'button down threshold' to return to normal (130) after seeing a
+    // low pressure value.
+    std::make_pair(make_hwstate(4.01, 0, 1, 1, &fs[8]), 0),
+    std::make_pair(make_hwstate(4.03, 0, 1, 1, &fs[9]), 0),
+    std::make_pair(make_hwstate(4.05, 0, 1, 1, &fs[10]), GESTURES_BUTTON_LEFT),
+
+    // Expect 'button up threshold' to return to normal after seeing a low
+    // pressure value.
+    std::make_pair(make_hwstate(5.01, 0, 1, 1, &fs[11]), GESTURES_BUTTON_LEFT),
+    std::make_pair(make_hwstate(5.03, 0, 1, 1, &fs[12]), 0),
+  };
+
+  for (size_t i = 0; i < arraysize(hs); i++) {
+    stime_t timeout = NO_DEADLINE;
+    wrapper.SyncInterpret(&hs[i].first, &timeout);
+    EXPECT_EQ(hs[i].first.buttons_down, hs[i].second);
+  }
+}
+
 }  // namespace gestures

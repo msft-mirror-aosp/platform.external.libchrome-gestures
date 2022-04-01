@@ -31,11 +31,17 @@ HapticButtonGeneratorFilterInterpreter::HapticButtonGeneratorFilterInterpreter(
       force_translate_(prop_reg, "Force Calibration Offset", 0.0),
       complete_release_suppress_speed_(
           prop_reg, "Haptic Complete Release Suppression Speed", 200.0),
+      use_dynamic_thresholds_(prop_reg, "Use Dynamic Haptic Thresholds", true),
+      dynamic_down_ratio_(prop_reg, "Dynamic Haptic Down Ratio", 1.2),
+      dynamic_up_ratio_(prop_reg, "Dynamic Haptic Up Ratio", 0.5),
+      max_dynamic_up_force_(prop_reg, "Max Dynamic Haptic Up Force", 350.0),
       release_suppress_factor_(1.0),
       active_gesture_(false),
       active_gesture_timeout_(0.1),
       active_gesture_deadline_(NO_DEADLINE),
-      button_down_(false) {
+      button_down_(false),
+      dynamic_down_threshold_(0.0),
+      dynamic_up_threshold_(0.0) {
   InitName();
 }
 
@@ -78,6 +84,11 @@ void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
   }
   up_threshold *= release_suppress_factor_;
 
+  if (use_dynamic_thresholds_.val_) {
+    up_threshold = fmax(up_threshold, dynamic_up_threshold_);
+    down_threshold = fmax(down_threshold, dynamic_down_threshold_);
+  }
+
   // Determine total force on touchpad in grams
   double force = 0.0;
   for (short i = 0; i < hwstate->finger_cnt; i++) {
@@ -87,6 +98,7 @@ void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
   force += force_translate_.val_;
 
   // Set the button state
+  bool prev_button_down = button_down_;
   if (button_down_) {
     if (force < up_threshold)
       button_down_ = false;
@@ -95,6 +107,37 @@ void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
   } else if (force > down_threshold && !active_gesture_) {
     button_down_ = true;
     hwstate->buttons_down = GESTURES_BUTTON_LEFT;
+  }
+
+  // When the user presses very hard, we want to increase the force threshold
+  // for releasing the button. We scale the release threshold as a ratio of the
+  // max force applied while the button is down.
+  if (prev_button_down) {
+    if (button_down_) {
+      dynamic_up_threshold_ = fmax(dynamic_up_threshold_,
+                                   force * dynamic_up_ratio_.val_);
+      dynamic_up_threshold_ = fmin(dynamic_up_threshold_,
+                                   max_dynamic_up_force_.val_);
+    } else {
+      dynamic_up_threshold_ = 0.0;
+    }
+  }
+
+  // Because we dynamically increase the up_threshold when a user presses very
+  // hard, we also need to increase the down_threshold for the next click.
+  // However, if the user continues to decrease force after the button release,
+  // event, we will keep scaling down the dynamic_down_threshold.
+  if (prev_button_down) {
+    if (!button_down_) {
+      dynamic_down_threshold_ = force * dynamic_down_ratio_.val_;
+    }
+  } else {
+    if (button_down_) {
+      dynamic_down_threshold_ = 0.0;
+    } else {
+      dynamic_down_threshold_ = fmin(dynamic_down_threshold_,
+                                     force * dynamic_down_ratio_.val_);
+    }
   }
   release_suppress_factor_ = 1.0;
 }

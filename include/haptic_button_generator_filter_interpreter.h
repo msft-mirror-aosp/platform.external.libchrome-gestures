@@ -23,6 +23,7 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(HapticButtonGeneratorFilterInterpreterTest, NotHapticTest);
   FRIEND_TEST(HapticButtonGeneratorFilterInterpreterTest,
               GesturePreventsButtonDownTest);
+  FRIEND_TEST(HapticButtonGeneratorFilterInterpreterTest, DynamicThresholdTest);
  public:
   // Takes ownership of |next|:
   explicit HapticButtonGeneratorFilterInterpreter(PropRegistry* prop_reg,
@@ -63,6 +64,11 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
 
   DoubleProperty complete_release_suppress_speed_;
 
+  BoolProperty use_dynamic_thresholds_;
+  DoubleProperty dynamic_down_ratio_;
+  DoubleProperty dynamic_up_ratio_;
+  DoubleProperty max_dynamic_up_force_;
+
   // Scaling factor for release force [0.0-1.0]
   double release_suppress_factor_;
 
@@ -76,6 +82,11 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
   bool button_down_;
 
   bool is_haptic_pad_;
+
+  // When the user presses very hard, we dynamically adjust force thresholds to
+  // allow easier double-clicking
+  double dynamic_down_threshold_;
+  double dynamic_up_threshold_;
 };
 
 }  // namespace gestures
