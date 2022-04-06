@@ -146,12 +146,6 @@ void HapticButtonGeneratorFilterInterpreter::HandleTimerImpl(
     stime_t now, stime_t *timeout) {
   stime_t next_timeout;
   if (ShouldCallNextTimer(active_gesture_deadline_)) {
-    if (next_timer_deadline_ > now) {
-      Err("Spurious callback. now: %f, next deadline: %f",
-          now, next_timer_deadline_);
-      return;
-    }
-
     next_timeout = NO_DEADLINE;
     next_->HandleTimer(now, &next_timeout);
   } else {
