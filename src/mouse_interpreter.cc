@@ -93,8 +93,12 @@ bool MouseInterpreter::EmulateScrollWheel(const HardwareState& hwstate) {
   if (!force_scroll_wheel_emulation_.val_ && hwprops_->has_wheel)
     return false;
 
-  bool down = hwstate.buttons_down & GESTURES_BUTTON_MIDDLE;
-  bool prev_down = prev_state_.buttons_down & GESTURES_BUTTON_MIDDLE;
+  bool down = hwstate.buttons_down & GESTURES_BUTTON_MIDDLE ||
+              (hwstate.buttons_down & GESTURES_BUTTON_LEFT &&
+               hwstate.buttons_down & GESTURES_BUTTON_RIGHT);
+  bool prev_down = prev_state_.buttons_down & GESTURES_BUTTON_MIDDLE ||
+                   (prev_state_.buttons_down & GESTURES_BUTTON_LEFT &&
+                    prev_state_.buttons_down & GESTURES_BUTTON_RIGHT);
   bool raising = down && !prev_down;
   bool falling = !down && prev_down;
 
@@ -110,8 +114,8 @@ bool MouseInterpreter::EmulateScrollWheel(const HardwareState& hwstate) {
     ProduceGesture(Gesture(kGestureButtonsChange,
                            prev_state_.timestamp,
                            hwstate.timestamp,
-                           GESTURES_BUTTON_MIDDLE,
-                           GESTURES_BUTTON_MIDDLE,
+                           prev_state_.buttons_down,
+                           prev_state_.buttons_down,
                            false)); // is_tap
   }
 
