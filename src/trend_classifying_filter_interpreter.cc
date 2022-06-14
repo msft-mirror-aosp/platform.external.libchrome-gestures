@@ -12,6 +12,7 @@
 #include "gestures/include/logging.h"
 #include "gestures/include/prop_registry.h"
 #include "gestures/include/tracer.h"
+#include "gestures/include/util.h"
 
 namespace {
 

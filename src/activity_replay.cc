@@ -5,6 +5,7 @@
 #include "gestures/include/activity_replay.h"
 
 #include <limits.h>
+#include <set>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -13,7 +14,6 @@
 
 #include "gestures/include/logging.h"
 #include "gestures/include/prop_registry.h"
-#include "gestures/include/set.h"
 #include "gestures/include/unittest_util.h"
 #include "gestures/include/util.h"
 

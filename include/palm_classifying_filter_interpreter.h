@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+#include <set>
+
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
 #include "gestures/include/macros.h"
-#include "gestures/include/map.h"
-#include "gestures/include/set.h"
 #include "gestures/include/tracer.h"
 
 #ifndef GESTURES_PALM_CLASSIFYING_FILTER_INTERPRETER_H_
@@ -71,48 +72,48 @@ class PalmClassifyingFilterInterpreter : public FilterInterpreter {
   stime_t FingerAge(short finger_id, stime_t now) const;
 
   // Time when a contact arrived. Persists even when fingers change.
-  map<short, stime_t, kMaxFingers> origin_timestamps_;
+  std::map<short, stime_t> origin_timestamps_;
   // FingerStates from when a contact first arrived. Persists even when fingers
   // change.
-  map<short, FingerState, kMaxFingers> origin_fingerstates_;
+  std::map<short, FingerState> origin_fingerstates_;
 
   // FingerStates from the previous HardwareState.
-  map<short, FingerState, kMaxFingers> prev_fingerstates_;
+  std::map<short, FingerState> prev_fingerstates_;
 
   // Max reported pressure for present fingers.
-  map<short, float, kMaxFingers> max_pressure_;
+  std::map<short, float> max_pressure_;
 
   // Max reported width for present fingers.
-  map<short, float, kMaxFingers> max_width_;
+  std::map<short, float> max_width_;
 
   // Accumulated distance travelled by each finger.
   // _positive[0]  -->  positive direction along x axis
   // _positive[1]  -->  positive direction along y axis
   // _negative[0]  -->  negative direction along x axis
   // _negative[1]  -->  negative direction along y axis
-  map<short, float, kMaxFingers> distance_positive_[2];
-  map<short, float, kMaxFingers> distance_negative_[2];
+  std::map<short, float> distance_positive_[2];
+  std::map<short, float> distance_negative_[2];
 
   // Same fingers state. This state is accumulated as fingers remain the same
   // and it's reset when fingers change.
-  set<short, kMaxFingers> palm_;  // tracking ids of known palms
+  std::set<short> palm_;  // tracking ids of known palms
   // These contacts have moved significantly and shouldn't be considered
   // stationary palms:
-  set<short, kMaxFingers> non_stationary_palm_;
+  std::set<short> non_stationary_palm_;
 
   static const unsigned kPointCloseToFinger = 1;
   static const unsigned kPointNotInEdge = 2;
   static const unsigned kPointMoving = 4;
   // tracking ids of known fingers that are not palms, along with the reason(s)
-  map<short, unsigned, kMaxFingers> pointing_;
+  std::map<short, unsigned> pointing_;
 
 
   // tracking ids that were ever close to other fingers.
-  set<short, kMaxFingers> was_near_other_fingers_;
+  std::set<short> was_near_other_fingers_;
 
   // tracking ids that have ever travelled out of the palm envelope or bottom
   // area.
-  set<short, kMaxFingers> fingers_not_in_edge_;
+  std::set<short> fingers_not_in_edge_;
 
   // Previously input timestamp
   stime_t prev_time_;

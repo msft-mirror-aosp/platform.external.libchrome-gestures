@@ -8,6 +8,7 @@
 #include "gestures/include/interpreter.h"
 #include "gestures/include/logging.h"
 #include "gestures/include/tracer.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 
@@ -71,7 +72,7 @@ void ClickWiggleFilterInterpreter::UpdateClickWiggle(
   // Update wiggle_recs_ for each current finger
   for (size_t i = 0; i < hwstate.finger_cnt; i++) {
     const FingerState& fs = hwstate.fingers[i];
-    map<short, ClickWiggleRec, kMaxFingers>::iterator it =
+    std::map<short, ClickWiggleRec>::iterator it =
         wiggle_recs_.find(fs.tracking_id);
     const bool new_finger = it == wiggle_recs_.end();
 
@@ -128,7 +129,7 @@ void ClickWiggleFilterInterpreter::SetWarpFlags(HardwareState* hwstate) const {
       Err("Missing finger in wiggle recs.");
       continue;
     }
-    if (wiggle_recs_[fs->tracking_id].suppress_)
+    if (wiggle_recs_.at(fs->tracking_id).suppress_)
       fs->flags |= (GESTURES_FINGER_WARP_X | GESTURES_FINGER_WARP_Y);
   }
 }

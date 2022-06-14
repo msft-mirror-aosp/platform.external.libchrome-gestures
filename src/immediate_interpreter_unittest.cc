@@ -1521,7 +1521,7 @@ TEST(ImmediateInterpreterTest, GetGesturingFingersTest) {
 
   ii.ResetSameFingersState(hardware_state[0]);
   ii.UpdatePointingFingers(hardware_state[1]);
-  set<short, kMaxGesturingFingers> ids =
+  std::set<short> ids =
       ii.GetGesturingFingers(hardware_state[1]);
   EXPECT_EQ(1, ids.size());
   EXPECT_TRUE(ids.end() != ids.find(91));
@@ -1562,22 +1562,22 @@ TEST(ImmediateInterpreterTest, GetGesturingFingersTest) {
 }
 
 namespace {
-set<short, kMaxGesturingFingers> MkSet() {
-  return set<short, kMaxGesturingFingers>();
+std::set<short> MkSet() {
+  return std::set<short>();
 }
-set<short, kMaxGesturingFingers> MkSet(short the_id) {
-  set<short, kMaxGesturingFingers> ret;
+std::set<short> MkSet(short the_id) {
+  std::set<short> ret;
   ret.insert(the_id);
   return ret;
 }
-set<short, kMaxGesturingFingers> MkSet(short id1, short id2) {
-  set<short, kMaxGesturingFingers> ret;
+std::set<short> MkSet(short id1, short id2) {
+  std::set<short> ret;
   ret.insert(id1);
   ret.insert(id2);
   return ret;
 }
-set<short, kMaxGesturingFingers> MkSet(short id1, short id2, short id3) {
-  set<short, kMaxGesturingFingers> ret;
+std::set<short> MkSet(short id1, short id2, short id3) {
+  std::set<short> ret;
   ret.insert(id1);
   ret.insert(id2);
   ret.insert(id3);
@@ -1612,6 +1612,12 @@ TEST(ImmediateInterpreterTest, TapRecordTest) {
     make_hwstate(0.5, 0, 1, 1, &fs[2]),
   };
 
+  /* Hack: Tap recorder points to immediate interpreter and assummes it contains
+   * valid values, so we need to insert some origin timestamps */
+  const_cast<ImmediateInterpreter*>(tr.immediate_interpreter_)->
+                                                    origin_timestamps_[kF1] = 0;
+  const_cast<ImmediateInterpreter*>(tr.immediate_interpreter_)->
+                                                    origin_timestamps_[kF2] = 0;
   tr.Update(hw[0], nullstate, MkSet(kF1), MkSet(), MkSet());
   EXPECT_FALSE(tr.Moving(hw[0], kTapMoveDist));
   EXPECT_FALSE(tr.TapComplete());
@@ -1669,7 +1675,7 @@ struct HWStateGs {
   long line_number_and_flags;
   HardwareState hws;
   stime_t callback_now;
-  set<short, kMaxGesturingFingers> gs;
+  std::set<short> gs;
   unsigned expected_down;
   unsigned expected_up;
   ImmediateInterpreter::TapToClickState expected_state;
@@ -2058,10 +2064,8 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
   const size_t hwsgs_full_size = arraysize(hwsgs) + kT5R2TestFirstIndex;
   std::vector<HWStateGs> hwsgs_full;
   hwsgs_full.reserve(hwsgs_full_size);
-  std::copy(hwsgs, hwsgs + arraysize(hwsgs), hwsgs_full.begin());
-  std::copy(hwsgs, hwsgs + kT5R2TestFirstIndex,
-            hwsgs_full.begin() + arraysize(hwsgs));
-
+  hwsgs_full.insert(hwsgs_full.end(), hwsgs, hwsgs + arraysize(hwsgs));
+  hwsgs_full.insert(hwsgs_full.end(), hwsgs, hwsgs + kT5R2TestFirstIndex);
   std::vector<std::vector<FingerState> > thumb_fs(arraysize(hwsgs));
   const FingerState& fs_thumb = fs[18];
   bool thumb_gestures = true;
@@ -2076,7 +2080,7 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
     newfs[0] = fs_thumb;
     for (size_t j = 0; j < hs->finger_cnt; ++j)
       newfs[j + 1] = hs->fingers[j];
-    set<short, kMaxGesturingFingers>& gs = hwsgs_full[i + arraysize(hwsgs)].gs;
+    std::set<short>& gs = hwsgs_full[i + arraysize(hwsgs)].gs;
     if (thumb_gestures)
       gs.insert(fs_thumb.tracking_id);
     hs->fingers = &thumb_fs[i][0];
@@ -2133,6 +2137,8 @@ TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
 
     if (hwstate)
       ii->state_buffer_.PushState(*hwstate);
+    for (auto finger: hwsgs_full[i].gs)
+      ii->origin_timestamps_.emplace(finger, 0);
     ii->UpdateTapState(
         hwstate, hwsgs_full[i].gs, same_fingers, now, &bdown, &bup, &tm);
     ii->prev_gs_fingers_ = hwsgs_full[i].gs;
@@ -2309,8 +2315,10 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
       down = 0;
       up = 0;
       stime_t timeout = NO_DEADLINE;
-      set<short, kMaxGesturingFingers> gs =
+      std::set<short> gs =
           hwstates[i].finger_cnt == 1 ? MkSet(91) : MkSet();
+      for (auto finger: gs)
+        ii->origin_timestamps_.emplace(finger, 0);
       ii->UpdateTapState(
           &hwstates[i],
           gs,
@@ -2452,6 +2460,8 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
       unsigned bdown = 0;
       unsigned bup = 0;
       stime_t tm = NO_DEADLINE;
+      for (auto finger: hwsgs.gs)
+        ii->origin_timestamps_.emplace(finger, 0);
       ii->UpdateTapState(
           hwstate, hwsgs.gs, same_fingers, now, &bdown, &bup, &tm);
       ii->prev_gs_fingers_ = hwsgs.gs;

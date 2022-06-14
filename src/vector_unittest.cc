@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/map.h"
+#include "gestures/include/vector.h"
 
 namespace gestures {
 

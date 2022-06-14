@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+#include <set>
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
-#include "gestures/include/map.h"
 #include "gestures/include/memory_manager.h"
 #include "gestures/include/list.h"
 #include "gestures/include/prop_registry.h"
-#include "gestures/include/set.h"
 #include "gestures/include/tracer.h"
 
 #ifndef GESTURES_TREND_CLASSIFYING_FILTER_INTERPRETER_H_
@@ -225,7 +225,7 @@ private:
 
   // A map to store each finger's past coordinates and calculation
   // intermediates
-  typedef map<short, FingerHistory*, kMaxFingers> FingerHistoryMap;
+  typedef std::map<short, FingerHistory*> FingerHistoryMap;
   FingerHistoryMap histories_;
 
   // Flag to turn on/off the trend classifying filter

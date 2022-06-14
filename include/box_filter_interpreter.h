@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
 #include <memory>
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
-#include "gestures/include/map.h"
 #include "gestures/include/prop_registry.h"
 #include "gestures/include/tracer.h"
 
@@ -45,7 +45,7 @@ class BoxFilterInterpreter : public FilterInterpreter, public PropertyDelegate {
   virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
 
  private:
-  map<short, FingerState, kMaxFingers> previous_output_;
+  std::map<short, FingerState> previous_output_;
 
   DoubleProperty box_width_;
   DoubleProperty box_height_;

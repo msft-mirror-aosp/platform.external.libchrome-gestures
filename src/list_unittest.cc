@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "gestures/include/list.h"
-#include "gestures/include/set.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 

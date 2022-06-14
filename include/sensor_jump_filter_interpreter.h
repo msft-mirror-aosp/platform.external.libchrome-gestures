@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+
 #include <gtest/gtest.h>  // For FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
-#include "gestures/include/map.h"
 #include "gestures/include/prop_registry.h"
 #include "gestures/include/tracer.h"
 
@@ -39,7 +40,7 @@ class SensorJumpFilterInterpreter : public FilterInterpreter,
  private:
   // Fingers from the previous two SyncInterpret calls. previous_input_[0]
   // is the more recent.
-  map<short, FingerState, kMaxFingers> previous_input_[2];
+  std::map<short, FingerState> previous_input_[2];
 
   // When a finger is flagged with a warp flag for the first time, we note it
   // here.
@@ -47,7 +48,7 @@ class SensorJumpFilterInterpreter : public FilterInterpreter,
   // first_flag_[1] for WARP_Y_NON_MOVE;
   // first_flag_[2] for WARP_X_MOVE;
   // first_flag_[3] for WARP_Y_MOVE.
-  set<short, kMaxFingers> first_flag_[4];
+  std::set<short> first_flag_[4];
 
   // Whether or not this filter is enabled. If disabled, it behaves as a
   // simple passthrough.

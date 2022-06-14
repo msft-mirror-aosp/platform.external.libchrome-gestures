@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <set>
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
 #include "gestures/include/prop_registry.h"
-#include "gestures/include/set.h"
 #include "gestures/include/tracer.h"
 
 #ifndef GESTURES_FLING_STOP_FILTER_INTERPRETER_H_
@@ -47,10 +47,10 @@ class FlingStopFilterInterpreter : public FilterInterpreter {
   bool already_extended_;
 
   // Which tracking id's were on the pad at the last fling
-  set<short, kMaxFingers> fingers_present_for_last_fling_;
+  std::set<short> fingers_present_for_last_fling_;
 
   // tracking id's of the last hardware state
-  set<short, kMaxFingers> fingers_of_last_hwstate_;
+  std::set<short> fingers_of_last_hwstate_;
 
   // touch_cnt from previously input HardwareState.
   short prev_touch_cnt_;

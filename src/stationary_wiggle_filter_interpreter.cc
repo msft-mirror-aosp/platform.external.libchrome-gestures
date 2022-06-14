@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+
 #include "gestures/include/stationary_wiggle_filter_interpreter.h"
 
 #include "gestures/include/gestures.h"
 #include "gestures/include/interpreter.h"
-#include "gestures/include/map.h"
 #include "gestures/include/tracer.h"
 #include "gestures/include/util.h"
 

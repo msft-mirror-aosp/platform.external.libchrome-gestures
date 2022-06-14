@@ -162,7 +162,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
       drumroll_max_speed_ratio_.val_;
   const float prev_dt_sq = prev_dt * prev_dt;
 
-  set<short, kMaxFingers> separated_fingers;  // input ids
+  std::set<short> separated_fingers;  // input ids
   float max_dist_sq = 0.0;  // largest non-drumroll dist squared.
   // If there is only a single finger drumrolling, this is the distance
   // it travelled squared.
@@ -277,7 +277,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
        max_dist_sq * co_move_ratio_.val_ * co_move_ratio_.val_)) {
     // Two fingers drumrolling at the exact same time. More likely this is
     // a fast multi-finger swipe. Abort the drumroll detection.
-    for (set<short, kMaxFingers>::const_iterator it = separated_fingers.begin(),
+    for (std::set<short>::const_iterator it = separated_fingers.begin(),
              e = separated_fingers.end(); it != e; ++it) {
       short input_id = *it;
       if (!MapContainsKey(prev_qs->output_ids_, input_id)) {

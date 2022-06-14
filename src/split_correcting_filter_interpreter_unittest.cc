@@ -9,6 +9,7 @@
 
 #include "gestures/include/split_correcting_filter_interpreter.h"
 #include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 using std::string;
 
@@ -48,7 +49,7 @@ class SplitCorrectingFilterInterpreterTestInterpreter :
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {}
 
-  set<short, kMaxFingers> expected_ids_;
+  std::set<short> expected_ids_;
   bool expect_finger_ids_;
   size_t iteration_;
   bool expect_warp_on_one_finger_only_;

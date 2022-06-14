@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
 #include "gestures/include/macros.h"
-#include "gestures/include/map.h"
 #include "gestures/include/tracer.h"
 
 #ifndef GESTURES_STATIONARY_WIGGLE_FILTER_INTERPRETER_H_
@@ -137,7 +138,7 @@ class StationaryWiggleFilterInterpreter : public FilterInterpreter {
   void UpdateStationaryFlags(HardwareState* hwstate);
 
   // Map of finger energy histories
-  typedef map<short, FingerEnergyHistory, kMaxFingers> FingerEnergyHistoryMap;
+  typedef std::map<short, FingerEnergyHistory> FingerEnergyHistoryMap;
   FingerEnergyHistoryMap histories_;
 
   // True if this interpreter is effective

@@ -56,7 +56,7 @@ void SplitCorrectingFilterInterpreter::RemoveMissingUnmergedContacts(
 
 void SplitCorrectingFilterInterpreter::MergeFingers(
     const HardwareState& hwstate) {
-  set<const FingerState*, kMaxFingers> unused;
+  std::set<const FingerState*> unused;
   for (size_t i = 0; i < hwstate.finger_cnt; i++) {
     if (!SetContainsValue(last_tracking_ids_, hwstate.fingers[i].tracking_id))
       unused.insert(&hwstate.fingers[i]);
@@ -72,8 +72,8 @@ void SplitCorrectingFilterInterpreter::MergeFingers(
     }
     // try all fingers for possible merging
     float min_error = INFINITY;
-    set<const FingerState*, kMaxFingers>::iterator min_error_it = unused.end();
-    for (set<const FingerState*, kMaxFingers>::iterator unused_it =
+    std::set<const FingerState*>::iterator min_error_it = unused.end();
+    for (std::set<const FingerState*>::iterator unused_it =
              unused.begin(), e = unused.end(); unused_it != e; ++unused_it) {
       const FingerState* new_contact = *unused_it;
       if (new_contact == existing_contact)
@@ -103,7 +103,7 @@ void SplitCorrectingFilterInterpreter::MergeFingers(
   // Find next slot
   UnmergedContact* it = unmerged_;
   for (; it->Valid() && it != &unmerged_[kMaxFingers]; ++it) {}
-  for (set<const FingerState*, kMaxFingers>::iterator unused_it =
+  for (std::set<const FingerState*>::iterator unused_it =
            unused.begin(), e = unused.end(); unused_it != e; ++unused_it) {
     if (it == &unmerged_[kMaxFingers]) {
       Err("How is there no space?");
@@ -351,7 +351,7 @@ void SplitCorrectingFilterInterpreter::UpdateUnmergedLocations(
 void SplitCorrectingFilterInterpreter::Dump(
     const HardwareState& hwstate) const {
   Log("Last Tracking IDs:");
-  for (set<short, kMaxFingers>::const_iterator it = last_tracking_ids_.begin(),
+  for (std::set<short>::const_iterator it = last_tracking_ids_.begin(),
            e = last_tracking_ids_.end(); it != e; ++it)
     Log("  %d", *it);
   Log("Unmerged:");

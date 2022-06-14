@@ -318,7 +318,7 @@ stime_t PalmClassifyingFilterInterpreter::FingerAge(short finger_id,
     Err("Don't have record of finger age for finger %d", finger_id);
     return -1;
   }
-  return now - origin_timestamps_[finger_id];
+  return now - origin_timestamps_.at(finger_id);
 }
 
 }  // namespace gestures

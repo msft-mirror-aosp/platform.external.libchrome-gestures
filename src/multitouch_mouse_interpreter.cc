@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "gestures/include/tracer.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 

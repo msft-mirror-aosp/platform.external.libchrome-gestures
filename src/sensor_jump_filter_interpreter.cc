@@ -44,7 +44,7 @@ void SensorJumpFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   RemoveMissingIdsFromSet(&first_flag_[2], *hwstate);
   RemoveMissingIdsFromSet(&first_flag_[3], *hwstate);
 
-  map<short, FingerState, kMaxFingers> current_input;
+  std::map<short, FingerState> current_input;
 
   for (size_t i = 0; i < hwstate->finger_cnt; i++)
     current_input[hwstate->fingers[i].tracking_id] = hwstate->fingers[i];

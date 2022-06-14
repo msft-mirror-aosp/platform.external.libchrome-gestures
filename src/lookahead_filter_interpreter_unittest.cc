@@ -41,7 +41,7 @@ class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
     }
     if (!expected_ids_.empty()) {
       EXPECT_EQ(expected_ids_.size(), hwstate->finger_cnt);
-      for (set<short, kMaxFingers>::iterator it = expected_ids_.begin(),
+      for (std::set<short>::iterator it = expected_ids_.begin(),
                e = expected_ids_.end(); it != e; ++it) {
         EXPECT_TRUE(hwstate->GetFingerState(*it)) << "Can't find ID " << *it
                                                   << " at "
@@ -79,7 +79,7 @@ class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
   // the expected id.
   short expected_id_;
   // if expected_ids_ is populated, we expect fingers w/ exactly those IDs
-  set<short, kMaxFingers> expected_ids_;
+  std::set<short> expected_ids_;
   // If we get a hardware state at time expected_flags_at_, it should have
   // the following flags set.
   unsigned expected_flags_;

@@ -68,10 +68,10 @@ class MultitouchMouseInterpreter : public MouseInterpreter {
 
   // This keeps track of where fingers started. Usually this is their original
   // position, but if the mouse is moved, we reset the positions at that time.
-  map<short, Vector2, kMaxFingers> start_position_;
+  std::map<short, Vector2> start_position_;
 
   // These fingers have started moving and should cause gestures.
-  set<short, kMaxFingers> moving_;
+  std::set<short> moving_;
 
   // Depth of recent scroll event buffer used to compute click.
   IntProperty click_buffer_depth_;

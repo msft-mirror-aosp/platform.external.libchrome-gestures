@@ -13,6 +13,7 @@
 #include "gestures/include/gestures.h"
 #include "gestures/include/palm_classifying_filter_interpreter.h"
 #include "gestures/include/unittest_util.h"
+#include "gestures/include/util.h"
 
 using std::deque;
 using std::make_pair;

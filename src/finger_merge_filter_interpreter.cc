@@ -11,6 +11,7 @@
 #include "gestures/include/logging.h"
 #include "gestures/include/prop_registry.h"
 #include "gestures/include/tracer.h"
+#include "gestures/include/util.h"
 
 namespace gestures {
 
@@ -56,7 +57,7 @@ bool FingerMergeFilterInterpreter::IsSuspiciousAngle(
   // We consider initial contacts as suspicious:
   if (!MapContainsKey(start_info_, fs.tracking_id))
     return true;
-  const Start& start_info = start_info_[fs.tracking_id];
+  const Start& start_info = start_info_.at(fs.tracking_id);
   float dx = fs.position_x - start_info.position_x;
   float dy = fs.position_y - start_info.position_y;
   // All angles are suspicious at very low distance

@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
-#include "gestures/include/map.h"
 #include "gestures/include/prop_registry.h"
 #include "gestures/include/tracer.h"
 
@@ -81,7 +82,7 @@ class IirFilterInterpreter : public FilterInterpreter, public PropertyDelegate {
   // Whether IIR filter should be used. Put as a member varible for
   // unittest purpose.
   bool using_iir_;
-  map<short, IoHistory, kMaxFingers> histories_;
+  std::map<short, IoHistory> histories_;
 
   // y[0] = b[0]*x[0] + b[1]*x[1] + b[2]*x[2] + b[3]*x[3]
   //        - (a[1]*y[1] + a[2]*y[2])

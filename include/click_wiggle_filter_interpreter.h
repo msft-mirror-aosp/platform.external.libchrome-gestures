@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
 #include <memory>
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
-#include "gestures/include/map.h"
 #include "gestures/include/prop_registry.h"
 #include "gestures/include/tracer.h"
 
@@ -52,7 +52,7 @@ class ClickWiggleFilterInterpreter : public FilterInterpreter {
   void UpdateClickWiggle(const HardwareState& hwstate);
   void SetWarpFlags(HardwareState* hwstate) const;
 
-  map<short, ClickWiggleRec, kMaxFingers> wiggle_recs_;
+  std::map<short, ClickWiggleRec> wiggle_recs_;
 
   // last time a physical button up or down edge occurred
   stime_t button_edge_occurred_;
@@ -60,7 +60,7 @@ class ClickWiggleFilterInterpreter : public FilterInterpreter {
   // If there was just one finger on the pad when the button changed
   bool button_edge_with_one_finger_;
 
-  map<short, float, kMaxFingers> prev_pressure_;
+  std::map<short, float> prev_pressure_;
 
   int prev_buttons_;
 

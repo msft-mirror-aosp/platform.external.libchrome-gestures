@@ -49,7 +49,7 @@ void IirFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   // Delete old entries from map
   short dead_ids[histories_.size() + 1];
   size_t dead_ids_len = 0;
-  for (map<short, IoHistory, kMaxFingers>::iterator it = histories_.begin(),
+  for (std::map<short, IoHistory>::iterator it = histories_.begin(),
            e = histories_.end(); it != e; ++it)
     if (!hwstate->GetFingerState((*it).first))
       dead_ids[dead_ids_len++] = (*it).first;
@@ -59,7 +59,7 @@ void IirFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   // Modify current hwstate
   for (size_t i = 0; i < hwstate->finger_cnt; i++) {
     FingerState* fs = &hwstate->fingers[i];
-    map<short, IoHistory, kMaxFingers>::iterator history =
+    std::map<short, IoHistory>::iterator history =
         histories_.find(fs->tracking_id);
     if (history == histories_.end()) {
       // new finger

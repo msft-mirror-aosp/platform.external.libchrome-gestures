@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <set>
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
 #include "gestures/include/prop_registry.h"
-#include "gestures/include/set.h"
 #include "gestures/include/tracer.h"
 
 #ifndef GESTURES_SPLIT_CORRECTING_FILTER_INTERPRETER_H_
@@ -100,7 +100,7 @@ class SplitCorrectingFilterInterpreter : public FilterInterpreter {
   // Dumps internal state and hwstate.
   void Dump(const HardwareState& hwstate) const;
 
-  set<short, kMaxFingers> last_tracking_ids_;
+  std::set<short> last_tracking_ids_;
   UnmergedContact unmerged_[kMaxFingers];
   MergedContact merged_[kMaxFingers / 2 + 1];
 

@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+#include <set>
+
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/filter_interpreter.h"
 #include "gestures/include/finger_metrics.h"
 #include "gestures/include/gestures.h"
-#include "gestures/include/map.h"
 #include "gestures/include/prop_registry.h"
-#include "gestures/include/set.h"
 #include "gestures/include/tracer.h"
 
 #ifndef GESTURES_FINGER_MERGE_FILTER_INTERPRETER_H_
@@ -54,15 +55,15 @@ class FingerMergeFilterInterpreter : public FilterInterpreter {
   };
 
   // Info about each contact's initial state
-  map<short, Start, kMaxFingers> start_info_;
+  std::map<short, Start> start_info_;
 
-  set<short, kMaxFingers> merge_tracking_ids_;
+  std::set<short> merge_tracking_ids_;
 
   // Fingers that should never merge, as we've determined they aren't a merge
-  set<short, kMaxFingers> never_merge_ids_;
+  std::set<short> never_merge_ids_;
 
-  map<short, float, kMaxFingers> prev_x_displacement_;
-  map<short, float, kMaxFingers> prev2_x_displacement_;
+  std::map<short, float> prev_x_displacement_;
+  std::map<short, float> prev2_x_displacement_;
 
   // Flag to turn on/off the finger merge filter
   BoolProperty finger_merge_filter_enable_;

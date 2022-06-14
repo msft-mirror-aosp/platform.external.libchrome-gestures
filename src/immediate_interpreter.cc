@@ -61,7 +61,7 @@ void TapRecord::NoteTouch(short the_id, const FingerState& fs) {
   // New finger must be close enough to an existing finger
   if (!touched_.empty()) {
     bool reject_new_finger = true;
-    for (map<short, FingerState, kMaxTapFingers>::const_iterator it =
+    for (std::map<short, FingerState>::const_iterator it =
              touched_.begin(), e = touched_.end(); it != e; ++it) {
       const FingerState& existing_fs = (*it).second;
       if (immediate_interpreter_->metrics_->CloseEnoughToGesture(
@@ -95,9 +95,9 @@ float TapRecord::CotapMinPressure() const {
 
 void TapRecord::Update(const HardwareState& hwstate,
                        const HardwareState& prev_hwstate,
-                       const set<short, kMaxTapFingers>& added,
-                       const set<short, kMaxTapFingers>& removed,
-                       const set<short, kMaxFingers>& dead) {
+                       const std::set<short>& added,
+                       const std::set<short>& removed,
+                       const std::set<short>& dead) {
   if (!t5r2_ && (hwstate.finger_cnt != hwstate.touch_cnt ||
                  prev_hwstate.finger_cnt != prev_hwstate.touch_cnt)) {
     // switch to T5R2 mode
@@ -113,25 +113,25 @@ void TapRecord::Update(const HardwareState& hwstate,
     else if (diff < 0)
       t5r2_released_size_ += -diff;
   }
-  for (set<short, kMaxTapFingers>::const_iterator it = added.begin(),
+  for (std::set<short>::const_iterator it = added.begin(),
            e = added.end(); it != e; ++it)
     Log("TapRecord::Update: Added: %d", *it);
-  for (set<short, kMaxTapFingers>::const_iterator it = removed.begin(),
+  for (std::set<short>::const_iterator it = removed.begin(),
            e = removed.end(); it != e; ++it)
     Log("TapRecord::Update: Removed: %d", *it);
-  for (set<short, kMaxFingers>::const_iterator it = dead.begin(),
+  for (std::set<short>::const_iterator it = dead.begin(),
            e = dead.end(); it != e; ++it)
     Log("TapRecord::Update: Dead: %d", *it);
   for_each(dead.begin(), dead.end(),
            bind(&TapRecord::Remove, this, std::placeholders::_1));
-  for (set<short, kMaxTapFingers>::const_iterator it = added.begin(),
+  for (std::set<short>::const_iterator it = added.begin(),
            e = added.end(); it != e; ++it)
     NoteTouch(*it, *hwstate.GetFingerState(*it));
   for_each(removed.begin(), removed.end(),
            bind(&TapRecord::NoteRelease, this, std::placeholders::_1));
   // Check if min tap/cotap pressure met yet
   const float cotap_min_pressure = CotapMinPressure();
-  for (map<short, FingerState, kMaxTapFingers>::iterator it =
+  for (std::map<short, FingerState>::iterator it =
            touched_.begin(), e = touched_.end();
        it != e; ++it) {
     const FingerState* fs = hwstate.GetFingerState((*it).first);
@@ -168,7 +168,7 @@ void TapRecord::Clear() {
 bool TapRecord::Moving(const HardwareState& hwstate,
                        const float dist_max) const {
   const float cotap_min_pressure = CotapMinPressure();
-  for (map<short, FingerState, kMaxTapFingers>::const_iterator it =
+  for (std::map<short, FingerState>::const_iterator it =
            touched_.begin(), e = touched_.end(); it != e; ++it) {
     const FingerState* fs = hwstate.GetFingerState((*it).first);
     if (!fs)
@@ -198,7 +198,7 @@ bool TapRecord::Moving(const HardwareState& hwstate,
 bool TapRecord::Motionless(const HardwareState& hwstate, const HardwareState&
                            prev_hwstate, const float max_speed) const {
   const float cotap_min_pressure = CotapMinPressure();
-  for (map<short, FingerState, kMaxTapFingers>::const_iterator it =
+  for (std::map<short, FingerState>::const_iterator it =
            touched_.begin(), e = touched_.end(); it != e; ++it) {
     const FingerState* fs = hwstate.GetFingerState((*it).first);
     const FingerState* prev_fs = prev_hwstate.GetFingerState((*it).first);
@@ -228,10 +228,10 @@ bool TapRecord::TapComplete() const {
     ret = t5r2_touched_size_ && t5r2_touched_size_ == t5r2_released_size_;
   else
     ret = !touched_.empty() && (touched_.size() == released_.size());
-  for (map<short, FingerState, kMaxTapFingers>::const_iterator
+  for (std::map<short, FingerState>::const_iterator
            it = touched_.begin(), e = touched_.end(); it != e; ++it)
     Log("TapRecord::TapComplete: touched_: %d", (*it).first);
-  for (set<short, kMaxTapFingers>::const_iterator it = released_.begin(),
+  for (std::set<short>::const_iterator it = released_.begin(),
            e = released_.end(); it != e; ++it)
     Log("TapRecord::TapComplete: released_: %d", *it);
   return ret;
@@ -1153,8 +1153,11 @@ void ImmediateInterpreter::SyncInterpretImpl(HardwareState* hwstate,
       (hwstate->buttons_down == state_buffer_.Get(1)->buttons_down);
   if (!same_fingers) {
     // Fingers changed, do nothing this time
-    FingerMap new_gs_fingers =
-        SetSubtract(GetGesturingFingers(*hwstate), non_gs_fingers_);
+    FingerMap new_gs_fingers;
+    FingerMap gs_fingers = GetGesturingFingers(*hwstate);
+    std::set_difference(gs_fingers.begin(), gs_fingers.end(),
+                        non_gs_fingers_.begin(), non_gs_fingers_.end(),
+                        std::inserter(new_gs_fingers, new_gs_fingers.begin()));
     ResetSameFingersState(*hwstate);
     FillStartPositions(*hwstate);
     if (pinch_enable_.val_ &&
@@ -1178,8 +1181,11 @@ void ImmediateInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   UpdateThumbState(*hwstate);
   FingerMap newly_moving_fingers = UpdateMovingFingers(*hwstate);
   UpdateNonGsFingers(*hwstate);
-  FingerMap gs_fingers =
-      SetSubtract(GetGesturingFingers(*hwstate), non_gs_fingers_);
+  FingerMap new_gs_fingers;
+  FingerMap gs_fingers = GetGesturingFingers(*hwstate);
+  std::set_difference(gs_fingers.begin(), gs_fingers.end(),
+                      non_gs_fingers_.begin(), non_gs_fingers_.end(),
+                      std::inserter(new_gs_fingers, new_gs_fingers.begin()));
   if (gs_fingers != prev_gs_fingers_)
     gs_changed_time_ = hwstate->timestamp;
   UpdateStartedMovingTime(hwstate->timestamp, gs_fingers, newly_moving_fingers);
@@ -1208,7 +1214,11 @@ void ImmediateInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   prev_result_ = result_;
   prev_gesture_type_ = current_gesture_type_;
   if (result_.type != kGestureTypeNull) {
-    non_gs_fingers_ = SetSubtract(gs_fingers, active_gs_fingers);
+    non_gs_fingers_.clear();
+    std::set_difference(gs_fingers.begin(), gs_fingers.end(),
+                        active_gs_fingers.begin(), active_gs_fingers.end(),
+                        std::inserter(non_gs_fingers_,
+                        non_gs_fingers_.begin()));
     ProduceGesture(result_);
   }
 }
@@ -1289,7 +1299,7 @@ float ImmediateInterpreter::DistanceTravelledSq(const FingerState& fs,
 
 Point ImmediateInterpreter::FingerTraveledVector(
     const FingerState& fs, bool origin, bool permit_warp) const {
-  const map<short, Point, kMaxFingers>* positions;
+  const std::map<short, Point>* positions;
   if (origin)
     positions = &origin_positions_;
   else
@@ -1298,7 +1308,7 @@ Point ImmediateInterpreter::FingerTraveledVector(
   if (!MapContainsKey(*positions, fs.tracking_id))
     return Point(0.0f, 0.0f);
 
-  const Point& start = (*positions)[fs.tracking_id];
+  const Point& start = positions->at(fs.tracking_id);
   float dx = fs.position_x - start.x_;
   float dy = fs.position_y - start.y_;
   bool suppress_move =
@@ -1315,36 +1325,31 @@ bool ImmediateInterpreter::EarlyZoomPotential(const HardwareState& hwstate)
   if (fingers_.size() != 2)
     return false;
   int id1 = *(fingers_.begin());
-  int id2 = *(fingers_.begin() + 1);
+  int id2 = *(++fingers_.begin());
   const FingerState* finger1 = hwstate.GetFingerState(id1);
   const FingerState* finger2 = hwstate.GetFingerState(id2);
   float pinch_eval_timeout = pinch_evaluation_timeout_.val_;
   if (finger1 == NULL || finger2 == NULL)
     return false;
   // Wait for a longer time if fingers arrived together
-  if (fabs(origin_timestamps_[id1] - origin_timestamps_[id2]) <
-          evaluation_timeout_.val_ &&
-      hwstate.timestamp -
-          max(origin_timestamps_[id1], origin_timestamps_[id2]) <
+  stime_t t1 = origin_timestamps_.at(id1);
+  stime_t t2 = origin_timestamps_.at(id2);
+  if (fabs(t1 - t2) < evaluation_timeout_.val_ &&
+      hwstate.timestamp - max(t1, t2) <
           thumb_pinch_evaluation_timeout_.val_ * thumb_pinch_delay_factor_.val_)
     pinch_eval_timeout *= thumb_pinch_delay_factor_.val_;
-  bool early_decision = hwstate.timestamp -
-                        min(origin_timestamps_[finger1->tracking_id],
-                            origin_timestamps_[finger2->tracking_id]) <
-                        pinch_eval_timeout;
+  bool early_decision = hwstate.timestamp - min(t1, t2) < pinch_eval_timeout;
   // Avoid extra computation if it's too late for a pinch zoom
   if (!early_decision &&
-      hwstate.timestamp - origin_timestamps_[finger1->tracking_id] >
-          thumb_pinch_evaluation_timeout_.val_)
+      hwstate.timestamp - t1 > thumb_pinch_evaluation_timeout_.val_)
     return false;
 
-  float walked_distance1 = distance_walked_[finger1->tracking_id];
-  float walked_distance2 = distance_walked_[finger2->tracking_id];
+  float walked_distance1 = distance_walked_.at(finger1->tracking_id);
+  float walked_distance2 = distance_walked_.at(finger2->tracking_id);
   if (walked_distance1 > walked_distance2)
     std::swap(walked_distance1,walked_distance2);
   if ((walked_distance1 > thumb_pinch_min_movement_.val_ ||
-           hwstate.timestamp - origin_timestamps_[finger1->tracking_id] >
-               thumb_pinch_evaluation_timeout_.val_) &&
+           hwstate.timestamp - t1 > thumb_pinch_evaluation_timeout_.val_) &&
       walked_distance1 > 0 &&
       walked_distance2 / walked_distance1 > thumb_pinch_movement_ratio_.val_)
     return false;
@@ -1378,12 +1383,9 @@ bool ImmediateInterpreter::EarlyZoomPotential(const HardwareState& hwstate)
   if ((pinch_guess_start_ > 0 || dot < 0) && early_decision)
     return true;
 
-  if (origin_timestamps_[finger1->tracking_id] -
-          origin_timestamps_[finger2->tracking_id] < evaluation_timeout_.val_ &&
-      origin_timestamps_[finger2->tracking_id] -
-          origin_timestamps_[finger1->tracking_id] < evaluation_timeout_.val_ &&
-      hwstate.timestamp - origin_timestamps_[finger1->tracking_id] <
-          thumb_pinch_evaluation_timeout_.val_)
+  if (t1 - t2 < evaluation_timeout_.val_ &&
+      t2 - t1 < evaluation_timeout_.val_ &&
+      hwstate.timestamp - t1 < thumb_pinch_evaluation_timeout_.val_)
     return true;
 
   return false;
@@ -1395,7 +1397,7 @@ bool ImmediateInterpreter::ZoomFingersAreConsistent(
     return false;
 
   int id1 = *(fingers_.begin());
-  int id2 = *(fingers_.begin() + 1);
+  int id2 = *(++fingers_.begin());
 
   const FingerState* curr1 = state_buffer.Get(min<int>(state_buffer.Size() - 1,
       pinch_zoom_min_events_.val_))->GetFingerState(id1);
@@ -1511,8 +1513,7 @@ float ImmediateInterpreter::TwoSpecificFingerDistanceSq(
     const HardwareState& hwstate, const FingerMap& fingers) const {
   if (fingers.size() == 2) {
     const FingerState* finger_a = hwstate.GetFingerState(*fingers.begin());
-    const FingerState* finger_b = hwstate.GetFingerState(
-        *(fingers.begin() + 1));
+    const FingerState* finger_b = hwstate.GetFingerState(*(++fingers.begin()));
     if (finger_a == NULL || finger_b == NULL) {
       Err("Finger unexpectedly NULL");
       return -1;
@@ -1665,7 +1666,7 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
       thumb_eval_timer_[fs.tracking_id] = thumb_eval_timeout_.val_;
     }
   }
-  for (map<short, stime_t, kMaxFingers>::const_iterator it = thumb_.begin();
+  for (std::map<short, stime_t>::const_iterator it = thumb_.begin();
        it != thumb_.end(); ++it)
     pointing_.erase((*it).first);
 }
@@ -1673,7 +1674,11 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
 void ImmediateInterpreter::UpdateNonGsFingers(const HardwareState& hwstate) {
   RemoveMissingIdsFromSet(&non_gs_fingers_, hwstate);
   // moving fingers may be gesturing, so take them out from the set.
-  non_gs_fingers_ = SetSubtract(non_gs_fingers_, moving_);
+  FingerMap temp;
+  std::set_difference(non_gs_fingers_.begin(), non_gs_fingers_.end(),
+                      moving_.begin(), moving_.end(),
+                      std::inserter(temp, temp.begin()));
+  non_gs_fingers_ = temp;
 }
 
 bool ImmediateInterpreter::KeyboardRecentlyUsed(stime_t now) const {
@@ -2019,7 +2024,7 @@ bool ImmediateInterpreter::UpdatePinchState(
   }
   const FingerState* finger1 = hwstate.GetFingerState(*(gs_fingers.begin()));
   const FingerState* finger2 =
-      hwstate.GetFingerState(*(gs_fingers.begin() + 1));
+      hwstate.GetFingerState(*(++gs_fingers.begin()));
   if (finger1 == NULL || finger2 == NULL) {
     Err("Finger unexpectedly NULL");
     return false;
@@ -2190,7 +2195,7 @@ bool ImmediateInterpreter::PalmIsArrivingOrDeparting(
 bool ImmediateInterpreter::IsTooCloseToThumb(const FingerState& finger) const {
   const float kMin2fDistThreshSq = tapping_finger_min_separation_.val_ *
       tapping_finger_min_separation_.val_;
-  for (map<short, stime_t, kMaxFingers>::const_iterator it = thumb_.begin();
+  for (std::map<short, stime_t>::const_iterator it = thumb_.begin();
        it != thumb_.end(); ++it) {
     const FingerState* thumb = state_buffer_.Get(0)->GetFingerState(it->first);
     float xdist = fabsf(finger.position_x - thumb->position_x);
@@ -2415,7 +2420,7 @@ GestureType ImmediateInterpreter::GetMultiFingerGestureType(
     const FingerState* const fingers[], const int num_fingers) {
   float swipe_distance_thresh;
   float swipe_distance_ratio;
-  map<short, Point, kMaxFingers> *swipe_start_positions;
+  std::map<short, Point> *swipe_start_positions;
   GestureType gesture_type;
   if (num_fingers == 4) {
     swipe_distance_thresh = four_finger_swipe_distance_thresh_.val_;
@@ -2584,13 +2589,13 @@ void ImmediateInterpreter::UpdateTapState(
       tap_gs_fingers.insert(*it);
     }
   }
-  set<short, kMaxTapFingers> added_fingers;
+  std::set<short> added_fingers;
 
   // Fingers removed from the pad entirely
-  set<short, kMaxTapFingers> removed_fingers;
+  std::set<short> removed_fingers;
 
   // Fingers that were gesturing, but now aren't
-  set<short, kMaxFingers> dead_fingers;
+  std::set<short> dead_fingers;
 
   const bool phys_click_in_progress = hwstate && hwstate->buttons_down != 0 &&
     (zero_finger_click_enable_.val_ || finger_seen_shortly_after_button_down_);
@@ -3011,7 +3016,7 @@ void ImmediateInterpreter::UpdateStartedMovingTime(
       started_moving_time_ = now;
       // Extend the thumb evaluation period for any finger that is still under
       // evaluation as there is a new moving finger.
-      for (map<short, stime_t, kMaxFingers>::iterator it = thumb_.begin();
+      for (std::map<short, stime_t>::iterator it = thumb_.begin();
            it != thumb_.end(); ++it)
         if ((*it).second < thumb_eval_timeout_.val_ && (*it).second > 0.0)
           (*it).second = thumb_eval_timeout_.val_;

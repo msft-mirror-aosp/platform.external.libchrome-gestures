@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+#include <set>
+
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
 #include "gestures/include/finger_metrics.h"
@@ -9,8 +12,6 @@
 #include "gestures/include/interpreter.h"
 #include "gestures/include/macros.h"
 #include "gestures/include/prop_registry.h"
-#include "gestures/include/map.h"
-#include "gestures/include/set.h"
 #include "gestures/include/tracer.h"
 
 #ifndef GESTURES_IMMEDIATE_INTERPRETER_H_
@@ -18,7 +19,7 @@
 
 namespace gestures {
 
-typedef set<short, kMaxGesturingFingers> FingerMap;
+typedef std::set<short> FingerMap;
 
 // This interpreter keeps some memory of the past and, for each incoming
 // frame of hardware state, immediately determines the gestures to the best
@@ -28,6 +29,7 @@ class ImmediateInterpreter;
 class MultitouchMouseInterpreter;
 
 class TapRecord {
+  FRIEND_TEST(ImmediateInterpreterTest, TapRecordTest);
  public:
   explicit TapRecord(const ImmediateInterpreter* immediate_interpreter)
       : immediate_interpreter_(immediate_interpreter),
@@ -37,9 +39,9 @@ class TapRecord {
         fingers_below_max_age_(true) {}
   void Update(const HardwareState& hwstate,
               const HardwareState& prev_hwstate,
-              const set<short, kMaxTapFingers>& added,
-              const set<short, kMaxTapFingers>& removed,
-              const set<short, kMaxFingers>& dead);
+              const std::set<short>& added,
+              const std::set<short>& removed,
+              const std::set<short>& dead);
   void Clear();
 
   // if any gesturing fingers are moving
@@ -62,14 +64,14 @@ class TapRecord {
 
   float CotapMinPressure() const;
 
-  map<short, FingerState, kMaxTapFingers> touched_;
-  set<short, kMaxTapFingers> released_;
+  std::map<short, FingerState> touched_;
+  std::set<short> released_;
   // At least one finger must meet the minimum pressure requirement during a
   // tap. This set contains the fingers that have.
-  set<short, kMaxTapFingers> min_tap_pressure_met_;
+  std::set<short> min_tap_pressure_met_;
   // All fingers must meet the cotap pressure, which is half of the min tap
   // pressure.
-  set<short, kMaxTapFingers> min_cotap_pressure_met_;
+  std::set<short> min_cotap_pressure_met_;
   // Used to fetch properties
   const ImmediateInterpreter* immediate_interpreter_;
   // T5R2: For these pads, we try to track individual IDs, but if we get an
@@ -217,7 +219,7 @@ class ScrollManager {
   void RegressScrollVelocity(const ScrollEventBuffer& scroll_buffer,
                              int count, ScrollEvent* out) const;
 
-  map<short, Point, kMaxFingers> stationary_start_positions_;
+  std::map<short, Point> stationary_start_positions_;
 
   // In addition to checking for large pressure changes when moving
   // slow, we can suppress all motion under a certain speed, unless
@@ -394,7 +396,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   stime_t tap_max_finger_age() const { return tap_max_finger_age_.val_; }
 
   stime_t finger_origin_timestamp(short finger_id) const {
-    return origin_timestamps_[finger_id];
+    return origin_timestamps_.at(finger_id);
   }
 
  private:
@@ -606,7 +608,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   virtual void IntWasWritten(IntProperty* prop);
 
   // Fingers which are prohibited from ever tapping.
-  set<short, kMaxFingers> tap_dead_fingers_;
+  std::set<short> tap_dead_fingers_;
 
   // Active gs fingers are the subset of gs_fingers that are actually performing
   // a gesture
@@ -623,10 +625,10 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   Gesture prev_result_;
 
   // Time when a contact arrived. Persists even when fingers change.
-  map<short, stime_t, kMaxFingers> origin_timestamps_;
+  std::map<short, stime_t> origin_timestamps_;
 
   // Total distance travelled by a finger since the origin_timestamps_.
-  map<short, float, kMaxFingers> distance_walked_;
+  std::map<short, float> distance_walked_;
 
   // Button data
   // Which button we are going to send/have sent for the physical btn press
@@ -646,7 +648,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   // When gesturing fingers move after change, we record the time.
   stime_t started_moving_time_;
   // Record which fingers have started moving already.
-  set<short, kMaxFingers> moving_;
+  std::set<short> moving_;
 
   // When different fingers are gesturing, we record the time
   stime_t gs_changed_time_;
@@ -656,30 +658,30 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
 
   // When fingers change, we keep track of where they started.
   // Map: Finger ID -> (x, y) coordinate
-  map<short, Point, kMaxFingers> start_positions_;
+  std::map<short, Point> start_positions_;
 
   // Keep track of finger position from when three fingers began moving in the
   // same direction.
   // Map: Finger ID -> (x, y) coordinate
-  map<short, Point, kMaxFingers> three_finger_swipe_start_positions_;
+  std::map<short, Point> three_finger_swipe_start_positions_;
 
   // Keep track of finger position from when four fingers began moving in the
   // same direction.
   // Map: Finger ID -> (x, y) coordinate
-  map<short, Point, kMaxFingers> four_finger_swipe_start_positions_;
+  std::map<short, Point> four_finger_swipe_start_positions_;
 
   // We keep track of where each finger started when they touched.
   // Map: Finger ID -> (x, y) coordinate.
-  map<short, Point, kMaxFingers> origin_positions_;
+  std::map<short, Point> origin_positions_;
 
   // tracking ids of known fingers that are not palms, nor thumbs.
-  set<short, kMaxFingers> pointing_;
+  std::set<short> pointing_;
   // tracking ids of known non-palms. But might be thumbs.
-  set<short, kMaxFingers> fingers_;
+  std::set<short> fingers_;
   // contacts believed to be thumbs, and when they were inserted into the map
-  map<short, stime_t, kMaxFingers> thumb_;
+  std::map<short, stime_t> thumb_;
   // Timer of the evaluation period for contacts believed to be thumbs.
-  map<short, stime_t, kMaxFingers> thumb_eval_timer_;
+  std::map<short, stime_t> thumb_eval_timer_;
 
   // once a moving finger is determined lock onto this one for cursor movement.
   short moving_finger_id_;
