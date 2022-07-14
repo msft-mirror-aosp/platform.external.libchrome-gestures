@@ -37,6 +37,18 @@ class SensorJumpFilterInterpreter : public FilterInterpreter,
   virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
 
  private:
+  // Fingers from the previous two SyncInterpret calls. previous_input_[0]
+  // is the more recent.
+  map<short, FingerState, kMaxFingers> previous_input_[2];
+
+  // When a finger is flagged with a warp flag for the first time, we note it
+  // here.
+  // first_flag_[0] for WARP_X_NON_MOVE;
+  // first_flag_[1] for WARP_Y_NON_MOVE;
+  // first_flag_[2] for WARP_X_MOVE;
+  // first_flag_[3] for WARP_Y_MOVE.
+  set<short, kMaxFingers> first_flag_[4];
+
   // Whether or not this filter is enabled. If disabled, it behaves as a
   // simple passthrough.
   BoolProperty enabled_;
@@ -65,18 +77,6 @@ class SensorJumpFilterInterpreter : public FilterInterpreter,
   // no_warp_min_dist_move_ to filter out really small direction change to
   // not be marked as WARP.
   DoubleProperty no_warp_min_dist_move_;
-
-  // Fingers from the previous two SyncInterpret calls. previous_input_[0]
-  // is the more recent.
-  map<short, FingerState, kMaxFingers> previous_input_[2];
-
-  // When a finger is flagged with a warp flag for the first time, we note it
-  // here.
-  // first_flag_[0] for WARP_X_NON_MOVE;
-  // first_flag_[1] for WARP_Y_NON_MOVE;
-  // first_flag_[2] for WARP_X_MOVE;
-  // first_flag_[3] for WARP_Y_MOVE.
-  set<short, kMaxFingers> first_flag_[4];
 };
 
 }  // namespace gestures

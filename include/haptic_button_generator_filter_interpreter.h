@@ -51,24 +51,6 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
   const double up_thresholds_[kMaxSensitivitySettings] =
       {80.0, 95.0, 105.0, 120.0, 135.0};
 
-  IntProperty sensitivity_;  // [1..5]
-
-  BoolProperty use_custom_thresholds_;
-  DoubleProperty custom_down_threshold_;
-  DoubleProperty custom_up_threshold_;
-
-  BoolProperty enabled_;
-
-  DoubleProperty force_scale_;
-  DoubleProperty force_translate_;
-
-  DoubleProperty complete_release_suppress_speed_;
-
-  BoolProperty use_dynamic_thresholds_;
-  DoubleProperty dynamic_down_ratio_;
-  DoubleProperty dynamic_up_ratio_;
-  DoubleProperty max_dynamic_up_force_;
-
   // Scaling factor for release force [0.0-1.0]
   double release_suppress_factor_;
 
@@ -87,6 +69,24 @@ class HapticButtonGeneratorFilterInterpreter : public FilterInterpreter {
   // allow easier double-clicking
   double dynamic_down_threshold_;
   double dynamic_up_threshold_;
+
+  IntProperty sensitivity_;  // [1..5]
+
+  BoolProperty use_custom_thresholds_;
+  DoubleProperty custom_down_threshold_;
+  DoubleProperty custom_up_threshold_;
+
+  BoolProperty enabled_;
+
+  DoubleProperty force_scale_;
+  DoubleProperty force_translate_;
+
+  DoubleProperty complete_release_suppress_speed_;
+
+  BoolProperty use_dynamic_thresholds_;
+  DoubleProperty dynamic_down_ratio_;
+  DoubleProperty dynamic_up_ratio_;
+  DoubleProperty max_dynamic_up_force_;
 };
 
 }  // namespace gestures

@@ -68,6 +68,9 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
   // True while wheel emulation is locked in.
   bool wheel_emulation_active_;
 
+  // f_approximated = a0 + a1*v + a2*v^2 + a3*v^3 + a4*v^4
+  double scroll_accel_curve_[5];
+
   // Reverse wheel scrolling.
   BoolProperty reverse_scrolling_;
 
@@ -98,10 +101,6 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
   // v = np.arange(-50, 201)
   // f = (580 * norm.cdf(v, 100, 40) + 20) / np.maximum(v / 125.0, 1)
   // coeff = np.flip(np.polyfit(v, f, 4), 0)
-
-  // f_approximated = a0 + a1*v + a2*v^2 + a3*v^3 + a4*v^4
-  double scroll_accel_curve_[5];
-
   // Adjust the scroll acceleration curve
   DoubleArrayProperty scroll_accel_curve_prop_;
 

@@ -100,12 +100,12 @@ class SplitCorrectingFilterInterpreter : public FilterInterpreter {
   // Dumps internal state and hwstate.
   void Dump(const HardwareState& hwstate) const;
 
-  // We only enable on non-T5R2 pads
-  BoolProperty enabled_;
-
   set<short, kMaxFingers> last_tracking_ids_;
   UnmergedContact unmerged_[kMaxFingers];
   MergedContact merged_[kMaxFingers / 2 + 1];
+
+  // We only enable on non-T5R2 pads
+  BoolProperty enabled_;
 
   // Contacts must be separated by less than this amount to be considered for
   // merging.

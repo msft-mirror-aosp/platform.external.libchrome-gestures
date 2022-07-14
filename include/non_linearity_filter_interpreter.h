@@ -91,8 +91,6 @@ class NonLinearityFilterInterpreter : public FilterInterpreter {
   bool LoadRange(std::unique_ptr<double[]>& arr, size_t& len, FILE* fd);
   int ReadObject(void* buf, size_t object_size, FILE* fd);
 
-  BoolProperty enabled_;
-  StringProperty data_location_;
   // These three arrays define the points where the error was sampled.
   // There is a reading in err_ for each point formed by the cross product
   // of these arrays.
@@ -100,6 +98,9 @@ class NonLinearityFilterInterpreter : public FilterInterpreter {
   size_t x_range_len_, y_range_len_, p_range_len_;
   // A flattened 3-d array holding the actual sampled error values
   std::unique_ptr<Error[]> err_;
+
+  BoolProperty enabled_;
+  StringProperty data_location_;
 };
 
 }  // namespace gestures

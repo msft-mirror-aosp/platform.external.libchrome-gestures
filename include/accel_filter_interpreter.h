@@ -74,6 +74,14 @@ class AccelFilterInterpreter : public FilterInterpreter {
   // Note: there is no mouse_custom_scroll_ b/c mouse wheel accel is
   // handled in the MouseInterpreter class.
 
+  // See max* and min_reasonable_dt_ properties
+  stime_t last_reasonable_dt_;
+
+  // These are used to calculate acceleration, see smooth_accel_
+  stime_t last_end_time_;
+  float last_mags_[2];
+  size_t last_mags_size_;
+
   // These properties expose the custom curves (just above) to the
   // property system.
   DoubleArrayProperty tp_custom_point_prop_;
@@ -111,14 +119,10 @@ class AccelFilterInterpreter : public FilterInterpreter {
   // reasonable period.
   DoubleProperty min_reasonable_dt_;
   DoubleProperty max_reasonable_dt_;
-  stime_t last_reasonable_dt_;
 
   // If we enable smooth accel, the past few magnitudes are used to compute the
   // multiplication factor.
   BoolProperty smooth_accel_;
-  stime_t last_end_time_;
-  float last_mags_[2];
-  size_t last_mags_size_;
 };
 
 }  // namespace gestures

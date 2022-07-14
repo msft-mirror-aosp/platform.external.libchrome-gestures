@@ -17,9 +17,9 @@ TimestampFilterInterpreter::TimestampFilterInterpreter(
       prev_msc_timestamp_(-1.0),
       msc_timestamp_offset_(-1.0),
       fake_timestamp_(-1.0),
-      fake_timestamp_delta_(prop_reg, "Fake Timestamp Delta", 0.0),
       fake_timestamp_max_divergence_(0.1),
-      skew_(0.0) {
+      skew_(0.0),
+      fake_timestamp_delta_(prop_reg, "Fake Timestamp Delta", 0.0) {
   InitName();
 }
 

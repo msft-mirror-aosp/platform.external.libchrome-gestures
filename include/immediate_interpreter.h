@@ -217,13 +217,14 @@ class ScrollManager {
   void RegressScrollVelocity(const ScrollEventBuffer& scroll_buffer,
                              int count, ScrollEvent* out) const;
 
+  map<short, Point, kMaxFingers> stationary_start_positions_;
+
   // In addition to checking for large pressure changes when moving
   // slow, we can suppress all motion under a certain speed, unless
   // the total distance exceeds a threshold.
   DoubleProperty max_stationary_move_speed_;
   DoubleProperty max_stationary_move_speed_hysteresis_;
   DoubleProperty max_stationary_move_suppress_distance_;
-  map<short, Point, kMaxFingers> stationary_start_positions_;
 
   // A finger must change in pressure by less than this per second to trigger
   // motion.
@@ -746,6 +747,9 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
 
   bool is_haptic_pad_;
 
+  // See keyboard_touched_* properties
+  stime_t keyboard_touched_;
+
   ScrollManager scroll_manager_;
 
   // Properties
@@ -890,7 +894,6 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   // the two are converted into an stime_t and stored in keyboard_touched_.
   IntProperty keyboard_touched_timeval_high_;  // seconds
   IntProperty keyboard_touched_timeval_low_;  // microseconds
-  stime_t keyboard_touched_;
   // During this timeout, which is time [s] since the keyboard has been used,
   // we are extra aggressive in palm detection. If this time is > 10s apart
   // from now (either before or after), it's disregarded. We disregard old

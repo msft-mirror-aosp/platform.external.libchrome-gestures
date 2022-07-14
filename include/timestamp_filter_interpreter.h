@@ -72,8 +72,6 @@ class TimestampFilterInterpreter : public FilterInterpreter {
 
   // If we are using fake timestamps, this holds the most recent fake
   stime_t fake_timestamp_;
-  // If we don't have a reliable timestamp, we use this as the timestamp delta.
-  DoubleProperty fake_timestamp_delta_;
   // Maximum we let fake_timestamp_ diverge from hwstate->timestamp
   stime_t fake_timestamp_max_divergence_;
 
@@ -81,6 +79,9 @@ class TimestampFilterInterpreter : public FilterInterpreter {
   // adjustment by this interpreter. When contact begins this will be zero, but
   // the two clocks may get out of sync by a small amount as time goes on
   stime_t skew_;
+
+  // If we don't have a reliable timestamp, we use this as the timestamp delta.
+  DoubleProperty fake_timestamp_delta_;
 };
 
 }  // namespace gestures

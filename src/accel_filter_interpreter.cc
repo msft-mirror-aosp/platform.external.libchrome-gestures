@@ -20,6 +20,9 @@ AccelFilterInterpreter::AccelFilterInterpreter(PropRegistry* prop_reg,
                                                Interpreter* next,
                                                Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
+      last_reasonable_dt_(0.05),
+      last_end_time_(-1.0),
+      last_mags_size_(0),
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsizeof-array-div"
       // Hack: cast tp_custom_point_/mouse_custom_point_/tp_custom_scroll_
@@ -52,10 +55,7 @@ AccelFilterInterpreter::AccelFilterInterpreter(PropRegistry* prop_reg,
       pointer_acceleration_(prop_reg, "Pointer Acceleration", 1),
       min_reasonable_dt_(prop_reg, "Accel Min dt", 0.003),
       max_reasonable_dt_(prop_reg, "Accel Max dt", 0.050),
-      last_reasonable_dt_(0.05),
-      smooth_accel_(prop_reg, "Smooth Accel", 0),
-      last_end_time_(-1.0),
-      last_mags_size_(0) {
+      smooth_accel_(prop_reg, "Smooth Accel", 0) {
   InitName();
   // Set up default curves.
 

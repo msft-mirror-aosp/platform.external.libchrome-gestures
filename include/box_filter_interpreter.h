@@ -45,10 +45,10 @@ class BoxFilterInterpreter : public FilterInterpreter, public PropertyDelegate {
   virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
 
  private:
+  map<short, FingerState, kMaxFingers> previous_output_;
+
   DoubleProperty box_width_;
   DoubleProperty box_height_;
-
-  map<short, FingerState, kMaxFingers> previous_output_;
 };
 
 }  // namespace gestures

@@ -79,6 +79,8 @@ class ScalingFilterInterpreter : public FilterInterpreter {
   // When orientation_scale_ = 0, no orientation is provided from kernel.
   float orientation_scale_;
 
+  HardwareProperties friendly_props_;
+
   // True if scrolling should be inverted
   BoolProperty australian_scrolling_;
 
@@ -113,8 +115,6 @@ class ScalingFilterInterpreter : public FilterInterpreter {
   BoolProperty force_touch_count_to_match_finger_count_;
 
   DoubleProperty mouse_cpi_;
-
-  HardwareProperties friendly_props_;
 
   // XInput properties that we use to identify the device type in Chrome for
   // all CMT devices. We put them here for now because they are not large

@@ -16,6 +16,13 @@ namespace gestures {
 HapticButtonGeneratorFilterInterpreter::HapticButtonGeneratorFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
+     release_suppress_factor_(1.0),
+      active_gesture_(false),
+      active_gesture_timeout_(0.1),
+      active_gesture_deadline_(NO_DEADLINE),
+      button_down_(false),
+      dynamic_down_threshold_(0.0),
+      dynamic_up_threshold_(0.0),
       sensitivity_(prop_reg, "Haptic Button Sensitivity", 3),
       use_custom_thresholds_(prop_reg,
                              "Use Custom Haptic Button Force Thresholds",
@@ -34,14 +41,7 @@ HapticButtonGeneratorFilterInterpreter::HapticButtonGeneratorFilterInterpreter(
       use_dynamic_thresholds_(prop_reg, "Use Dynamic Haptic Thresholds", false),
       dynamic_down_ratio_(prop_reg, "Dynamic Haptic Down Ratio", 1.2),
       dynamic_up_ratio_(prop_reg, "Dynamic Haptic Up Ratio", 0.5),
-      max_dynamic_up_force_(prop_reg, "Max Dynamic Haptic Up Force", 350.0),
-      release_suppress_factor_(1.0),
-      active_gesture_(false),
-      active_gesture_timeout_(0.1),
-      active_gesture_deadline_(NO_DEADLINE),
-      button_down_(false),
-      dynamic_down_threshold_(0.0),
-      dynamic_up_threshold_(0.0) {
+      max_dynamic_up_force_(prop_reg, "Max Dynamic Haptic Up Force", 350.0) {
   InitName();
 }
 
