@@ -1603,7 +1603,7 @@ TEST(ImmediateInterpreterTest, TapRecordTest) {
   };
   HardwareState nullstate = make_hwstate(0.0, 0, 0, 0, NULL);
   HardwareState hw[] = {
-    // time, buttons, finger count, finger states pointer
+    // time, buttons, finger count, touch count, finger states pointer
     make_hwstate(0.0, 0, 1, 1, &fs[0]),
     make_hwstate(0.1, 0, 2, 2, &fs[0]),
     make_hwstate(0.2, 0, 1, 1, &fs[1]),

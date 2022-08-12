@@ -2656,27 +2656,27 @@ void ImmediateInterpreter::UpdateTapState(
   //     Start
   //       ↓
   //    [Idle**] <----------------------------------------------------------,
-  //       ↓ added finger(s)                                                |
+  //       ↓ added finger(s)                                                ^
   //  ,>[FirstTapBegan] -<right click: send right click, timeout/movement>->|
   //  |    ↓ released all fingers                                           |
   // ,->[TapComplete*] --<timeout: send click>----------------------------->|
   // ||    | | two finger touching: send left click.                        |
-  // |'----+-'                                                              |
+  // |'<---+-'                                                              ^
   // |     ↓ add finger(s)                                                  |
-  // |  [SubsequentTapBegan] --<timeout/move w/o delay: send click>-------->|
+  // ^  [SubsequentTapBegan] --<timeout/move w/o delay: send click>-------->|
   // |     | | | release all fingers: send left click                       |
-  // |<----+-+-'                                                            |
+  // |<----+-+-'                                                            ^
   // |     | `-> start non-left click: send left click; goto FirstTapBegan  |
   // |     ↓ timeout/movement with delay: send button down                  |
   // | ,->[Drag] --<detect 2 finger gesture: send button up>--------------->|
-  // | |   ↓ release all fingers                                            |
+  // | |   ↓ release all fingers                                            ^
   // | |  [DragRelease*]  --<timeout: send button up>---------------------->|
-  // | |   ↓ add finger(s)                                                  |
-  // | |  [DragRetouch]  --<remove fingers (left tap): send button up>----->|
+  // ^ ^   ↓ add finger(s)                                                  ^
+  // | |  [DragRetouch]  --<remove fingers (left tap): send button up>----->'
   // | |   | | timeout/movement
-  // | '---+-'
+  // | '-<-+-'
   // |     |  remove all fingers (non-left tap): send button up
-  // '-----'
+  // '<----'
   //
   // * When entering TapComplete or DragRelease, we set a timer, since
   //   we will have no fingers on the pad and want to run possibly before
