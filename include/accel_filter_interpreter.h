@@ -19,6 +19,8 @@ namespace gestures {
 
 // This interpreter provides pointer and scroll acceleration based on
 // an acceleration curve and the user's sensitivity setting.
+//
+// For additional documentation, see ../docs/accel_filter_interpreter.md.
 
 class AccelFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(AccelFilterInterpreterTest, CustomAccelTest);
