@@ -31,7 +31,7 @@ HapticButtonGeneratorFilterInterpreter::HapticButtonGeneratorFilterInterpreter(
       force_translate_(prop_reg, "Force Calibration Offset", 0.0),
       complete_release_suppress_speed_(
           prop_reg, "Haptic Complete Release Suppression Speed", 200.0),
-      use_dynamic_thresholds_(prop_reg, "Use Dynamic Haptic Thresholds", true),
+      use_dynamic_thresholds_(prop_reg, "Use Dynamic Haptic Thresholds", false),
       dynamic_down_ratio_(prop_reg, "Dynamic Haptic Down Ratio", 1.2),
       dynamic_up_ratio_(prop_reg, "Dynamic Haptic Up Ratio", 0.5),
       max_dynamic_up_force_(prop_reg, "Max Dynamic Haptic Up Force", 350.0),

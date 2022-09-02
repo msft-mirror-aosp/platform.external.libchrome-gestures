@@ -279,6 +279,7 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, DynamicThresholdTest) {
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
   interpreter.enabled_.val_ = true;
+  interpreter.use_dynamic_thresholds_.val_ = true;
 
   FingerState fs[] = {
     // TM, Tm, WM, Wm, pr, orient, x, y, id, flag
