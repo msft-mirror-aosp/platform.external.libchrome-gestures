@@ -82,12 +82,13 @@ void HapticButtonGeneratorFilterInterpreter::HandleHardwareState(
     down_threshold = down_thresholds_[sensitivity_.val_ - 1];
     up_threshold = up_thresholds_[sensitivity_.val_ - 1];
   }
-  up_threshold *= release_suppress_factor_;
 
   if (use_dynamic_thresholds_.val_) {
     up_threshold = fmax(up_threshold, dynamic_up_threshold_);
     down_threshold = fmax(down_threshold, dynamic_down_threshold_);
   }
+
+  up_threshold *= release_suppress_factor_;
 
   // Determine total force on touchpad in grams
   double force = 0.0;
