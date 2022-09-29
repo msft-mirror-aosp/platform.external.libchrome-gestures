@@ -2568,6 +2568,55 @@
     "result": "success",
     "score": 1.0
   },
+  "redrix-1.0/baseline/click": {
+    "description": "",
+    "disabled": true,
+    "error": "",
+    "result": "incomplete",
+    "score": 0
+  },
+  "redrix-1.0/baseline/drag": {
+    "description": "",
+    "disabled": true,
+    "error": "",
+    "result": "incomplete",
+    "score": 0
+  },
+  "redrix-1.0/baseline/fling": {
+    "description": "",
+    "disabled": true,
+    "error": "",
+    "result": "incomplete",
+    "score": 0
+  },
+  "redrix-1.0/baseline/move": {
+    "description": "",
+    "disabled": true,
+    "error": "",
+    "result": "incomplete",
+    "score": 0
+  },
+  "redrix-1.0/baseline/scroll": {
+    "description": "",
+    "disabled": true,
+    "error": "",
+    "result": "incomplete",
+    "score": 0
+  },
+  "redrix-1.0/baseline/tap": {
+    "description": "",
+    "disabled": true,
+    "error": "",
+    "result": "incomplete",
+    "score": 0
+  },
+  "redrix-1.0/skipped_moves_with_unstable_size": {
+    "description": "",
+    "disabled": false,
+    "error": "",
+    "result": "success",
+    "score": 1
+  },
   "relm-1.0/baseline/click": {
     "description": "",
     "disabled": true,
