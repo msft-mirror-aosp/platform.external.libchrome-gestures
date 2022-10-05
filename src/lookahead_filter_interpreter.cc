@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <math.h>
-#include <values.h>
 
 #include "gestures/include/tracer.h"
 #include "gestures/include/util.h"
