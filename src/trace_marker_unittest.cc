@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/trace_marker.h"
+#include "include/trace_marker.h"
 
 namespace gestures {
 

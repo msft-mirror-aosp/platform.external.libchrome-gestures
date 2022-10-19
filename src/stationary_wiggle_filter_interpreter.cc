@@ -4,12 +4,12 @@
 
 #include <map>
 
-#include "gestures/include/stationary_wiggle_filter_interpreter.h"
+#include "include/stationary_wiggle_filter_interpreter.h"
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/interpreter.h"
-#include "gestures/include/tracer.h"
-#include "gestures/include/util.h"
+#include "include/gestures.h"
+#include "include/interpreter.h"
+#include "include/tracer.h"
+#include "include/util.h"
 
 namespace gestures {
 

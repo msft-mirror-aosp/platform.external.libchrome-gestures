@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/activity_replay.h"
+#include "include/activity_replay.h"
 
 #include <limits.h>
 #include <set>
@@ -12,10 +12,10 @@
 #include <json/reader.h>
 #include <json/writer.h>
 
-#include "gestures/include/logging.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/unittest_util.h"
-#include "gestures/include/util.h"
+#include "include/logging.h"
+#include "include/prop_registry.h"
+#include "include/unittest_util.h"
+#include "include/util.h"
 
 using std::endl;
 using std::set;

@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>  // For FRIEND_TEST
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/interpreter.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/tracer.h"
+#include "include/gestures.h"
+#include "include/interpreter.h"
+#include "include/prop_registry.h"
+#include "include/tracer.h"
 
 #ifndef GESTURES_MOUSE_INTERPRETER_H_
 #define GESTURES_MOUSE_INTERPRETER_H_

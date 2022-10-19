@@ -6,10 +6,10 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/activity_log.h"
-#include "gestures/include/macros.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/unittest_util.h"
+#include "include/activity_log.h"
+#include "include/macros.h"
+#include "include/prop_registry.h"
+#include "include/unittest_util.h"
 
 using std::string;
 

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/lookahead_filter_interpreter.h"
+#include "include/lookahead_filter_interpreter.h"
 
 #include <algorithm>
 #include <math.h>
 
-#include "gestures/include/tracer.h"
-#include "gestures/include/util.h"
+#include "include/tracer.h"
+#include "include/util.h"
 
 using std::max;
 using std::min;

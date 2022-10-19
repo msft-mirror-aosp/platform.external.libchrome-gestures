@@ -7,10 +7,10 @@
 #include <gtest/gtest.h>
 #include <json/value.h>
 
-#include "gestures/include/interpreter.h"
-#include "gestures/include/macros.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/tracer.h"
+#include "include/interpreter.h"
+#include "include/macros.h"
+#include "include/prop_registry.h"
+#include "include/tracer.h"
 
 #ifndef GESTURES_FILTER_INTERPRETER_H__
 #define GESTURES_FILTER_INTERPRETER_H__

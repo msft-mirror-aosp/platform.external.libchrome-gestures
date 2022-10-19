@@ -10,8 +10,8 @@
 
 #include <math.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/interpreter.h"
+#include "include/gestures.h"
+#include "include/interpreter.h"
 
 namespace gestures {
 

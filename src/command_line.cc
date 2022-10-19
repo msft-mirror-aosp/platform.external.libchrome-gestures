@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/command_line.h"
+#include "include/command_line.h"
 
 #include <algorithm>
 #include <ostream>
 #include <string>
 
-#include "gestures/include/macros.h"
-#include "gestures/include/string_util.h"
+#include "include/macros.h"
+#include "include/string_util.h"
 
 namespace gestures {
 

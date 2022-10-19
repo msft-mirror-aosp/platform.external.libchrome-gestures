@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/filter_interpreter.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/tracer.h"
+#include "include/filter_interpreter.h"
+#include "include/gestures.h"
+#include "include/prop_registry.h"
+#include "include/tracer.h"
 
 #ifndef GESTURES_T5R2_CORRECTING_FILTER_INTERPRETER_H_
 #define GESTURES_T5R2_CORRECTING_FILTER_INTERPRETER_H_

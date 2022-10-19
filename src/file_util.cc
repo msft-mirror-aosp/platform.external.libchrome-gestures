@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/file_util.h"
+#include "include/file_util.h"
 
 #include <fcntl.h>
 #include <limits>
@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "gestures/include/eintr_wrapper.h"
+#include "include/eintr_wrapper.h"
 
 namespace gestures {
 

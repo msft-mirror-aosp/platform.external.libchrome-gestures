@@ -6,8 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/activity_log.h"
-#include "gestures/include/prop_registry.h"
+#include "include/activity_log.h"
+#include "include/prop_registry.h"
 
 using std::string;
 

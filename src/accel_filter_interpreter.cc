@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/accel_filter_interpreter.h"
+#include "include/accel_filter_interpreter.h"
 
 #include <algorithm>
 #include <math.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/interpreter.h"
-#include "gestures/include/logging.h"
-#include "gestures/include/macros.h"
-#include "gestures/include/tracer.h"
+#include "include/gestures.h"
+#include "include/interpreter.h"
+#include "include/logging.h"
+#include "include/macros.h"
+#include "include/tracer.h"
 
 namespace gestures {
 

@@ -7,8 +7,8 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/command_line.h"
-#include "gestures/include/gestures.h"
+#include "include/command_line.h"
+#include "include/gestures.h"
 
 int main(int argc, char **argv) {
   gestures::CommandLine::Init(argc, argv);

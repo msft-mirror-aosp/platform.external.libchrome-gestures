@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/tracer.h"
+#include "include/tracer.h"
 
 using std::string;
 

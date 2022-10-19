@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/multitouch_mouse_interpreter.h"
-#include "gestures/include/unittest_util.h"
-#include "gestures/include/util.h"
+#include "include/gestures.h"
+#include "include/multitouch_mouse_interpreter.h"
+#include "include/unittest_util.h"
+#include "include/util.h"
 
 namespace gestures {
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/immediate_interpreter.h"
+#include "include/immediate_interpreter.h"
 
 #include <algorithm>
 #include <cmath>
@@ -12,9 +12,9 @@
 #include <limits>
 #include <tuple>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/logging.h"
-#include "gestures/include/util.h"
+#include "include/gestures.h"
+#include "include/logging.h"
+#include "include/util.h"
 
 using std::bind;
 using std::for_each;

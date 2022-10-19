@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/interpreter.h"
+#include "include/interpreter.h"
 
 #include <cxxabi.h>
 #include <string>
@@ -10,11 +10,11 @@
 #include <json/value.h>
 #include <json/writer.h>
 
-#include "gestures/include/activity_log.h"
-#include "gestures/include/finger_metrics.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/logging.h"
-#include "gestures/include/tracer.h"
+#include "include/activity_log.h"
+#include "include/finger_metrics.h"
+#include "include/gestures.h"
+#include "include/logging.h"
+#include "include/tracer.h"
 
 using std::string;
 

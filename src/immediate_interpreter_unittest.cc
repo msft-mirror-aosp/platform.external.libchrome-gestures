@@ -7,11 +7,11 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/immediate_interpreter.h"
-#include "gestures/include/string_util.h"
-#include "gestures/include/unittest_util.h"
-#include "gestures/include/util.h"
+#include "include/gestures.h"
+#include "include/immediate_interpreter.h"
+#include "include/string_util.h"
+#include "include/unittest_util.h"
+#include "include/util.h"
 
 namespace gestures {
 

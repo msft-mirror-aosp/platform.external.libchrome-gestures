@@ -8,13 +8,13 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/activity_replay.h"
-#include "gestures/include/command_line.h"
-#include "gestures/include/file_util.h"
-#include "gestures/include/finger_metrics.h"
-#include "gestures/include/logging_filter_interpreter.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/string_util.h"
+#include "include/activity_replay.h"
+#include "include/command_line.h"
+#include "include/file_util.h"
+#include "include/finger_metrics.h"
+#include "include/gestures.h"
+#include "include/logging_filter_interpreter.h"
+#include "include/string_util.h"
 
 using std::string;
 

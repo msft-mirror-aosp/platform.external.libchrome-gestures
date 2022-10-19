@@ -5,9 +5,9 @@
 #ifndef GESTURES_UNITTEST_UTIL_H_
 #define GESTURES_UNITTEST_UTIL_H_
 
-#include "gestures/include/finger_metrics.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/interpreter.h"
+#include "include/finger_metrics.h"
+#include "include/gestures.h"
+#include "include/interpreter.h"
 
 namespace gestures {
 

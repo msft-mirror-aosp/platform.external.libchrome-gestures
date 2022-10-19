@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/stuck_button_inhibitor_filter_interpreter.h"
+#include "include/stuck_button_inhibitor_filter_interpreter.h"
 
-#include "gestures/include/logging.h"
-#include "gestures/include/tracer.h"
+#include "include/logging.h"
+#include "include/tracer.h"
 
 namespace gestures {
 

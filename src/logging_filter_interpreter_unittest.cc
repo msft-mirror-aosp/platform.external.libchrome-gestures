@@ -6,12 +6,12 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/activity_replay.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/interpreter.h"
-#include "gestures/include/logging_filter_interpreter.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/unittest_util.h"
+#include "include/activity_replay.h"
+#include "include/gestures.h"
+#include "include/interpreter.h"
+#include "include/logging_filter_interpreter.h"
+#include "include/prop_registry.h"
+#include "include/unittest_util.h"
 using std::string;
 
 namespace gestures {

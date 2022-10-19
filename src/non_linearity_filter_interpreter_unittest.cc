@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/non_linearity_filter_interpreter.h"
-#include "gestures/include/unittest_util.h"
-#include "gestures/include/util.h"
+#include "include/gestures.h"
+#include "include/non_linearity_filter_interpreter.h"
+#include "include/unittest_util.h"
+#include "include/util.h"
 
 const char kTestNonlinearData[] =
     "data/non_linearity_data/testing_non_linearity_data.dat";

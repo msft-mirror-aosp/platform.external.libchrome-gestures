@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/t5r2_correcting_filter_interpreter.h"
+#include "include/t5r2_correcting_filter_interpreter.h"
 
 namespace gestures {
 

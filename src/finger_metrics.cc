@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/finger_metrics.h"
+#include "include/finger_metrics.h"
 
 namespace gestures {
 

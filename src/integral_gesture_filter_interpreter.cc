@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/integral_gesture_filter_interpreter.h"
+#include "include/integral_gesture_filter_interpreter.h"
 
 #include <math.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/interpreter.h"
-#include "gestures/include/logging.h"
-#include "gestures/include/tracer.h"
+#include "include/gestures.h"
+#include "include/interpreter.h"
+#include "include/logging.h"
+#include "include/tracer.h"
 
 namespace gestures {
 

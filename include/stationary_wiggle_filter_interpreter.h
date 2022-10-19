@@ -4,11 +4,11 @@
 
 #include <map>
 
-#include "gestures/include/filter_interpreter.h"
-#include "gestures/include/finger_metrics.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/macros.h"
-#include "gestures/include/tracer.h"
+#include "include/filter_interpreter.h"
+#include "include/finger_metrics.h"
+#include "include/gestures.h"
+#include "include/macros.h"
+#include "include/tracer.h"
 
 #ifndef GESTURES_STATIONARY_WIGGLE_FILTER_INTERPRETER_H_
 #define GESTURES_STATIONARY_WIGGLE_FILTER_INTERPRETER_H_

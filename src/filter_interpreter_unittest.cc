@@ -6,10 +6,10 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/filter_interpreter.h"
-#include "gestures/include/unittest_util.h"
-#include "gestures/include/util.h"
+#include "include/filter_interpreter.h"
+#include "include/gestures.h"
+#include "include/unittest_util.h"
+#include "include/util.h"
 
 using std::string;
 

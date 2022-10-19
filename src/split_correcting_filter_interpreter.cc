@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/split_correcting_filter_interpreter.h"
+#include "include/split_correcting_filter_interpreter.h"
 
 #include <math.h>
 
-#include "gestures/include/tracer.h"
-#include "gestures/include/util.h"
+#include "include/tracer.h"
+#include "include/util.h"
 
 namespace gestures {
 

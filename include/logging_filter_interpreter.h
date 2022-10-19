@@ -5,11 +5,11 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "gestures/include/activity_log.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/filter_interpreter.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/tracer.h"
+#include "include/activity_log.h"
+#include "include/gestures.h"
+#include "include/filter_interpreter.h"
+#include "include/prop_registry.h"
+#include "include/tracer.h"
 
 #ifndef GESTURES_LOGGING_FILTER_INTERPRETER_H_
 #define GESTURES_LOGGING_FILTER_INTERPRETER_H_

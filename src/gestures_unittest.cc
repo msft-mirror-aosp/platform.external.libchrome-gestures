@@ -6,9 +6,9 @@
 #include <memory>
 #include <stdio.h>
 
-#include "gestures/include/macros.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/unittest_util.h"
+#include "include/gestures.h"
+#include "include/macros.h"
+#include "include/unittest_util.h"
 
 namespace gestures {
 

@@ -5,13 +5,13 @@
 #include <map>
 #include <gtest/gtest.h>  // for FRIEND_TEST
 
-#include "gestures/include/filter_interpreter.h"
-#include "gestures/include/finger_metrics.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/list.h"
-#include "gestures/include/memory_manager.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/tracer.h"
+#include "include/filter_interpreter.h"
+#include "include/finger_metrics.h"
+#include "include/gestures.h"
+#include "include/list.h"
+#include "include/memory_manager.h"
+#include "include/prop_registry.h"
+#include "include/tracer.h"
 
 #ifndef GESTURES_METRICS_FILTER_INTERPRETER_H_
 #define GESTURES_METRICS_FILTER_INTERPRETER_H_

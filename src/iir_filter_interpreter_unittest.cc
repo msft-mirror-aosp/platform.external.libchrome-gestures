@@ -4,9 +4,9 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/iir_filter_interpreter.h"
-#include "gestures/include/unittest_util.h"
+#include "include/gestures.h"
+#include "include/iir_filter_interpreter.h"
+#include "include/unittest_util.h"
 
 namespace gestures {
 

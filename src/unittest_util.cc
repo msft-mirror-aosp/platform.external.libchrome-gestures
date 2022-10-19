@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/unittest_util.h"
+#include "include/unittest_util.h"
 
-#include "gestures/include/gestures.h"
+#include "include/gestures.h"
 
 namespace gestures {
 

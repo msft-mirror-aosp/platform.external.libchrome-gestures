@@ -4,8 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/haptic_button_generator_filter_interpreter.h"
-#include "gestures/include/unittest_util.h"
+#include "include/haptic_button_generator_filter_interpreter.h"
+#include "include/unittest_util.h"
 
 namespace gestures {
 

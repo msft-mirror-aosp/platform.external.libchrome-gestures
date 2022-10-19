@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/prop_registry.h"
+#include "include/prop_registry.h"
 
 #include <set>
 #include <string>
 
 #include <json/value.h>
 
-#include "gestures/include/activity_log.h"
-#include "gestures/include/gestures.h"
+#include "include/activity_log.h"
+#include "include/gestures.h"
 
 using std::set;
 using std::string;

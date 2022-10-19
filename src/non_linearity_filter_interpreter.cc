@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/non_linearity_filter_interpreter.h"
+#include "include/non_linearity_filter_interpreter.h"
 
 #include <linux/in.h>
 

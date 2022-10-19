@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "gestures/include/compiler_specific.h"
+#include "include/compiler_specific.h"
 
 namespace gestures {
 

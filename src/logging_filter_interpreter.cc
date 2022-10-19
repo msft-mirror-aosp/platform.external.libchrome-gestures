@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/logging_filter_interpreter.h"
+#include "include/logging_filter_interpreter.h"
 
 #include <errno.h>
 #include <fcntl.h>
 #include <string>
 
-#include "gestures/include/logging.h"
-#include "gestures/include/file_util.h"
+#include "include/file_util.h"
+#include "include/logging.h"
 
 namespace gestures {
 

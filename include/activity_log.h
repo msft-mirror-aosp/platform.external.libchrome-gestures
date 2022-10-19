@@ -5,7 +5,7 @@
 #ifndef GESTURES_ACTIVITY_LOG_H_
 #define GESTURES_ACTIVITY_LOG_H_
 
-#include "gestures/include/gestures.h"
+#include "include/gestures.h"
 
 #include <string>
 

@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-#include "gestures/include/logging.h"
+#include "include/logging.h"
 
 namespace gestures {
 

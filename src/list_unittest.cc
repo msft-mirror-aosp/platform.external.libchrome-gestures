@@ -7,8 +7,8 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/list.h"
-#include "gestures/include/util.h"
+#include "include/list.h"
+#include "include/util.h"
 
 namespace gestures {
 

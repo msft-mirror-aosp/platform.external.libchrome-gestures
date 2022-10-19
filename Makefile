@@ -122,7 +122,7 @@ CXXFLAGS+=\
 	-D__STDC_FORMAT_MACROS=1 \
 	-D_FILE_OFFSET_BITS=64 \
 	-DGESTURES_INTERNAL=1 \
-	-I..
+	-I.
 
 # Local compilation needs these flags, esp for code coverage testing
 ifeq (g++,$(CXX))

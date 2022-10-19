@@ -6,10 +6,10 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/activity_log.h"
-#include "gestures/include/gestures.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/tracer.h"
+#include "include/activity_log.h"
+#include "include/gestures.h"
+#include "include/prop_registry.h"
+#include "include/tracer.h"
 
 #ifndef GESTURES_INTERPRETER_H__
 #define GESTURES_INTERPRETER_H__

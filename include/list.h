@@ -5,8 +5,8 @@
 #ifndef GESTURES_LIST_H__
 #define GESTURES_LIST_H__
 
-#include "gestures/include/logging.h"
-#include "gestures/include/memory_manager.h"
+#include "include/logging.h"
+#include "include/memory_manager.h"
 
 namespace gestures {
 

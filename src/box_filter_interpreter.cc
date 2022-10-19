@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/box_filter_interpreter.h"
+#include "include/box_filter_interpreter.h"
 
-#include "gestures/include/macros.h"
-#include "gestures/include/tracer.h"
-#include "gestures/include/util.h"
+#include "include/macros.h"
+#include "include/tracer.h"
+#include "include/util.h"
 
 namespace gestures {
 

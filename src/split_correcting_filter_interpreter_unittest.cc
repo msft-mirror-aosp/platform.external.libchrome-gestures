@@ -7,9 +7,9 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/split_correcting_filter_interpreter.h"
-#include "gestures/include/unittest_util.h"
-#include "gestures/include/util.h"
+#include "include/split_correcting_filter_interpreter.h"
+#include "include/unittest_util.h"
+#include "include/util.h"
 
 using std::string;
 

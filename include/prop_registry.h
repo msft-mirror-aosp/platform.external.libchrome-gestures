@@ -10,8 +10,8 @@
 
 #include <json/value.h>
 
-#include "gestures/include/gestures.h"
-#include "gestures/include/logging.h"
+#include "include/gestures.h"
+#include "include/logging.h"
 
 namespace gestures {
 

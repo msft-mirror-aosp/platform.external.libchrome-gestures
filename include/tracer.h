@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "gestures/include/prop_registry.h"
+#include "include/prop_registry.h"
 
 #ifndef GESTURES_TRACER_H__
 #define GESTURES_TRACER_H__

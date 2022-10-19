@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gestures/include/activity_log.h"
+#include "include/activity_log.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -14,10 +14,10 @@
 #include <json/value.h>
 #include <json/writer.h>
 
-#include "gestures/include/file_util.h"
-#include "gestures/include/logging.h"
-#include "gestures/include/prop_registry.h"
-#include "gestures/include/string_util.h"
+#include "include/file_util.h"
+#include "include/logging.h"
+#include "include/prop_registry.h"
+#include "include/string_util.h"
 
 // This should be set by build system:
 #ifndef VCSID
