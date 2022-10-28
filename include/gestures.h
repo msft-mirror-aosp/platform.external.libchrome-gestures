@@ -160,6 +160,7 @@ struct HardwareProperties {
 // skip the flag so that we can have the option to use the not-that-accurate
 // positions.
 #define GESTURES_FINGER_WARP_TELEPORTATION (1 << 19)
+#define GESTURES_FINGER_LARGE_PALM (1 << 20)
 
 #define GESTURES_FINGER_WARP_X    (GESTURES_FINGER_WARP_X_NON_MOVE | \
                                    GESTURES_FINGER_WARP_X_MOVE)
