@@ -1,4 +1,4 @@
-# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Copyright 2012 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -51,6 +51,7 @@ TEST_OBJECTS=\
 	$(OBJDIR)/click_wiggle_filter_interpreter_unittest.o \
 	$(OBJDIR)/command_line.o \
 	$(OBJDIR)/filter_interpreter_unittest.o \
+	$(OBJDIR)/finger_metrics_unittest.o \
 	$(OBJDIR)/fling_stop_filter_interpreter_unittest.o \
 	$(OBJDIR)/gestures_unittest.o \
 	$(OBJDIR)/haptic_button_generator_filter_interpreter_unittest.o \
