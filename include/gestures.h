@@ -14,6 +14,8 @@
 
 #include <memory>
 
+#include <gtest/gtest.h>  // for FRIEND_TEST
+
 extern "C" {
 #endif
 
@@ -546,6 +548,8 @@ class MetricsProperties;
 #if __cplusplus >= 201103L
 
 struct GestureInterpreter {
+  FRIEND_TEST(GesturesTest, SimpleTest);
+
  public:
   explicit GestureInterpreter(int version);
   ~GestureInterpreter();
