@@ -55,6 +55,10 @@ struct HardwareProperties {
   float orientation_maximum;
   unsigned short max_finger_cnt; // Max finger slots in one report
   unsigned short max_touch_cnt;  // Max fingers that can be detected at once
+
+  // Whether this is a "Track 5, Report 2" touchpad, which can track up to five
+  // fingers but only report the locations of two. (For more details, see
+  // https://crrev.com/37cccb42e652b50f9e788d90e82252f78c78f1ed)
   unsigned supports_t5r2:1;
   unsigned support_semi_mt:1;
   unsigned is_button_pad:1;
