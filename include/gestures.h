@@ -555,6 +555,8 @@ struct GestureInterpreter {
 
   void TimerCallback(stime_t now, stime_t* timeout);
 
+  void SetCallback(GestureReadyFunction callback, void* client_data);
+  // Deprecated; use SetCallback instead.
   void set_callback(GestureReadyFunction callback,
                     void* client_data);
   void SetTimerProvider(GesturesTimerProvider* tp, void* data);
