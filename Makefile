@@ -51,6 +51,7 @@ TEST_OBJECTS=\
 	$(OBJDIR)/click_wiggle_filter_interpreter_unittest.o \
 	$(OBJDIR)/command_line.o \
 	$(OBJDIR)/filter_interpreter_unittest.o \
+	$(OBJDIR)/finger_merge_filter_interpreter_unittest.o \
 	$(OBJDIR)/finger_metrics_unittest.o \
 	$(OBJDIR)/fling_stop_filter_interpreter_unittest.o \
 	$(OBJDIR)/gestures_unittest.o \
