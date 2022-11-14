@@ -72,6 +72,7 @@ TEST_OBJECTS=\
 	$(OBJDIR)/scaling_filter_interpreter_unittest.o \
 	$(OBJDIR)/sensor_jump_filter_interpreter_unittest.o \
 	$(OBJDIR)/split_correcting_filter_interpreter_unittest.o \
+	$(OBJDIR)/stationary_wiggle_filter_interpreter_unittest.o \
 	$(OBJDIR)/string_util_unittest.o \
 	$(OBJDIR)/stuck_button_inhibitor_filter_interpreter_unittest.o \
 	$(OBJDIR)/t5r2_correcting_filter_interpreter_unittest.o \
