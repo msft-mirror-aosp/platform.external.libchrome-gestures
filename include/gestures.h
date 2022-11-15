@@ -380,10 +380,10 @@ struct Gesture {
   // Create Move/Scroll gesture
 #ifdef GESTURES_INTERNAL
   Gesture() : start_time(0), end_time(0), type(kGestureTypeNull) {}
-  std::string String() const;
   bool operator==(const Gesture& that) const;
   bool operator!=(const Gesture& that) const { return !(*this == that); };
 #endif  // GESTURES_INTERNAL
+  std::string String() const;
   Gesture(const GestureMove&, stime_t start, stime_t end, float dx, float dy)
       : start_time(start), end_time(end), type(kGestureTypeMove) {
     details.move.ordinal_dx = details.move.dx = dx;
