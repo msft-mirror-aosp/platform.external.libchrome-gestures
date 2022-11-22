@@ -59,7 +59,8 @@ struct HardwareProperties {
   float res_x;
   float res_y;
 
-  // The DPI of the screen to which gestures output by the library should be
+  // Deprecated: these values are now ignored. Previously, they specified the
+  // DPI of the screen to which gestures output by the library should be
   // scaled.
   float screen_x_dpi;
   float screen_y_dpi;
