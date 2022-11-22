@@ -169,4 +169,5 @@ cc_test {
        "-Wno-sign-compare",
     ],
     host_supported: false,
+    test_suites: ["general-tests"],
 }
