@@ -59,7 +59,8 @@ struct HardwareProperties {
   float res_x;
   float res_y;
 
-  // The DPI of the screen to which gestures output by the library should be
+  // Deprecated: these values are now ignored. Previously, they specified the
+  // DPI of the screen to which gestures output by the library should be
   // scaled.
   float screen_x_dpi;
   float screen_y_dpi;
@@ -380,10 +381,10 @@ struct Gesture {
   // Create Move/Scroll gesture
 #ifdef GESTURES_INTERNAL
   Gesture() : start_time(0), end_time(0), type(kGestureTypeNull) {}
-  std::string String() const;
   bool operator==(const Gesture& that) const;
   bool operator!=(const Gesture& that) const { return !(*this == that); };
 #endif  // GESTURES_INTERNAL
+  std::string String() const;
   Gesture(const GestureMove&, stime_t start, stime_t end, float dx, float dy)
       : start_time(start), end_time(end), type(kGestureTypeMove) {
     details.move.ordinal_dx = details.move.dx = dx;
