@@ -344,21 +344,38 @@ typedef struct {
   float data[2];
 } GestureMetrics;
 
+// Describes the type of gesture that is being reported.
 enum GestureType {
 #ifdef GESTURES_INTERNAL
   kGestureTypeNull = -1,  // internal to Gestures library only
 #endif  // GESTURES_INTERNAL
+  // No longer used.
   kGestureTypeContactInitiated = 0,
+  // For touchpads, a movement of a single finger on the pad. For mice, a
+  // movement of the whole mouse.
   kGestureTypeMove,
+  // A two-finger scroll gesture on a touchpad. (See kGestureTypeMouseWheel for
+  // the mouse equivalent.)
   kGestureTypeScroll,
+  // A change in the buttons that are currently pressed on the device.
   kGestureTypeButtonsChange,
+  // The start or end of a fling motion, where scrolling should continue after
+  // the user's fingers have left the touchpad.
   kGestureTypeFling,
+  // A movement of three fingers on a touchpad.
   kGestureTypeSwipe,
+  // A movement of two fingers on a touchpad that are primarily moving closer to
+  // or further from each other.
   kGestureTypePinch,
+  // The end of a movement of three fingers on a touchpad.
   kGestureTypeSwipeLift,
+  // Used to report metrics to the client.
   kGestureTypeMetrics,
+  // A movement of four fingers on a touchpad.
   kGestureTypeFourFingerSwipe,
+  // The end of a movement of four fingers on a touchpad.
   kGestureTypeFourFingerSwipeLift,
+  // The movement of a scroll wheel on a mouse.
   kGestureTypeMouseWheel,
 };
 
