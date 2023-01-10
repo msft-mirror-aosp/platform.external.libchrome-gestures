@@ -540,8 +540,10 @@ typedef unsigned char GesturesPropBool;
 
 // These functions create a named property of given type.
 //   data - data used by PropProvider
-//   loc - location of a variable to be updated by PropProvider.
-//         Set to NULL to create a ReadOnly property
+//   loc - location of a variable to be updated by PropProvider
+//         (Chromium calls its own GesturesPropCreate... functions with loc set
+//         to null to create read-only properties, but the Gestures library
+//         itself doesn't, so other clients don't need to support them.)
 //   init - initial value for the property.
 //          If the PropProvider has an alternate configuration source, it may
 //          override this initial value, in which case *loc returns the
