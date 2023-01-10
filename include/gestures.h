@@ -578,12 +578,17 @@ typedef GesturesPropBool (*GesturesPropGetHandler)(void* handler_data);
 // |handler_data| is a local context pointer that can be used by the handler.
 typedef void (*GesturesPropSetHandler)(void* handler_data);
 
-// Register handlers to be called when a GesturesProp is accessed.
-// The get handler, if not NULL, is called immediately before the property's
-// value is to be read.  This gives the library a chance to update its value.
-// The set handler, if not NULL, is called immediately after the property's
-// value is updated.  This can be used to create a property that is used to
-// trigger an action, or to force an update to multiple properties atomically.
+// Register handlers for the client to call when a GesturesProp is accessed.
+//
+// The get handler, if not NULL, should be called immediately before the
+// property's value is to be read. This gives the library a chance to update its
+// value.
+//
+// The set handler, if not NULL, should be called immediately after the
+// property's value is updated. This can be used to create a property that is
+// used to trigger an action, or to force an update to multiple properties
+// atomically.
+//
 // Note: the handlers are called from non-signal/interrupt context
 typedef void (*GesturesPropRegisterHandlers)(void* data, GesturesProp* prop,
                                              void* handler_data,
