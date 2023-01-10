@@ -550,9 +550,9 @@ typedef GesturesProp* (*GesturesPropCreateInt)(void* data, const char* name,
                                                int* loc, size_t count,
                                                const int* init);
 
-typedef GesturesProp* (*GesturesPropCreateShort)(void* data, const char* name,
-                                                 short* loc, size_t count,
-                                                 const short* init);
+// Deprecated: the gestures library no longer uses short gesture properties.
+typedef GesturesProp* (*GesturesPropCreateShort_Deprecated)(
+    void*, const char*, short*, size_t, const short*);
 
 typedef GesturesProp* (*GesturesPropCreateBool)(void* data, const char* name,
                                                 GesturesPropBool* loc,
@@ -593,7 +593,9 @@ typedef void (*GesturesPropFree)(void* data, GesturesProp* prop);
 
 typedef struct GesturesPropProvider {
   GesturesPropCreateInt create_int_fn;
-  GesturesPropCreateShort create_short_fn;
+  // Deprecated: the library no longer uses short gesture properties, so this
+  // function pointer should be null.
+  GesturesPropCreateShort_Deprecated create_short_fn;
   GesturesPropCreateBool create_bool_fn;
   GesturesPropCreateString create_string_fn;
   GesturesPropCreateReal create_real_fn;
