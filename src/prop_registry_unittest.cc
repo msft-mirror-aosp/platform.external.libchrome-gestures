@@ -129,7 +129,7 @@ TEST(PropRegistryTest, PropChangeTest) {
   ActivityLog log(&reg);
   reg.set_activity_log(&log);
 
-  DoubleProperty dp(&reg, "hi", 1234.0, NULL);
+  DoubleProperty dp(&reg, "hi", 1234.0);
   EXPECT_EQ(0, log.size());
   dp.HandleGesturesPropWritten();
   EXPECT_EQ(1, log.size());
