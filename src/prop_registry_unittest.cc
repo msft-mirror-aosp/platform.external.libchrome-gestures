@@ -203,6 +203,11 @@ TEST(PropRegistryTest, SetAtCreateShouldNotifyTest) {
   EXPECT_EQ(0, delegate.call_cnt_);
   reg.SetPropProvider(&mock_gestures_props_provider, NULL);
   EXPECT_EQ(4, delegate.call_cnt_);
+
+  BoolProperty my_bool2(&reg, "MyBool2", 1);
+  EXPECT_EQ(4, delegate.call_cnt_);
+  my_bool2.SetDelegate(&delegate);
+  EXPECT_EQ(5, delegate.call_cnt_);
 }
 
 TEST(PropRegistryTest, DoublePromoteIntTest) {

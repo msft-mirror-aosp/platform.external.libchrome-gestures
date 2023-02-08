@@ -59,6 +59,19 @@ class Property {
   virtual void CreatePropImpl() = 0;
   void DestroyProp();
 
+  // b/253585974
+  // delegate used to get passed as a constructor parameter but that
+  // led to a chance that the delegate was 'this' and setting the
+  // delegate to 'this' in the initializer list allowed the property
+  // creation to use 'this' before it was initialized.  This could
+  // lead to unexpected behavior and if you were lucky to a crash.
+  //
+  // Now the delegate is always NULL on initilization of the property
+  // instance and after the delegate and property are completely
+  // created the user should set the delegate in the constructor
+  // body. This will allow access to this in a safe manner.
+  void SetDelegate(PropertyDelegate* delegate);
+
   const char* name() { return name_; }
   // Returns a newly allocated Value object
   virtual Json::Value NewValue() const = 0;
