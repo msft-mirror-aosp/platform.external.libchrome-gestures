@@ -30,10 +30,10 @@
   } while(false)
 
 #define Log(format, ...) \
-  gestures_log(GESTURES_LOG_INFO, "INFO:%s:%d:" format "\n", \
+  gestures_log(GESTURES_LOG_INFO, "INFO:%s:%d: " format "\n", \
                __FILE__, __LINE__, ## __VA_ARGS__)
 #define Err(format, ...) \
-  gestures_log(GESTURES_LOG_ERROR, "ERROR:%s:%d:" format "\n", \
+  gestures_log(GESTURES_LOG_ERROR, "ERROR:%s:%d: " format "\n", \
                __FILE__, __LINE__, ## __VA_ARGS__)
 
 #define ErrOnce(format, ...) \
