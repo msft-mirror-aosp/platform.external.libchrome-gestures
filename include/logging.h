@@ -36,6 +36,15 @@
   gestures_log(GESTURES_LOG_ERROR, "ERROR:%s:%d:" format "\n", \
                __FILE__, __LINE__, ## __VA_ARGS__)
 
+#define ErrOnce(format, ...) \
+  do { \
+    static bool written = false; \
+    if (!written) { \
+      Err(format, ## __VA_ARGS__); \
+      written = true; \
+    } \
+  } while(false)
+
 #define MTStatSample(key, value, timestamp) \
   gestures_log(GESTURES_LOG_INFO, "MTStat:%f:%s:%s\n", \
                (timestamp), (key), (value))
