@@ -6,7 +6,7 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <vector>
+#include <optional>
 
 #include <gtest/gtest.h>  // For FRIEND_TEST
 
@@ -65,10 +65,7 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
     std::map<short, short> output_ids_;  // input tracking ids -> output
 
     stime_t due_;
-    bool completed_;
-
-    QState* next_;
-    QState* prev_;
+    bool completed_ = false;
   };
 
   void LogVectors();
@@ -111,12 +108,16 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
 
   stime_t ExtraVariableDelay() const;
 
-  class QStateList : public std::list<QState*> {
-  public:
-    QState* at(int offset);
-  } queue_;
+  typedef std::optional<
+            std::reference_wrapper<
+              LookaheadFilterInterpreter::QState
+            >
+          > OptionalRefQState;
 
-  std::vector<QState*> free_list_;
+  class QStateList : public std::list<QState> {
+  public:
+    OptionalRefQState at(int offset);
+  } queue_;
 
   // The last id assigned to a contact (part of drumroll suppression)
   short last_id_;
