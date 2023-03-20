@@ -63,28 +63,16 @@ bool MapContainsKey(const Map& the_map, const Key& the_key) {
 }
 
 // Removes any ids from the map that are not finger ids in hs.
-// This implementation supports returning removed elements for
-// further processing.
-template<typename Data>
-void RemoveMissingIdsFromMap(std::map<short, Data>* the_map,
-                             const HardwareState& hs,
-                             std::map<short, Data>* removed) {
-  removed->clear();
-  for (typename std::map<short, Data>::const_iterator it =
-      the_map->begin(); it != the_map->end(); ++it)
-    if (!hs.GetFingerState((*it).first))
-      (*removed)[it->first] = it->second;
-  for (typename std::map<short, Data>::const_iterator it =
-      removed->begin(); it != removed->end(); ++it)
-    the_map->erase(it->first);
-}
-
-// Removes any ids from the map that are not finger ids in hs.
 template<typename Data>
 void RemoveMissingIdsFromMap(std::map<short, Data>* the_map,
                              const HardwareState& hs) {
   std::map<short, Data> removed;
-  RemoveMissingIdsFromMap(the_map, hs, &removed);
+  for (const auto& [key, value] : *the_map) {
+    if (!hs.GetFingerState(key))
+      removed[key] = value;
+  }
+  for (const auto& [key, value] : removed)
+    the_map->erase(key);
 }
 
 // Removes any ids from the set that are not finger ids in hs.
