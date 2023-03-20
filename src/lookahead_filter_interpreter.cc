@@ -587,24 +587,4 @@ void LookaheadFilterInterpreter::QState::set_state(
   state_.msc_timestamp = new_state.msc_timestamp;
 }
 
-LookaheadFilterInterpreter::OptionalRefQState
-LookaheadFilterInterpreter::QStateList::at(int offset) {
-  // Traverse to the appropriate offset
-  if (offset < 0) {
-    // negative offset is from end to begin
-    for (auto iter = rbegin(); iter != rend(); ++iter) {
-      if (++offset == 0)
-        return LookaheadFilterInterpreter::OptionalRefQState{*iter};
-    }
-  } else {
-    // positive offset is from begin to end
-    for (auto iter = begin(); iter != end(); ++iter, --offset) {
-      if (offset == 0)
-        return LookaheadFilterInterpreter::OptionalRefQState{*iter};
-    }
-  }
-  // Invalid offset
-  return std::nullopt;
-}
-
 }  // namespace gestures

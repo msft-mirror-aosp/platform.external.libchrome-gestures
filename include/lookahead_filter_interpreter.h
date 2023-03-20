@@ -15,6 +15,7 @@
 #include "include/gestures.h"
 #include "include/prop_registry.h"
 #include "include/tracer.h"
+#include "include/util.h"
 
 #ifndef GESTURES_LOOKAHEAD_FILTER_INTERPRETER_H_
 #define GESTURES_LOOKAHEAD_FILTER_INTERPRETER_H_
@@ -34,7 +35,6 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(LookaheadFilterInterpreterTest, SimpleTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, VariableDelayTest);
-  FRIEND_TEST(LookaheadFilterInterpreterTest, QStateListTest);
 
  public:
   LookaheadFilterInterpreter(PropRegistry* prop_reg, Interpreter* next,
@@ -108,15 +108,13 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
 
   stime_t ExtraVariableDelay() const;
 
-  typedef std::optional<
-            std::reference_wrapper<
-              LookaheadFilterInterpreter::QState
-            >
-          > OptionalRefQState;
+  typedef std::list<QState> QStateListType;
+  typedef std::optional<std::reference_wrapper<QState>> OptionalRefQState;
 
-  class QStateList : public std::list<QState> {
-  public:
-    OptionalRefQState at(int offset);
+  struct QStateList : public QStateListType {
+    OptionalRefQState at(int offset) {
+      return ListAt<OptionalRefQState, QStateListType>(*this, offset);
+    }
   } queue_;
 
   // The last id assigned to a contact (part of drumroll suppression)
