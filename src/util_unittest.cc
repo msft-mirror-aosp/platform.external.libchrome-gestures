@@ -21,4 +21,44 @@ TEST(UtilTest, DistSqTest) {
   EXPECT_FLOAT_EQ(DistSqXY(fs[0], 4, 6), 25);
 }
 
+TEST(UtilTest, ListAtTest) {
+  const int kMaxElements = 3;
+  struct element {
+    int x;
+  };
+
+  typedef std::list<element> ElemListType;
+  typedef std::optional<std::reference_wrapper<element>> OptionalRefElem;
+
+  struct ElemList : public ElemListType {
+    OptionalRefElem at(int offset) {
+      return ListAt<OptionalRefElem, ElemListType>(*this, offset);
+    }
+  } list;
+
+  for (auto i = 0; i < kMaxElements; ++i) {
+    auto& elem = list.emplace_back();
+    elem.x = i;
+  }
+  EXPECT_EQ(list.at(-1)->get().x, list.at(list.size() - 1)->get().x);
+
+  for (auto i = 0; i < kMaxElements; ++i) {
+    for (auto j = 0; j < kMaxElements; ++j) {
+      if (i == j) {
+        EXPECT_EQ(list.at(i)->get().x, list.at(j)->get().x);
+        EXPECT_EQ(&(list.at(i)->get()), &(list.at(j)->get()));
+      } else {
+        EXPECT_NE(list.at(i)->get().x, list.at(j)->get().x);
+        EXPECT_NE(&(list.at(i)->get()), &(list.at(j)->get()));
+      }
+    }
+  }
+
+  int list_count = list.size();
+  EXPECT_EQ(list.at(list_count), std::nullopt);
+  EXPECT_NE(list.at(list_count - 1), std::nullopt);
+  EXPECT_EQ(list.at(-list_count - 1), std::nullopt);
+  EXPECT_NE(list.at(-list_count), std::nullopt);
+}
+
 }  // namespace gestures

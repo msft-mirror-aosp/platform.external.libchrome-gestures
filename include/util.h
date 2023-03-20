@@ -5,7 +5,9 @@
 #ifndef GESTURES_UTIL_H_
 #define GESTURES_UTIL_H_
 
+#include <list>
 #include <map>
+#include <optional>
 #include <set>
 
 #include <math.h>
@@ -103,6 +105,26 @@ template<typename Set, typename Elt>
 inline bool SetContainsValue(const Set& the_set,
                              const Elt& elt) {
   return the_set.find(elt) != the_set.end();
+}
+
+template<typename R, typename L>
+R ListAt(L& the_list, int offset) {
+  // Traverse to the appropriate offset
+  if (offset < 0) {
+    // negative offset is from end to begin
+    for (auto iter = the_list.rbegin(); iter != the_list.rend(); ++iter) {
+      if (++offset == 0)
+        return R(*iter);
+    }
+  } else {
+    // positive offset is from begin to end
+    for (auto iter = the_list.begin(); iter != the_list.end(); ++iter) {
+      if (offset-- == 0)
+        return R(*iter);
+    }
+  }
+  // Invalid offset
+  return std::nullopt;
 }
 
 }  // namespace gestures
