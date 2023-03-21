@@ -27,12 +27,9 @@ TEST(UtilTest, ListAtTest) {
     int x;
   };
 
-  typedef std::list<element> ElemListType;
-  typedef std::optional<std::reference_wrapper<element>> OptionalRefElem;
-
-  struct ElemList : public ElemListType {
-    OptionalRefElem at(int offset) {
-      return ListAt<OptionalRefElem, ElemListType>(*this, offset);
+  struct ElemList : public std::list<element> {
+    element& at(int offset) {
+      return ListAt<element>(*this, offset);
     }
   } list;
 
@@ -40,25 +37,49 @@ TEST(UtilTest, ListAtTest) {
     auto& elem = list.emplace_back();
     elem.x = i;
   }
-  EXPECT_EQ(list.at(-1)->get().x, list.at(list.size() - 1)->get().x);
+  EXPECT_EQ(list.at(-1).x, list.at(list.size() - 1).x);
 
   for (auto i = 0; i < kMaxElements; ++i) {
     for (auto j = 0; j < kMaxElements; ++j) {
       if (i == j) {
-        EXPECT_EQ(list.at(i)->get().x, list.at(j)->get().x);
-        EXPECT_EQ(&(list.at(i)->get()), &(list.at(j)->get()));
+        EXPECT_EQ(list.at(i).x, list.at(j).x);
+        EXPECT_EQ(&(list.at(i)), &(list.at(j)));
       } else {
-        EXPECT_NE(list.at(i)->get().x, list.at(j)->get().x);
-        EXPECT_NE(&(list.at(i)->get()), &(list.at(j)->get()));
+        EXPECT_NE(list.at(i).x, list.at(j).x);
+        EXPECT_NE(&(list.at(i)), &(list.at(j)));
       }
     }
   }
+}
 
-  int list_count = list.size();
-  EXPECT_EQ(list.at(list_count), std::nullopt);
-  EXPECT_NE(list.at(list_count - 1), std::nullopt);
-  EXPECT_EQ(list.at(-list_count - 1), std::nullopt);
-  EXPECT_NE(list.at(-list_count), std::nullopt);
+TEST(UtilTest, ListAtDeathForwardTest) {
+  const int kMaxElements = 3;
+
+  struct IntList : public std::list<int> {
+    int& at(int offset) {
+      return ListAt<int>(*this, offset);
+    }
+  } list;
+
+  for (auto i = 0; i < kMaxElements; ++i) {
+    list.emplace_back(i);
+  }
+  EXPECT_DEATH(list.at(kMaxElements+1), "");
+}
+
+TEST(UtilTest, ListAtDeathBackwardTest) {
+  const int kMaxElements = 3;
+
+  struct IntList : public std::list<int> {
+    int& at(int offset) {
+      return ListAt<int>(*this, offset);
+    }
+  } list;
+
+  for (auto i = 0; i < kMaxElements; ++i) {
+    list.emplace_back(i);
+  }
+  EXPECT_DEATH(list.at(-(kMaxElements+1)), "");
 }
 
 }  // namespace gestures

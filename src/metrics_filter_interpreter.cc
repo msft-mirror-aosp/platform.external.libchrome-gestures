@@ -151,9 +151,9 @@ bool MetricsFilterInterpreter::DetectNoisyGround(FingerHistory& history) {
   if (history.size() < 3)
     return false;
 
-  auto current = history.at(-1)->get();
-  auto past_1 = history.at(-2)->get();
-  auto past_2 = history.at(-3)->get();
+  auto current = history.at(-1);
+  auto past_1 = history.at(-2);
+  auto past_2 = history.at(-3);
   // Noise pattern needs to happen in a short period of time
   if (current.timestamp - past_2.timestamp > noisy_ground_time_threshold_.val_)
     return false;

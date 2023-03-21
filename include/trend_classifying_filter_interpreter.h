@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>  // for FRIEND_TEST
 #include <list>
 #include <map>
-#include <optional>
 #include <set>
 
 #include "include/filter_interpreter.h"
@@ -154,15 +153,11 @@ private:
     }
   };
 
-  typedef std::list<KState> KStateListType;
-  typedef std::optional<std::reference_wrapper<KState>> OptionalRefKState;
-
-  struct FingerHistory : public KStateListType {
-    OptionalRefKState at(int offset) {
-      return ListAt<OptionalRefKState, KStateListType>(*this, offset);
+  struct FingerHistory : public std::list<KState> {
+    KState& at(int offset) {
+      return ListAt<KState>(*this, offset);
     }
   };
-
 
   // Trend types for internal use
   enum TrendType {

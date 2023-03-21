@@ -147,11 +147,11 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
     return;
   }
 
-  auto& tail = queue_.at(-1)->get();
+  auto& tail = queue_.at(-1);
   HardwareState* hs = &tail.state_;
-  QState* prev_qs = queue_.size() < 2 ? NULL : &(queue_.at(-2)->get());
+  QState* prev_qs = queue_.size() < 2 ? NULL : &(queue_.at(-2));
   HardwareState* prev_hs = prev_qs ? &prev_qs->state_ : NULL;
-  QState* prev2_qs = queue_.size() < 3 ? NULL : &(queue_.at(-3)->get());
+  QState* prev2_qs = queue_.size() < 3 ? NULL : &(queue_.at(-3));
   HardwareState* prev2_hs = prev2_qs ? &prev2_qs->state_ : NULL;
 
   RemoveMissingIdsFromMap(&tail.output_ids_, *hs);
@@ -352,7 +352,7 @@ void LookaheadFilterInterpreter::TapDownOccurringGesture(stime_t now) {
     return;  // We didn't push a new hardware state now
   // See if latest hwstate has finger that previous doesn't.
   // Get the state_ of back->prev
-  HardwareState& prev_hs = queue_.at(-2)->get().state_;
+  HardwareState& prev_hs = queue_.at(-2).state_;
   if (hs.finger_cnt > prev_hs.finger_cnt) {
     // Finger was added.
     ProduceGesture(Gesture(kGestureFling, prev_hs.timestamp, hs.timestamp,
@@ -388,8 +388,8 @@ short LookaheadFilterInterpreter::NextTrackingId() {
 void LookaheadFilterInterpreter::AttemptInterpolation() {
   if (queue_.size() < 2)
     return;
-  QState& new_node = queue_.at(-1)->get();
-  QState& prev = queue_.at(-2)->get();
+  QState& new_node = queue_.at(-1);
+  QState& prev = queue_.at(-2);
   if (new_node.state_.timestamp - prev.state_.timestamp <
       split_min_period_.val_) {
     return;  // Nodes came in too quickly to need interpolation

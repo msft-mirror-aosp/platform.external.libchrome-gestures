@@ -79,7 +79,7 @@ void TrendClassifyingFilterInterpreter::AddNewStateToBuffer(
   auto& current = history.emplace_back(fs);
   if (history.size() == 1)
     return;
-  auto& previous_end = history.at(-2)->get();
+  auto& previous_end = history.at(-2);
 
   current.DxAxis()->val = current.XAxis()->val - previous_end.XAxis()->val;
   current.DyAxis()->val = current.YAxis()->val - previous_end.YAxis()->val;

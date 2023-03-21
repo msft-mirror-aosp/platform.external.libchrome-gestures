@@ -821,9 +821,9 @@ TEST(LookaheadFilterInterpreterTest, QuickMoveTest) {
 
   // Expecting Quick movement detected and ID correction 5 -> 4.
   wrapper.SyncInterpret(&hs[6], &timeout);
-  EXPECT_EQ(interpreter->queue_.at(-1)->get().fs_[0].tracking_id, 4);
-  EXPECT_EQ(interpreter->queue_.at(-2)->get().fs_[0].tracking_id, 4);
-  EXPECT_EQ(interpreter->queue_.at(-3)->get().fs_[0].tracking_id, 4);
+  EXPECT_EQ(interpreter->queue_.at(-1).fs_[0].tracking_id, 4);
+  EXPECT_EQ(interpreter->queue_.at(-2).fs_[0].tracking_id, 4);
+  EXPECT_EQ(interpreter->queue_.at(-3).fs_[0].tracking_id, 4);
 }
 
 struct QuickSwipeTestInputs {

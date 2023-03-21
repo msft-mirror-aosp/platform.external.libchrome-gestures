@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>  // for FRIEND_TEST
 #include <list>
 #include <map>
-#include <optional>
 
 #include "include/filter_interpreter.h"
 #include "include/finger_metrics.h"
@@ -55,12 +54,10 @@ class MetricsFilterInterpreter : public FilterInterpreter {
 
   // struct for one finger's data of one frame.
   typedef State<FingerState, 3> MState;
-  typedef std::list<MState> MStateListType;
-  typedef std::optional<std::reference_wrapper<MState>> OptionalRefMState;
 
-  struct FingerHistory : public MStateListType {
-    OptionalRefMState at(int offset) {
-      return ListAt<OptionalRefMState, MStateListType>(*this, offset);
+  struct FingerHistory : public std::list<MState> {
+    MState& at(int offset) {
+      return ListAt<MState>(*this, offset);
     }
   };
 

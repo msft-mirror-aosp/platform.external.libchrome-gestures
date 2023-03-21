@@ -6,7 +6,6 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <optional>
 
 #include <gtest/gtest.h>  // For FRIEND_TEST
 
@@ -108,12 +107,9 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
 
   stime_t ExtraVariableDelay() const;
 
-  typedef std::list<QState> QStateListType;
-  typedef std::optional<std::reference_wrapper<QState>> OptionalRefQState;
-
-  struct QStateList : public QStateListType {
-    OptionalRefQState at(int offset) {
-      return ListAt<OptionalRefQState, QStateListType>(*this, offset);
+  struct QStateList : public std::list<QState> {
+    QState& at(int offset) {
+      return ListAt<QState>(*this, offset);
     }
   } queue_;
 
