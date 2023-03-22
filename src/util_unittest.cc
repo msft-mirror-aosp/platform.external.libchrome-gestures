@@ -27,11 +27,7 @@ TEST(UtilTest, ListAtTest) {
     int x;
   };
 
-  struct ElemList : public std::list<element> {
-    element& at(int offset) {
-      return ListAt<element>(*this, offset);
-    }
-  } list;
+  List<element> list;
 
   for (auto i = 0; i < kMaxElements; ++i) {
     auto& elem = list.emplace_back();
@@ -53,13 +49,8 @@ TEST(UtilTest, ListAtTest) {
 }
 
 TEST(UtilTest, ListAtDeathForwardTest) {
+  List<int> list;
   const int kMaxElements = 3;
-
-  struct IntList : public std::list<int> {
-    int& at(int offset) {
-      return ListAt<int>(*this, offset);
-    }
-  } list;
 
   for (auto i = 0; i < kMaxElements; ++i) {
     list.emplace_back(i);
@@ -68,13 +59,8 @@ TEST(UtilTest, ListAtDeathForwardTest) {
 }
 
 TEST(UtilTest, ListAtDeathBackwardTest) {
+  List<int> list;
   const int kMaxElements = 3;
-
-  struct IntList : public std::list<int> {
-    int& at(int offset) {
-      return ListAt<int>(*this, offset);
-    }
-  } list;
 
   for (auto i = 0; i < kMaxElements; ++i) {
     list.emplace_back(i);

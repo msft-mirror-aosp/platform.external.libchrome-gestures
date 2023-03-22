@@ -107,11 +107,7 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
 
   stime_t ExtraVariableDelay() const;
 
-  struct QStateList : public std::list<QState> {
-    QState& at(int offset) {
-      return ListAt<QState>(*this, offset);
-    }
-  } queue_;
+  List<QState> queue_;
 
   // The last id assigned to a contact (part of drumroll suppression)
   short last_id_;

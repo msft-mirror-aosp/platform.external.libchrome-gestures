@@ -153,11 +153,7 @@ private:
     }
   };
 
-  struct FingerHistory : public std::list<KState> {
-    KState& at(int offset) {
-      return ListAt<KState>(*this, offset);
-    }
-  };
+  typedef List<KState> FingerHistory;
 
   // Trend types for internal use
   enum TrendType {

@@ -95,24 +95,27 @@ inline bool SetContainsValue(const Set& the_set,
 }
 
 template<typename Elem>
-Elem& ListAt(std::list<Elem>& the_list, int offset) {
-  // Traverse to the appropriate offset
-  if (offset < 0) {
-    // negative offset is from end to begin
-    for (auto iter = the_list.rbegin(); iter != the_list.rend(); ++iter) {
-      if (++offset == 0)
-        return *iter;
+class List : public std::list<Elem> {
+public:
+  Elem& at(int offset) {
+    // Traverse to the appropriate offset
+    if (offset < 0) {
+      // negative offset is from end to begin
+      for (auto iter = this->rbegin(); iter != this->rend(); ++iter) {
+        if (++offset == 0)
+          return *iter;
+      }
+    } else {
+      // positive offset is from begin to end
+      for (auto iter = this->begin(); iter != this->end(); ++iter) {
+        if (offset-- == 0)
+          return *iter;
+      }
     }
-  } else {
-    // positive offset is from begin to end
-    for (auto iter = the_list.begin(); iter != the_list.end(); ++iter) {
-      if (offset-- == 0)
-        return *iter;
-    }
+    // Invalid offset
+    abort();
   }
-  // Invalid offset
-  abort();
-}
+};
 
 }  // namespace gestures
 

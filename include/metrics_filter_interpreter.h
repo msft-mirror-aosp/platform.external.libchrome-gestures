@@ -54,12 +54,7 @@ class MetricsFilterInterpreter : public FilterInterpreter {
 
   // struct for one finger's data of one frame.
   typedef State<FingerState, 3> MState;
-
-  struct FingerHistory : public std::list<MState> {
-    MState& at(int offset) {
-      return ListAt<MState>(*this, offset);
-    }
-  };
+  typedef List<MState> FingerHistory;
 
   // Push the new data into the buffer.
   void AddNewStateToBuffer(FingerHistory& history,
