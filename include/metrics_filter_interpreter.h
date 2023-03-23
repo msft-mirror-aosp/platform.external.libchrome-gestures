@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <gtest/gtest.h>  // for FRIEND_TEST
-#include <list>
 #include <map>
 
 #include "include/filter_interpreter.h"

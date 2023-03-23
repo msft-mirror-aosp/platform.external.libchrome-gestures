@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 #include <gtest/gtest.h>  // for FRIEND_TEST
-#include <list>
 #include <map>
-#include <set>
 
 #include "include/filter_interpreter.h"
 #include "include/finger_metrics.h"
