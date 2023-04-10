@@ -55,7 +55,8 @@ struct HardwareProperties {
   float right;
   // The maximum Y coordinate that the device can report.
   float bottom;
-  // The resolutions of the X and Y axes, in units per mm.
+  // The resolutions of the X and Y axes, in units per mm. Set to 0 if the
+  // resolution is unknown.
   float res_x;
   float res_y;
 
@@ -104,15 +105,6 @@ struct HardwareProperties {
   std::string String() const;
 #endif  // __cplusplus
 };
-
-// position is the (x,y) cartesian coord of the finger on the trackpad.
-// touch_major/minor are the large/small radii of the ellipse of the touching
-// finger. width_major/minor are also radii, but of the finger itself,
-// including a little bit that isn't touching. So, width* is generally a tad
-// larger than touch*.
-// tracking_id: If a finger is the same physical finger across two
-// consecutive frames, it must have the same tracking id; if it's a different
-// finger, it may (should) have a different tracking id.
 
 // Warp: If a finger has the 'warp' flag set for an axis, it means that while
 // the finger may have moved, it should not cause any motion in that direction.
@@ -167,16 +159,27 @@ struct HardwareProperties {
 #define GESTURES_FINGER_WARP_Y    (GESTURES_FINGER_WARP_Y_NON_MOVE | \
                                    GESTURES_FINGER_WARP_Y_MOVE)
 
-// Describes a single contact on a touch surface. Unless otherwise noted, the
-// fields have the same meaning as the equivalent ABS_MT_... axis in the Linux
-// evdev protocol.
+// Describes a single contact on a touch surface. Generally, the fields have the
+// same meaning as the equivalent ABS_MT_... axis in the Linux evdev protocol.
 struct FingerState {
+  // The large and small radii of the ellipse of the finger touching the pad.
   float touch_major, touch_minor;
+
+  // The large and small radii of the ellipse of the finger, including parts
+  // that are hovering over the pad but not quite touching. Devices normally
+  // don't report these values, in which case they should be left at 0.
   float width_major, width_minor;
   float pressure;
   float orientation;
+
   float position_x;
   float position_y;
+
+  // A number that identifies a single physical finger across consecutive
+  // frames. If a finger is the same physical finger across two consecutive
+  // frames, it must have the same tracking ID; if it's a different finger, it
+  // should have a different tracking ID. It should be ≥ 0 (see documentation
+  // comment for HardwareState::fingers).
   short tracking_id;
 
   // A bit field of flags that are used internally by the library. (See the
@@ -228,8 +231,13 @@ struct HardwareState {
   unsigned short finger_cnt;
   // The number of fingers touching the pad, which may be more than finger_cnt.
   unsigned short touch_cnt;
-  // A pointer to finger_cnt FingerState structs representing the contacts
-  // currently being tracked.
+  // A pointer to an array of FingerState structs with finger_cnt entries,
+  // representing the contacts currently being tracked. The order in which
+  // FingerStates appear need not be stable between HardwareStates — only the
+  // tracking ID is used to track individual contacts over time. Accordingly,
+  // when a finger is lifted from the pad (and therefore its ABS_MT_TRACKING_ID
+  // becomes -1), the client should simply stop including it in this array,
+  // rather than including a final FingerState for it.
   struct FingerState* fingers;
 
   // Mouse axes, which have the same meanings as the Linux evdev axes of the
@@ -261,13 +269,23 @@ struct HardwareState {
 // the ordinal_* fields.
 
 typedef struct {
-  float dx, dy;
+  // The movement in the X axis. Positive values indicate motion to the right.
+  float dx;
+  // The movement in the Y axis. Positive values indicate downwards motion.
+  float dy;
   float ordinal_dx, ordinal_dy;
 } GestureMove;
 
 // Represents scroll gestures on a touch device.
 typedef struct{
-  float dx, dy;
+  // The scroll movement in the X axis. Unlike with move gestures, *negative*
+  // values indicate the fingers moving to the right, unless the "Australian
+  // Scrolling" or "Invert Scrolling" properties are set.
+  float dx;
+  // The scroll movement in the Y axis. Unlike with move gestures, *negative*
+  // values indicate the fingers moving downwards, unless the "Australian
+  // Scrolling" or "Invert Scrolling" properties are set.
+  float dy;
   float ordinal_dx, ordinal_dy;
   // If set, stop_fling means that this scroll should stop flinging, thus
   // if an interpreter suppresses it for any reason (e.g., rounds the size
@@ -293,19 +311,39 @@ typedef struct {
 } GestureButtonsChange;
 
 typedef struct {
-  // fling velocity (valid when fling_state is GESTURES_FLING_START):
-  float vx, vy;
+  // The fling velocity in the X axis, only valid when fling_state is
+  // GESTURES_FLING_START. Unlike with move gestures, *negative* values indicate
+  // the fingers moving to the right, unless the "Australian Scrolling" or
+  // "Invert Scrolling" properties are set.
+  float vx;
+  // The fling velocity in the Y axis, only valid when fling_state is
+  // GESTURES_FLING_START. Unlike with move gestures, *negative* values indicate
+  // the fingers moving downwards, unless the "Australian Scrolling" or "Invert
+  // Scrolling" properties are set.
+  float vy;
   float ordinal_vx, ordinal_vy;
   unsigned fling_state:1;  // GESTURES_FLING_START or GESTURES_FLING_TAP_DOWN
 } GestureFling;
 
 typedef struct {
-  float dx, dy;
+  // The swipe movement in the X axis. Positive values indicate motion to the
+  // right.
+  float dx;
+  // The swipe movement in the Y axis. Unlike with move gestures, *negative*
+  // values indicate downwards motion, unless the "Australian Scrolling"
+  // property is set.
+  float dy;
   float ordinal_dx, ordinal_dy;
 } GestureSwipe;
 
 typedef struct {
-  float dx, dy;
+  // The swipe movement in the X axis. Positive values indicate motion to the
+  // right.
+  float dx;
+  // The swipe movement in the Y axis. Unlike with move gestures, *negative*
+  // values indicate downwards motion, unless the "Australian Scrolling"
+  // property is set.
+  float dy;
   float ordinal_dx, ordinal_dy;
 } GestureFourFingerSwipe;
 
