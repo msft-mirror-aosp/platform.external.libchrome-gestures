@@ -11,9 +11,9 @@
 #include "include/filter_interpreter.h"
 #include "include/finger_metrics.h"
 #include "include/gestures.h"
-#include "include/list.h"
 #include "include/prop_registry.h"
 #include "include/tracer.h"
+#include "include/util.h"
 
 #ifndef GESTURES_LOOKAHEAD_FILTER_INTERPRETER_H_
 #define GESTURES_LOOKAHEAD_FILTER_INTERPRETER_H_
@@ -33,6 +33,7 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(LookaheadFilterInterpreterTest, SimpleTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, VariableDelayTest);
+
  public:
   LookaheadFilterInterpreter(PropRegistry* prop_reg, Interpreter* next,
                              Tracer* tracer);
@@ -62,10 +63,7 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
     std::map<short, short> output_ids_;  // input tracking ids -> output
 
     stime_t due_;
-    bool completed_;
-
-    QState* next_;
-    QState* prev_;
+    bool completed_ = false;
   };
 
   void LogVectors();
@@ -109,7 +107,6 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
   stime_t ExtraVariableDelay() const;
 
   List<QState> queue_;
-  List<QState> free_list_;
 
   // The last id assigned to a contact (part of drumroll suppression)
   short last_id_;
