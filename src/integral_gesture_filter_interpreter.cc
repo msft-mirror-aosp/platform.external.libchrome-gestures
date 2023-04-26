@@ -36,18 +36,15 @@ void IntegralGestureFilterInterpreter::SyncInterpretImpl(
 
 void IntegralGestureFilterInterpreter::HandleTimerImpl(
     stime_t now, stime_t *timeout) {
+  stime_t next_timeout;
   if (ShouldCallNextTimer(remainder_reset_deadline_)) {
     if (next_timer_deadline_ > now) {
       Err("Spurious callback. now: %f, next deadline: %f",
           now, next_timer_deadline_);
       return;
     }
-
-    stime_t next_timeout = NO_DEADLINE;
+    next_timeout = NO_DEADLINE;
     next_->HandleTimer(now, &next_timeout);
-    *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
-                                                  remainder_reset_deadline_,
-                                                  next_timeout);
   } else {
     if (remainder_reset_deadline_ > now) {
       Err("Spurious callback. now: %f, remainder reset deadline: %f",
@@ -59,13 +56,14 @@ void IntegralGestureFilterInterpreter::HandleTimerImpl(
           hscroll_remainder_ = vscroll_remainder_ = 0.0;
 
     remainder_reset_deadline_ = NO_DEADLINE;
-    stime_t next_timeout =
-      next_timer_deadline_ == NO_DEADLINE || next_timer_deadline_ <= now ?
-      NO_DEADLINE : next_timer_deadline_ - now;
-    *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
-                                                  remainder_reset_deadline_,
-                                                  next_timeout);
+    next_timeout = next_timer_deadline_ == NO_DEADLINE ||
+                   next_timer_deadline_ <= now
+                      ? NO_DEADLINE
+                      : next_timer_deadline_ - now;
   }
+  *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
+                                                remainder_reset_deadline_,
+                                                next_timeout);
 }
 
 namespace {
