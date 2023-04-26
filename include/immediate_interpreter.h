@@ -641,7 +641,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   bool sent_button_down_;
 
   // If we haven't sent a button down by this time, send one
-  stime_t button_down_timeout_;
+  stime_t button_down_deadline_;
 
   // When fingers change, we record the time
   stime_t changed_time_;

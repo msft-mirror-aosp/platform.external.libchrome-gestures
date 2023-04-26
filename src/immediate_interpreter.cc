@@ -984,7 +984,7 @@ ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
       button_type_(0),
       finger_button_click_(this),
       sent_button_down_(false),
-      button_down_timeout_(0.0),
+      button_down_deadline_(0.0),
       started_moving_time_(-1.0),
       gs_changed_time_(-1.0),
       finger_leave_time_(-1.0),
@@ -3045,25 +3045,25 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
   if (phys_down_edge) {
     finger_seen_shortly_after_button_down_ = false;
     sent_button_down_ = false;
-    button_down_timeout_ = hwstate.timestamp + button_evaluation_timeout;
+    button_down_deadline_ = hwstate.timestamp + button_evaluation_timeout;
   }
 
   // If we haven't seen a finger on the pad shortly after the click, do nothing
   if (!finger_seen_shortly_after_button_down_ &&
-      hwstate.timestamp <= button_down_timeout_)
+      hwstate.timestamp <= button_down_deadline_)
     finger_seen_shortly_after_button_down_ = (hwstate.finger_cnt > 0);
   if (!finger_seen_shortly_after_button_down_ &&
       !zero_finger_click_enable_.val_)
     return;
 
   if (!sent_button_down_) {
-    stime_t button_down_time = button_down_timeout_ -
+    stime_t button_down_time = button_down_deadline_ -
                                button_evaluation_timeout;
     button_type_ = EvaluateButtonType(hwstate, button_down_time);
 
     if (!hwstate.SameFingersAs(*state_buffer_.Get(0))) {
       // Fingers have changed since last state, reset timeout
-      button_down_timeout_ = hwstate.timestamp + button_finger_timeout;
+      button_down_deadline_ = hwstate.timestamp + button_finger_timeout;
     }
 
     // button_up before button_evaluation_timeout expired.
@@ -3071,7 +3071,7 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
     if (button_type_ == GESTURES_BUTTON_NONE)
       button_type_ = prev_button_down;
     // Send button down if timeout has been reached or button up happened
-    if (button_down_timeout_ <= hwstate.timestamp ||
+    if (button_down_deadline_ <= hwstate.timestamp ||
         phys_up_edge) {
       // Send button down
       if (result_.type == kGestureTypeButtonsChange)
@@ -3084,7 +3084,7 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
                         false); // is_tap
       sent_button_down_ = true;
     } else if (timeout) {
-      *timeout = button_down_timeout_ - hwstate.timestamp;
+      *timeout = button_down_deadline_ - hwstate.timestamp;
     }
   }
   if (phys_up_edge) {
@@ -3100,7 +3100,7 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
       result_.details.buttons.up = button_type_;
     // Reset button state
     button_type_ = GESTURES_BUTTON_NONE;
-    button_down_timeout_ = 0;
+    button_down_deadline_ = 0;
     sent_button_down_ = false;
     // When a buttons_up event is generated, we need to reset the
     // finger_leave_time_ in order to defer any gesture generation
