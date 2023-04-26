@@ -17,7 +17,7 @@ namespace gestures {
 HapticButtonGeneratorFilterInterpreter::HapticButtonGeneratorFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
-     release_suppress_factor_(1.0),
+      release_suppress_factor_(1.0),
       active_gesture_(false),
       active_gesture_timeout_(0.1),
       active_gesture_deadline_(NO_DEADLINE),
@@ -176,11 +176,11 @@ void HapticButtonGeneratorFilterInterpreter::HandleTimerImpl(
     // missed the gesture ending event, to prevent a state where the button is
     // stuck down.
     active_gesture_ = false;
-
     active_gesture_deadline_ = NO_DEADLINE;
-    next_timeout =
-      next_timer_deadline_ == NO_DEADLINE || next_timer_deadline_ <= now ?
-      NO_DEADLINE : next_timer_deadline_ - now;
+    next_timeout = next_timer_deadline_ == NO_DEADLINE ||
+                   next_timer_deadline_ <= now
+                      ? NO_DEADLINE
+                      : next_timer_deadline_ - now;
   }
   *timeout = SetNextDeadlineAndReturnTimeoutVal(now,
                                                 active_gesture_deadline_,
