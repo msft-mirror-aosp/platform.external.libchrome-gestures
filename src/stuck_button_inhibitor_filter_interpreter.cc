@@ -28,7 +28,10 @@ void StuckButtonInhibitorFilterInterpreter::SyncInterpretImpl(
 
 void StuckButtonInhibitorFilterInterpreter::HandleTimerImpl(
     stime_t now, stime_t* timeout) {
-  if (!next_expects_timer_) {
+  stime_t next_timeout = NO_DEADLINE;
+  if (next_expects_timer_) {
+    next_->HandleTimer(now, &next_timeout);
+  } else {
     if (!sent_buttons_down_) {
       Err("Bug: got callback, but no gesture to send.");
       return;
@@ -40,8 +43,6 @@ void StuckButtonInhibitorFilterInterpreter::HandleTimerImpl(
       sent_buttons_down_ = 0;
     }
   }
-  stime_t next_timeout = NO_DEADLINE;
-  next_->HandleTimer(now, &next_timeout);
   HandleTimeouts(next_timeout, timeout);
 }
 
