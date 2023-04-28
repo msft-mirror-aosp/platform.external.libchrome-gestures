@@ -22,8 +22,8 @@ static const stime_t kMaxDelay = 0.09;  // 90ms
 LookaheadFilterInterpreter::LookaheadFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
     : FilterInterpreter(NULL, next, tracer, false),
-      last_id_(0), max_fingers_per_hwstate_(0), interpreter_due_(-1.0),
-      last_interpreted_time_(-1.0),
+      last_id_(0), max_fingers_per_hwstate_(0),
+      interpreter_due_deadline_(-1.0), last_interpreted_time_(-1.0),
       min_nonsuppress_speed_(prop_reg, "Input Queue Min Nonsuppression Speed",
                              200.0),
       min_delay_(prop_reg, "Input Queue Delay", 0.0),
@@ -48,34 +48,40 @@ void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   // Keep track of where the last node is in the current queue_
   auto const queue_was_not_empty = !queue_.empty();
   QState* old_back_node = queue_was_not_empty ? &queue_.back() : nullptr;
+
   // Allocate and initialize a new node on the end of the queue_
   auto& new_node = queue_.emplace_back(hwprops_->max_finger_cnt);
-  new_node.set_state(*hwstate);
+  new_node.state_.DeepCopy(*hwstate, hwprops_->max_finger_cnt);
   double delay = max(0.0, min<stime_t>(kMaxDelay, min_delay_.val_));
   new_node.due_ = hwstate->timestamp + delay;
-  if (queue_was_not_empty)
+
+  if (queue_was_not_empty) {
     new_node.output_ids_ = old_back_node->output_ids_;
-  // At this point, if ExtraVariableDelay() > 0, old_back_node.due_ may have
-  // ExtraVariableDelay() applied, but new_node.due_ does not, yet.
-  if (queue_was_not_empty &&
-      (old_back_node->due_ - new_node.due_ > ExtraVariableDelay())) {
-    Err("Clock changed backwards. Flushing queue.");
-    stime_t next_timeout = NO_DEADLINE;
-    auto q_node_iter = queue_.begin();
-    do {
-      if (!(*q_node_iter).completed_)
-        next_->SyncInterpret(&(*q_node_iter).state_, &next_timeout);
-      ++q_node_iter;
-      queue_.pop_front();
-    } while (queue_.size() > 1);
-    interpreter_due_ = -1.0;
-    last_interpreted_time_ = -1.0;
+
+    // At this point, if ExtraVariableDelay() > 0, old_back_node.due_ may have
+    // ExtraVariableDelay() applied, but new_node.due_ does not, yet.
+    if (old_back_node->due_ - new_node.due_ > ExtraVariableDelay()) {
+      Err("Clock changed backwards. Flushing queue.");
+      stime_t next_timeout = NO_DEADLINE;
+      auto q_node_iter = queue_.begin();
+      do {
+        if (!q_node_iter->completed_)
+          next_->SyncInterpret(&q_node_iter->state_, &next_timeout);
+        ++q_node_iter;
+        queue_.pop_front();
+      } while (queue_.size() > 1);
+      interpreter_due_deadline_ = -1.0;
+      last_interpreted_time_ = -1.0;
+    }
   }
+
   AssignTrackingIds();
   AttemptInterpolation();
-  UpdateInterpreterDue(interpreter_due_ < 0.0 ?
-                       interpreter_due_ : interpreter_due_ + hwstate->timestamp,
-                       hwstate->timestamp, timeout);
+
+  // Update the timeout and interpreter_due_deadline_ based on above processing
+  UpdateInterpreterDue(interpreter_due_deadline_, hwstate->timestamp, timeout);
+
+  // Make sure to handle any state expiration processing that is needed
   HandleTimerImpl(hwstate->timestamp, timeout);
 
   // Copy finger flags for upstream filters.
@@ -397,8 +403,6 @@ void LookaheadFilterInterpreter::AttemptInterpolation() {
   if (!prev.state_.SameFingersAs(new_node.state_))
     return;
   auto node = QState(hwprops_->max_finger_cnt);
-  node.state_.fingers = node.fs_.get();
-  node.completed_ = false;
   Interpolate(prev.state_, new_node.state_, &node.state_);
 
   double delay = max(0.0, min<stime_t>(kMaxDelay, min_delay_.val_));
@@ -412,22 +416,30 @@ void LookaheadFilterInterpreter::AttemptInterpolation() {
 
 void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
                                                  stime_t* timeout) {
-  TapDownOccurringGesture(now);
   stime_t next_timeout = NO_DEADLINE;
 
+  // Determine if a FlingTapDown gesture needs to be produced
+  TapDownOccurringGesture(now);
+
+  // The queue_ can have multiple nodes that are due_, so look for all
   while (true) {
-    if (interpreter_due_ > 0.0) {
-      if (interpreter_due_ > now) {
-        next_timeout = interpreter_due_ - now;
+    if (interpreter_due_deadline_ > 0.0) {
+      // Previously determined we have an expired node
+      if (interpreter_due_deadline_ > now) {
+        next_timeout = interpreter_due_deadline_ - now;
         break;  // Spurious callback
       }
-      next_timeout = NO_DEADLINE;
+
+      // Mark that we interpreted and propagate the next_ HandleTimer
       last_interpreted_time_ = now;
+      next_timeout = NO_DEADLINE;
       next_->HandleTimer(now, &next_timeout);
     } else {
+      // No previous detection of an expired node
       if (queue_.empty())
         break;
-      // Get next uncompleted and overdue hwstate
+
+      // Get next uncompleted and overdue node
       auto node = &queue_.back();
       for (auto& elem : queue_) {
         if (!elem.completed_) {
@@ -437,7 +449,10 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
       }
       if (node->completed_ || node->due_ > now)
         break;
-      next_timeout = NO_DEADLINE;
+
+      // node has not completed and is due.  Mark that we interpreted,
+      // copy the hwstate back out of the node and propagate the next_
+      // SyncInterpret
       last_interpreted_time_ = node->state_.timestamp;
       const size_t finger_cnt = node->state_.finger_cnt;
       FingerState fs_copy[std::max(finger_cnt,(size_t)1)];
@@ -457,6 +472,7 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
         node->state_.rel_hwheel,
         node->state_.msc_timestamp,
       };
+      next_timeout = NO_DEADLINE;
       next_->SyncInterpret(&hs_copy, &next_timeout);
 
       // Clear previously completed nodes, but keep at least two nodes.
@@ -530,11 +546,11 @@ void LookaheadFilterInterpreter::UpdateInterpreterDue(
     break;
   }
 
-  interpreter_due_ = -1.0;
+  interpreter_due_deadline_ = -1.0;
   if (new_interpreter_timeout >= 0.0 &&
       (new_interpreter_timeout < next_hwstate_timeout ||
        next_hwstate_timeout == -DBL_MAX)) {
-    interpreter_due_ = new_interpreter_timeout + now;
+    interpreter_due_deadline_ = new_interpreter_timeout + now;
     *timeout = new_interpreter_timeout;
   } else if (next_hwstate_timeout > -DBL_MAX) {
     *timeout = next_hwstate_timeout <= 0.0 ? NO_DEADLINE : next_hwstate_timeout;
@@ -564,27 +580,6 @@ LookaheadFilterInterpreter::QState::QState(unsigned short max_fingers)
     : max_fingers_(max_fingers) {
   fs_.reset(new FingerState[max_fingers]);
   state_.fingers = fs_.get();
-}
-
-void LookaheadFilterInterpreter::QState::set_state(
-    const HardwareState& new_state) {
-  state_.timestamp = new_state.timestamp;
-  state_.buttons_down = new_state.buttons_down;
-  state_.touch_cnt = new_state.touch_cnt;
-  unsigned short copy_count = new_state.finger_cnt;
-  if (new_state.finger_cnt > max_fingers_) {
-    Err("State with too many fingers! (%u vs %u)",
-        new_state.finger_cnt,
-        max_fingers_);
-    copy_count = max_fingers_;
-  }
-  state_.finger_cnt = copy_count;
-  std::copy(new_state.fingers, new_state.fingers + copy_count, state_.fingers);
-  state_.rel_x = new_state.rel_x;
-  state_.rel_y = new_state.rel_y;
-  state_.rel_wheel = new_state.rel_wheel;
-  state_.rel_hwheel = new_state.rel_hwheel;
-  state_.msc_timestamp = new_state.msc_timestamp;
 }
 
 }  // namespace gestures

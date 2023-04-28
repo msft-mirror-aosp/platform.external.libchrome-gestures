@@ -113,7 +113,8 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
 
   unsigned short max_fingers_per_hwstate_;
 
-  stime_t interpreter_due_;
+  // Last detected due_ time as an absolute deadline
+  stime_t interpreter_due_deadline_;
 
   // We want to present time to next_ in a monotonically increasing manner,
   // so this keeps track of the most recent timestamp we've given next_.
