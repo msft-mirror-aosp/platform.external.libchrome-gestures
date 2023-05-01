@@ -36,6 +36,7 @@ class TimestampFilterInterpreter : public FilterInterpreter {
 
  protected:
   virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
 
  private:
 
@@ -79,6 +80,9 @@ class TimestampFilterInterpreter : public FilterInterpreter {
   // adjustment by this interpreter. When contact begins this will be zero, but
   // the two clocks may get out of sync by a small amount as time goes on
   stime_t skew_;
+
+  // Maximum skew_ since the last reset.
+  stime_t max_skew_;
 
   // If we don't have a reliable timestamp, we use this as the timestamp delta.
   DoubleProperty fake_timestamp_delta_;

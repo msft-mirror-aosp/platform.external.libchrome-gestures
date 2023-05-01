@@ -19,6 +19,7 @@ TimestampFilterInterpreter::TimestampFilterInterpreter(
       fake_timestamp_(-1.0),
       fake_timestamp_max_divergence_(0.1),
       skew_(0.0),
+      max_skew_(0.0),
       fake_timestamp_delta_(prop_reg, "Fake Timestamp Delta", 0.0) {
   InitName();
 }
@@ -39,11 +40,13 @@ void TimestampFilterInterpreter::ChangeTimestampDefault(
       hwstate->msc_timestamp == 0.0 ||
       hwstate->msc_timestamp < prev_msc_timestamp_) {
     msc_timestamp_offset_ = hwstate->timestamp - hwstate->msc_timestamp;
+    max_skew_ = 0.0;
   }
   prev_msc_timestamp_ = hwstate->msc_timestamp;
 
   stime_t new_timestamp = hwstate->msc_timestamp + msc_timestamp_offset_;
   skew_ = new_timestamp - hwstate->timestamp;
+  max_skew_ = std::max(max_skew_, skew_);
   hwstate->timestamp = new_timestamp;
 
   hwstate->msc_timestamp = 0.0;
@@ -53,11 +56,21 @@ void TimestampFilterInterpreter::ChangeTimestampUsingFake(
     HardwareState* hwstate) {
   fake_timestamp_ += fake_timestamp_delta_.val_;
   if (fabs(fake_timestamp_ - hwstate->timestamp) >
-      fake_timestamp_max_divergence_)
+      fake_timestamp_max_divergence_) {
     fake_timestamp_ = hwstate->timestamp;
+    max_skew_ = 0.0;
+  }
 
   skew_ = fake_timestamp_ - hwstate->timestamp;
+  max_skew_ = std::max(max_skew_, skew_);
   hwstate->timestamp = fake_timestamp_;
+}
+
+void TimestampFilterInterpreter::HandleTimerImpl(stime_t now,
+                                                 stime_t* timeout) {
+  // Adjust the timestamp by the largest skew_ since reset. This ensures that
+  // the callback isn't ignored because it looks like it's coming too early.
+  next_->HandleTimer(now + max_skew_, timeout);
 }
 
 void TimestampFilterInterpreter::ConsumeGesture(const Gesture& gs) {

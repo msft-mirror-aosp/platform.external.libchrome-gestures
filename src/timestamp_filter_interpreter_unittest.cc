@@ -17,6 +17,11 @@ class TimestampFilterInterpreterTestInterpreter : public Interpreter {
  public:
   TimestampFilterInterpreterTestInterpreter()
       : Interpreter(NULL, NULL, false) {}
+  virtual void HandleTimer(stime_t now, stime_t* timeout) {
+    // For tests, use timeout to return the adjusted timestamp.
+    *timeout = now;
+  }
+
 };
 
 static HardwareState make_hwstate_times(stime_t timestamp,
@@ -43,6 +48,12 @@ TEST(TimestampFilterInterpreterTest, SimpleTest) {
     wrapper.SyncInterpret(&hs[i], NULL);
     EXPECT_EQ(hs[i].timestamp, expected_timestamps[i]);
   }
+
+  stime_t adjusted_timestamp = 0.0;
+  wrapper.HandleTimer(2.0, &adjusted_timestamp);
+
+  // Should be adjusted by the maximum skew between timestamps.
+  EXPECT_FLOAT_EQ(adjusted_timestamp, 2.002);
 }
 
 TEST(TimestampFilterInterpreterTest, NoMscTimestampTest) {
@@ -63,6 +74,11 @@ TEST(TimestampFilterInterpreterTest, NoMscTimestampTest) {
     wrapper.SyncInterpret(&hs[i], NULL);
     EXPECT_EQ(hs[i].timestamp, expected_timestamp);
   }
+
+  stime_t adjusted_timestamp = 0.0;
+  wrapper.HandleTimer(2.0, &adjusted_timestamp);
+
+  EXPECT_FLOAT_EQ(adjusted_timestamp, 2.0);
 }
 
 TEST(TimestampFilterInterpreterTest, MscTimestampResetTest) {
@@ -75,22 +91,29 @@ TEST(TimestampFilterInterpreterTest, MscTimestampResetTest) {
     make_hwstate_times(1.000, 0.000),
     make_hwstate_times(1.010, 0.012),
     make_hwstate_times(1.020, 0.018),
-    make_hwstate_times(1.030, 0.031),
+    make_hwstate_times(1.030, 0.035),
     make_hwstate_times(3.000, 0.000),  // msc_timestamp reset to 0
     make_hwstate_times(3.010, 0.008),
     make_hwstate_times(3.020, 0.020),
-    make_hwstate_times(3.030, 0.035),
+    make_hwstate_times(3.030, 0.031),
   };
 
   stime_t expected_timestamps[] = {
-    1.000, 1.012, 1.018, 1.031,
-    3.000, 3.008, 3.020, 3.035
+    1.000, 1.012, 1.018, 1.035,
+    3.000, 3.008, 3.020, 3.031
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     wrapper.SyncInterpret(&hs[i], NULL);
     EXPECT_EQ(hs[i].timestamp, expected_timestamps[i]);
   }
+
+  stime_t adjusted_timestamp = 0.0;
+  wrapper.HandleTimer(4.0, &adjusted_timestamp);
+
+  // Should be adjusted by the maximum skew between timestamps, but only since
+  // the last reset.
+  EXPECT_FLOAT_EQ(adjusted_timestamp, 4.001);
 }
 
 TEST(TimestampFilterInterpreterTest, FakeTimestampTest) {
@@ -114,6 +137,12 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampTest) {
     wrapper.SyncInterpret(&hs[i], NULL);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
+
+  stime_t adjusted_timestamp = 0.0;
+  wrapper.HandleTimer(2.0, &adjusted_timestamp);
+
+  // Should be adjusted by the maximum skew between timestamps.
+  EXPECT_FLOAT_EQ(adjusted_timestamp, 2.012);
 }
 
 TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest) {
@@ -131,7 +160,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest) {
     make_hwstate_times(1.031, 0.001),
     make_hwstate_times(2.000, 6.552),
     make_hwstate_times(2.002, 6.553),
-    make_hwstate_times(2.008, 0.002),
+    make_hwstate_times(2.011, 0.002),
     make_hwstate_times(2.031, 0.001),
   };
 
@@ -144,6 +173,13 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest) {
     wrapper.SyncInterpret(&hs[i], NULL);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
+
+  stime_t adjusted_timestamp = 0.0;
+  wrapper.HandleTimer(3.0, &adjusted_timestamp);
+
+  // Should be adjusted by the maximum skew between timestamps, but only since
+  // the last reset.
+  EXPECT_FLOAT_EQ(adjusted_timestamp, 3.009);
 }
 
 TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest) {
@@ -163,7 +199,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest) {
     make_hwstate_times(1.004, 6.552),
     make_hwstate_times(1.005, 6.553),
     make_hwstate_times(1.006, 0.002),
-    make_hwstate_times(1.007, 6.552),
+    make_hwstate_times(1.009, 6.552),
   };
 
   stime_t expected_timestamps[] = {
@@ -175,5 +211,12 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest) {
     wrapper.SyncInterpret(&hs[i], NULL);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
+
+  stime_t adjusted_timestamp = 0.0;
+  wrapper.HandleTimer(2.0, &adjusted_timestamp);
+
+  // Should be adjusted by the maximum skew between timestamps, but only since
+  // the last reset.
+  EXPECT_FLOAT_EQ(adjusted_timestamp, 2.025);
 }
 }  // namespace gestures
