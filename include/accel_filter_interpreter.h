@@ -27,6 +27,8 @@ class AccelFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(AccelFilterInterpreterTest, CustomAccelTest);
   FRIEND_TEST(AccelFilterInterpreterTest, SimpleTest);
   FRIEND_TEST(AccelFilterInterpreterTest, TimingTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, NotSmoothingTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, SmoothingTest);
   FRIEND_TEST(AccelFilterInterpreterTest, TinyMoveTest);
   FRIEND_TEST(AccelFilterInterpreterTest, UnacceleratedMouseTest);
   FRIEND_TEST(AccelFilterInterpreterTest, UnacceleratedTouchpadTest);
@@ -55,6 +57,8 @@ class AccelFilterInterpreter : public FilterInterpreter {
 
   static const size_t kMaxCurveSegs = 3;
   static const size_t kMaxCustomCurveSegs = 20;
+  static const size_t kMaxUnaccelCurveSegs = 1;
+
   static const size_t kMaxAccelCurves = 5;
 
   // curves for sensitivity 1..5
@@ -76,12 +80,13 @@ class AccelFilterInterpreter : public FilterInterpreter {
   // handled in the MouseInterpreter class.
 
   // See max* and min_reasonable_dt_ properties
-  stime_t last_reasonable_dt_;
+  stime_t last_reasonable_dt_ = 0.05;
 
   // These are used to calculate acceleration, see smooth_accel_
-  stime_t last_end_time_;
-  float last_mags_[2];
-  size_t last_mags_size_;
+  stime_t last_end_time_ = -1.0;
+
+  std::vector<float> last_mags_;
+  static const size_t kMaxLastMagsSize = 2;
 
   // These properties expose the custom curves (just above) to the
   // property system.
@@ -101,6 +106,7 @@ class AccelFilterInterpreter : public FilterInterpreter {
   DoubleProperty point_y_out_scale_;
   DoubleProperty scroll_x_out_scale_;
   DoubleProperty scroll_y_out_scale_;
+
   // These properties are automatically set on mice-like devices:
   BoolProperty use_mouse_point_curves_;  // set on {touch,nontouch} mice
   BoolProperty use_mouse_scroll_curves_;  // set on nontouch mice
@@ -110,7 +116,7 @@ class AccelFilterInterpreter : public FilterInterpreter {
   // Flag for disabling mouse/touchpad acceleration.
   BoolProperty pointer_acceleration_;
 
-  // Sometimes on wireless hardware (e.g. Bluetooth), patckets need to be
+  // Sometimes on wireless hardware (e.g. Bluetooth), packets need to be
   // resent. This can lead to a time between packets that very large followed
   // by a very small one. Very small periods especially cause problems b/c they
   // make the velocity seem very fast, which leads to an exaggeration of

@@ -239,6 +239,150 @@ TEST(AccelFilterInterpreterTest, TimingTest) {
   EXPECT_GT(fabsf(last_dy), fabsf(out->details.scroll.dy));
 }
 
+TEST(AccelFilterInterpreterTest, NotSmoothingTest) {
+  AccelFilterInterpreterTestInterpreter* base_interpreter =
+      new AccelFilterInterpreterTestInterpreter;
+  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  TestInterpreterWrapper interpreter(&accel_interpreter);
+  accel_interpreter.scroll_x_out_scale_.val_ =
+      accel_interpreter.scroll_y_out_scale_.val_ = 1.0;
+  accel_interpreter.min_reasonable_dt_.val_ = 0.0;
+  accel_interpreter.max_reasonable_dt_.val_ = INFINITY;
+
+  accel_interpreter.pointer_sensitivity_.val_ = 3;  // standard sensitivity
+  accel_interpreter.scroll_sensitivity_.val_ = 3;  // standard sensitivity
+
+  accel_interpreter.smooth_accel_.val_ = false;
+
+  float last_dx = 0.0;
+  float last_dy = 0.0;
+
+  base_interpreter->return_values_.push_back(Gesture());  // Null type
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     /*start=*/1,
+                                                     /*end=*/1.001,
+                                                     /*dx=*/-4,
+                                                     /*dy=*/2.8));
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     /*start=*/2,
+                                                     /*end=*/3,
+                                                     /*dx=*/-4,
+                                                     /*dy=*/2.8));
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     /*start=*/3,
+                                                     /*end=*/3.001,
+                                                     /*dx=*/4.1,
+                                                     /*dy=*/-10.3));
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     /*start=*/4,
+                                                     /*end=*/5,
+                                                     /*dx=*/4.1,
+                                                     /*dy=*/-10.3));
+
+  Gesture* out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  // Expect less accel for same movement over more time
+  last_dx = out->details.move.dx;
+  last_dy = out->details.move.dy;
+  out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
+  EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
+
+  out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  // Expect less accel for same movement over more time
+  last_dx = out->details.move.dx;
+  last_dy = out->details.move.dy;
+  ASSERT_GT(fabsf(last_dx), 32.5780);
+  ASSERT_LT(fabsf(last_dx), 32.5782);
+  ASSERT_GT(fabsf(last_dy), 81.8424);
+  ASSERT_LT(fabsf(last_dy), 81.8426);
+
+  out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
+  EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
+}
+
+TEST(AccelFilterInterpreterTest, SmoothingTest) {
+  AccelFilterInterpreterTestInterpreter* base_interpreter =
+      new AccelFilterInterpreterTestInterpreter;
+  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  TestInterpreterWrapper interpreter(&accel_interpreter);
+  accel_interpreter.scroll_x_out_scale_.val_ =
+      accel_interpreter.scroll_y_out_scale_.val_ = 1.0;
+  accel_interpreter.min_reasonable_dt_.val_ = 0.0;
+  accel_interpreter.max_reasonable_dt_.val_ = INFINITY;
+
+  accel_interpreter.pointer_sensitivity_.val_ = 3;  // standard sensitivity
+  accel_interpreter.scroll_sensitivity_.val_ = 3;  // standard sensitivity
+
+  accel_interpreter.smooth_accel_.val_ = true;
+
+  float last_dx = 0.0;
+  float last_dy = 0.0;
+
+  base_interpreter->return_values_.push_back(Gesture());  // Null type
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     /*start=*/1,
+                                                     /*end=*/1.001,
+                                                     /*dx=*/-4,
+                                                     /*dy=*/2.8));
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     /*start=*/2,
+                                                     /*end=*/3,
+                                                     /*dx=*/-4,
+                                                     /*dy=*/2.8));
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     /*start=*/3,
+                                                     /*end=*/3.001,
+                                                     /*dx=*/4.1,
+                                                     /*dy=*/-10.3));
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     /*start=*/4,
+                                                     /*end=*/5,
+                                                     /*dx=*/4.1,
+                                                     /*dy=*/-10.3));
+
+  Gesture* out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  // Expect less accel for same movement over more time
+  last_dx = out->details.move.dx;
+  last_dy = out->details.move.dy;
+  out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
+  EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
+
+  out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  // Expect less accel for same movement over more time
+  last_dx = out->details.move.dx;
+  last_dy = out->details.move.dy;
+  ASSERT_GT(fabsf(last_dx), 32.3563);
+  ASSERT_LT(fabsf(last_dx), 32.3565);
+  ASSERT_GT(fabsf(last_dy), 81.2855);
+  ASSERT_LT(fabsf(last_dy), 81.2857);
+
+  out = interpreter.SyncInterpret(NULL, NULL);
+  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
+  EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
+}
+
 TEST(AccelFilterInterpreterTest, CurveSegmentInitializerTest) {
   AccelFilterInterpreter::CurveSegment temp1 =
       AccelFilterInterpreter::CurveSegment(INFINITY, 0.0, 2.0, -2.0);
