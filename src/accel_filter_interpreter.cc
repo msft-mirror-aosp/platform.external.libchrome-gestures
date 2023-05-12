@@ -227,29 +227,31 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
 
       // Setup CurveSegments for the device options set
       if (use_mouse_point_curves_.val_ && use_custom_mouse_curve_.val_) {
+        // Custom Mouse
         segs = mouse_custom_point_;
         max_segs = kMaxCustomCurveSegs;
       } else if (!use_mouse_point_curves_.val_ &&
                  use_custom_tp_point_curve_.val_) {
+        // Custom Touch
         segs = tp_custom_point_;
         max_segs = kMaxCustomCurveSegs;
-      } else {
-        if (use_mouse_point_curves_.val_) {
-          if (!pointer_acceleration_.val_) {
-            segs = &unaccel_mouse_curves_[pointer_sensitivity_.val_ - 1];
-            max_segs = kMaxUnaccelCurveSegs;
-          } else if (use_old_mouse_point_curves_.val_) {
-            segs = old_mouse_point_curves_[pointer_sensitivity_.val_ - 1];
-          } else {
-            segs = mouse_point_curves_[pointer_sensitivity_.val_ - 1];
-          }
+      } else if (use_mouse_point_curves_.val_) {
+        // Standard Mouse
+        if (!pointer_acceleration_.val_) {
+          segs = &unaccel_mouse_curves_[pointer_sensitivity_.val_ - 1];
+          max_segs = kMaxUnaccelCurveSegs;
+        } else if (use_old_mouse_point_curves_.val_) {
+          segs = old_mouse_point_curves_[pointer_sensitivity_.val_ - 1];
         } else {
-          if (!pointer_acceleration_.val_) {
-            segs = &unaccel_point_curves_[pointer_sensitivity_.val_ - 1];
-            max_segs = kMaxUnaccelCurveSegs;
-          } else {
-            segs = point_curves_[pointer_sensitivity_.val_ - 1];
-          }
+          segs = mouse_point_curves_[pointer_sensitivity_.val_ - 1];
+        }
+      } else {
+        // Standard Touch
+        if (!pointer_acceleration_.val_) {
+          segs = &unaccel_point_curves_[pointer_sensitivity_.val_ - 1];
+          max_segs = kMaxUnaccelCurveSegs;
+        } else {
+          segs = point_curves_[pointer_sensitivity_.val_ - 1];
         }
       }
 
