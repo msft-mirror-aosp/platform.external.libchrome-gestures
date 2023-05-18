@@ -706,4 +706,177 @@ TEST(AccelFilterInterpreterTest, UnacceleratedTouchpadTest) {
   }
 }
 
+TEST(AccelFilterInterpreterTest, TouchpadPointAccelCurveTest) {
+  AccelFilterInterpreterTestInterpreter* base_interpreter =
+      new AccelFilterInterpreterTestInterpreter;
+  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  TestInterpreterWrapper interpreter(&accel_interpreter);
+
+  size_t num_segs = AccelFilterInterpreter::kMaxCurveSegs;
+  AccelFilterInterpreter::CurveSegment* segs;
+
+  // x = input speed of movement (mm/s, always >= 0), y = output speed (mm/s)
+  // Sensitivity: 1 No Acceleration
+  segs = accel_interpreter.point_curves_[0];
+
+  float ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, 0);
+  ASSERT_EQ(ratio, 0.0);
+
+  ASSERT_EQ(segs[0].x_, INFINITY);
+  ASSERT_EQ(segs[0].sqr_, 0.0);
+  ASSERT_EQ(segs[0].mul_, 1.0);
+  ASSERT_EQ(segs[0].int_, 0.0);
+  for (int x = 1; x < 1000; ++x) {
+    ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, x);
+    float y = ratio * float(x);
+    ASSERT_EQ(x, y);
+  }
+
+  // Sensitivity 2-5
+  const float point_divisors[] = {0.0, // unused
+                                  60.0, 37.5, 30.0, 25.0 };  // used
+
+  for (int sensitivity = 2; sensitivity <= 5; ++sensitivity) {
+    segs = accel_interpreter.point_curves_[sensitivity - 1];
+    const float divisor = point_divisors[sensitivity - 1];
+
+    ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, 0.0);
+    ASSERT_EQ(ratio, 0.0);
+
+    //    y = 32x/divisor   (x < 32)
+    const float linear_until_x = 32.0;
+    ASSERT_EQ(segs[0].x_, linear_until_x);
+    ASSERT_EQ(segs[0].sqr_, 0.0);
+    ASSERT_EQ(segs[0].mul_, linear_until_x / divisor);
+    ASSERT_EQ(segs[0].int_, 0.0);
+    for (int i = 1; i < 32; ++i) {
+      float x = float(i);
+      ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, x);
+      float y = x * ratio;
+      float expected = (linear_until_x * x) / divisor;
+      ASSERT_LE(expected - 0.001, y);
+      ASSERT_GE(expected + 0.001, y);
+    }
+
+    //    y = x^2/divisor   (x < 150)
+    const float x_border = 150.0;
+    ASSERT_EQ(segs[1].x_, x_border);
+    ASSERT_EQ(segs[1].sqr_, 1 / divisor);
+    ASSERT_EQ(segs[1].mul_, 0.0);
+    ASSERT_EQ(segs[1].int_, 0.0);
+    for (int i = 33; i < 150; ++i) {
+      float x = float(i);
+      ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, x);
+      float y = x * ratio;
+      float expected = (x * x) / divisor;
+      ASSERT_LE(expected - 0.001, y);
+      ASSERT_GE(expected + 0.001, y);
+    }
+
+    // linear with same slope after
+    const float slope = (x_border * 2) / divisor;
+    const float y_at_border = (x_border * x_border) / divisor;
+    const float intercept = y_at_border - (slope * x_border);
+    ASSERT_EQ(segs[2].x_, INFINITY);
+    ASSERT_EQ(segs[2].sqr_, 0.0);
+    ASSERT_EQ(segs[2].mul_, slope);
+    ASSERT_EQ(segs[2].int_, intercept);
+    for (int i = 150; i < 1000; ++i) {
+      float x = float(i);
+          // return seg.mul_ + seg.int_ / speed;;
+      ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, x);
+      float y = x * ratio;
+      float expected = x * (slope + (intercept / x));
+      ASSERT_LE(expected - 0.001, y);
+      ASSERT_GE(expected + 0.001, y);
+    }
+  }
+}
+
+TEST(AccelFilterInterpreterTest, TouchpadScrollAccelCurveTest) {
+  AccelFilterInterpreterTestInterpreter* base_interpreter =
+      new AccelFilterInterpreterTestInterpreter;
+  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  TestInterpreterWrapper interpreter(&accel_interpreter);
+
+  size_t num_segs = AccelFilterInterpreter::kMaxCurveSegs;
+  AccelFilterInterpreter::CurveSegment* segs;
+
+  // x = input speed of movement (mm/s, always >= 0), y = output speed (mm/s)
+  // Sensitivity: 1 No Acceleration
+  segs = accel_interpreter.scroll_curves_[0];
+
+  float ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, 0);
+  ASSERT_EQ(ratio, 0.0);
+
+  ASSERT_EQ(segs[0].x_, INFINITY);
+  ASSERT_EQ(segs[0].sqr_, 0.0);
+  ASSERT_EQ(segs[0].mul_, 1.0);
+  ASSERT_EQ(segs[0].int_, 0.0);
+  for (int x = 1; x < 1000; ++x) {
+    ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, x);
+    float y = ratio * float(x);
+    ASSERT_EQ(x, y);
+  }
+
+  // Sensitivity 2-5
+  const float scroll_divisors[] = {0.0, // unused
+                                   150, 75.0, 70.0, 65.0 };  // used
+
+  for (int sensitivity = 2; sensitivity <= 5; ++sensitivity) {
+    segs = accel_interpreter.scroll_curves_[sensitivity - 1];
+    const float divisor = scroll_divisors[sensitivity - 1];
+
+    ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, 0.0);
+    ASSERT_EQ(ratio, 0.0);
+
+    //    y = 75x/divisor   (x < 75)
+    const float linear_until_x = 75.0;
+    ASSERT_EQ(segs[0].x_, linear_until_x);
+    ASSERT_EQ(segs[0].sqr_, 0.0);
+    ASSERT_EQ(segs[0].mul_, linear_until_x / divisor);
+    ASSERT_EQ(segs[0].int_, 0.0);
+    for (int i = 1; i < 75; ++i) {
+      float x = float(i);
+      ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, x);
+      float y = x * ratio;
+      float expected = (linear_until_x * x) / divisor;
+      ASSERT_LE(expected - 0.001, y);
+      ASSERT_GE(expected + 0.001, y);
+    }
+
+    //    y = x^2/divisor   (x < 600)
+    const float x_border = 600.0;
+    ASSERT_EQ(segs[1].x_, x_border);
+    ASSERT_EQ(segs[1].sqr_, 1 / divisor);
+    ASSERT_EQ(segs[1].mul_, 0.0);
+    ASSERT_EQ(segs[1].int_, 0.0);
+    for (int i = 75; i < 600; ++i) {
+      float x = float(i);
+      ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, x);
+      float y = x * ratio;
+      float expected = (x * x) / divisor;
+      ASSERT_LE(expected - 0.001, y);
+      ASSERT_GE(expected + 0.001, y);
+    }
+
+    // linear with same slope after
+    const float slope = linear_until_x / divisor;
+    const float y_at_border = (x_border * x_border) / divisor;
+    const float intercept = y_at_border - (slope * x_border);
+    ASSERT_EQ(segs[2].x_, INFINITY);
+    ASSERT_EQ(segs[2].sqr_, 0.0);
+    ASSERT_EQ(segs[2].mul_, slope);
+    ASSERT_EQ(segs[2].int_, intercept);
+    for (int i = 600; i < 1000; ++i) {
+      float x = float(i);
+      ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, x);
+      float y = x * ratio;
+      float expected = x * (slope + (intercept / x));
+      ASSERT_LE(expected - 0.001, y);
+      ASSERT_GE(expected + 0.001, y);
+    }
+  }
+}
+
 }  // namespace gestures

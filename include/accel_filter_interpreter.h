@@ -32,6 +32,8 @@ class AccelFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(AccelFilterInterpreterTest, TinyMoveTest);
   FRIEND_TEST(AccelFilterInterpreterTest, UnacceleratedMouseTest);
   FRIEND_TEST(AccelFilterInterpreterTest, UnacceleratedTouchpadTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, TouchpadPointAccelCurveTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, TouchpadScrollAccelCurveTest);
  public:
   // Takes ownership of |next|:
   AccelFilterInterpreter(PropRegistry* prop_reg, Interpreter* next,
@@ -54,6 +56,11 @@ class AccelFilterInterpreter : public FilterInterpreter {
     double mul_;  // Slope of line (x multiplier)
     double int_;  // Intercept of line
   };
+
+  // Map a magnitude/speed on a given CurveSegment array to a ratio multiplier
+  float RatioFromAccelCurve(CurveSegment const * segs,
+                            size_t const max_segs,
+                            float const mag);
 
   static const size_t kMaxCurveSegs = 3;
   static const size_t kMaxCustomCurveSegs = 20;

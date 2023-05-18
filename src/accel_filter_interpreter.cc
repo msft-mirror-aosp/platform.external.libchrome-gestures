@@ -263,9 +263,6 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
     case kGestureTypeScroll:
       // Setup the Gesture velocity/delta fields/scaling for the gesture type
       if (gs.type == kGestureTypeFling) {
-        float vx = gs.details.fling.vx;
-        float vy = gs.details.fling.vy;
-        mag = sqrtf(vx * vx + vy * vy);
         scale_out_x = &gs_copy.details.fling.vx;
         scale_out_y = &gs_copy.details.fling.vy;
         scale_out_x_ordinal = &gs_copy.details.fling.ordinal_vx;
@@ -301,14 +298,19 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
       return;
   }
 
-  // If dx and dy are present, then calculate the hypotenuse to determine
-  // the actual distance traveled, magnitude.
+  // Calculate the hypotenuse to determine the actual distance traveled
+  // and the magnitude/speed.
   if (dx != NULL && dy != NULL) {
     if (dt < 0.00001) {
       ProduceGesture(gs);
       return;  // Avoid division by 0
     }
     mag = sqrtf(*dx * *dx + *dy * *dy) / dt;
+  } else {
+    // FLING is the only gesture that uses vx/vy and assumes dt=1
+    float vx = gs.details.fling.vx;
+    float vy = gs.details.fling.vy;
+    mag = sqrtf(vx * vx + vy * vy);
   }
 
   // Perform smoothing, if it is enabled.
@@ -336,26 +338,36 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
     return;  // Avoid division by 0
   }
 
-  // Find the appropriate CurveSegment and apply scaling
+  // Find the appropriate ratio and apply scaling
+  auto ratio = RatioFromAccelCurve(segs, max_segs, mag);
+  if (ratio > 0.0) {
+    *scale_out_x *= ratio * x_scale;
+    *scale_out_y *= ratio * y_scale;
+
+    if (gs.type == kGestureTypeFling ||
+        gs.type == kGestureTypeScroll) {
+      // We don't accelerate the ordinal values as we do for normal ones
+      // because this is how the Chrome needs it.
+      *scale_out_x_ordinal *= x_scale;
+      *scale_out_y_ordinal *= y_scale;
+    }
+    ProduceGesture(gs_copy);
+  }
+}
+
+float AccelFilterInterpreter::RatioFromAccelCurve(
+    CurveSegment const * segs,
+    size_t const max_segs,
+    float const mag) {
+  if (mag <= 0.0)
+    return 0.0;
   for (size_t i = 0; i < max_segs; ++i) {
-    CurveSegment& seg = segs[i];
+    CurveSegment const & seg = segs[i];
     if (mag <= seg.x_) {
-      float ratio = seg.sqr_ * mag + seg.mul_ + seg.int_ / mag;
-
-      *scale_out_x *= ratio * x_scale;
-      *scale_out_y *= ratio * y_scale;
-
-      if (gs.type == kGestureTypeFling ||
-          gs.type == kGestureTypeScroll) {
-        // We don't accelerate the ordinal values as we do for normal ones
-        // because this is how the Chrome needs it.
-        *scale_out_x_ordinal *= x_scale;
-        *scale_out_y_ordinal *= y_scale;
-      }
-      ProduceGesture(gs_copy);
-      break;
+      return (seg.sqr_ * mag) + seg.mul_ + (seg.int_ / mag);
     }
   }
+  return 0.0;
 }
 
 }  // namespace gestures
