@@ -723,7 +723,7 @@ bool FingerButtonClick::Update(const HardwareState& hwstate,
 
   // Copy all fingers to an array, but leave out palms
   num_fingers_ = 0;
-  for (int i = 0; i < hwstate.touch_cnt; ++i) {
+  for (int i = 0; i < hwstate.finger_cnt; ++i) {
     const FingerState& fs = hwstate.fingers[i];
     if (fs.flags & (GESTURES_FINGER_PALM | GESTURES_FINGER_POSSIBLE_PALM))
       continue;
