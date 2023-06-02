@@ -29,7 +29,7 @@ namespace gestures {
 
 TrendClassifyingFilterInterpreter::TrendClassifyingFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       trend_classifying_filter_enable_(
           prop_reg, "Trend Classifying Filter Enabled", true),
       second_order_enable_(

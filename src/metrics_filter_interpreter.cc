@@ -21,7 +21,7 @@ MetricsFilterInterpreter::MetricsFilterInterpreter(
     Interpreter* next,
     Tracer* tracer,
     GestureInterpreterDeviceClass devclass)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       devclass_(devclass),
       mouse_movement_session_index_(0),
       mouse_movement_current_session_length(0),

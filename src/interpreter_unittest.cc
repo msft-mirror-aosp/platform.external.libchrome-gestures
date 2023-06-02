@@ -22,8 +22,8 @@ class InterpreterTest : public ::testing::Test {};
 class InterpreterTestInterpreter : public Interpreter {
  public:
   explicit InterpreterTestInterpreter(PropRegistry* prop_reg)
-      : Interpreter(prop_reg, NULL, true),
-        expected_hwstate_(NULL),
+      : Interpreter(prop_reg, nullptr, true),
+        expected_hwstate_(nullptr),
         interpret_call_count_(0),
         handle_timer_call_count_(0),
         bool_prop_(prop_reg, "BoolProp", 0),
@@ -153,8 +153,8 @@ TEST(InterpreterTest, SimpleTest) {
 
 class InterpreterResetLogTestInterpreter : public Interpreter {
  public:
-  InterpreterResetLogTestInterpreter() : Interpreter(NULL, NULL, true) {
-    log_.reset(new ActivityLog(NULL));
+  InterpreterResetLogTestInterpreter() : Interpreter(nullptr, nullptr, true) {
+    log_.reset(new ActivityLog(nullptr));
   }
  protected:
   virtual void SyncInterpretImpl(HardwareState* hwstate,

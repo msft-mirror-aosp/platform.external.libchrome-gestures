@@ -151,7 +151,7 @@ void MultitouchMouseInterpreter::SyncInterpretImpl(HardwareState* hwstate,
 
   // We don't keep finger data here, this is just for standard mouse:
   prev_state_ = *hwstate;
-  prev_state_.fingers = NULL;
+  prev_state_.fingers = nullptr;
   prev_state_.finger_cnt = 0;
 
   prev_gs_fingers_ = gs_fingers_;

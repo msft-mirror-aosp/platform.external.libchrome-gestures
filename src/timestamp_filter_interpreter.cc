@@ -13,7 +13,7 @@ namespace gestures {
 
 TimestampFilterInterpreter::TimestampFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       prev_msc_timestamp_(-1.0),
       msc_timestamp_offset_(-1.0),
       fake_timestamp_(-1.0),

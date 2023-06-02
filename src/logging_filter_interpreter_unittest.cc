@@ -22,7 +22,7 @@ class LoggingFilterInterpreterTest : public ::testing::Test {};
 class LoggingFilterInterpreterResetLogTestInterpreter : public Interpreter {
  public:
   LoggingFilterInterpreterResetLogTestInterpreter()
-      : Interpreter(NULL, NULL, false) {}
+      : Interpreter(nullptr, nullptr, false) {}
  protected:
   virtual void SyncInterpretImpl(HardwareState* hwstate,
                                      stime_t* timeout) {}
@@ -35,7 +35,7 @@ TEST(LoggingFilterInterpreterTest, LogResetHandlerTest) {
   PropRegistry prop_reg;
   LoggingFilterInterpreterResetLogTestInterpreter* base_interpreter =
       new LoggingFilterInterpreterResetLogTestInterpreter();
-  LoggingFilterInterpreter interpreter(&prop_reg, base_interpreter, NULL);
+  LoggingFilterInterpreter interpreter(&prop_reg, base_interpreter, nullptr);
 
   interpreter.event_logging_enable_.SetValue(Json::Value(true));
   interpreter.BoolWasWritten(&interpreter.event_logging_enable_);

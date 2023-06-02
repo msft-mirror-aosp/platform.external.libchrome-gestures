@@ -16,7 +16,7 @@ class TimestampFilterInterpreterTest : public ::testing::Test {};
 class TimestampFilterInterpreterTestInterpreter : public Interpreter {
  public:
   TimestampFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false) {}
+      : Interpreter(nullptr, nullptr, false) {}
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
     // For tests, use timeout to return the adjusted timestamp.
     *timeout = now;
@@ -26,13 +26,13 @@ class TimestampFilterInterpreterTestInterpreter : public Interpreter {
 
 static HardwareState make_hwstate_times(stime_t timestamp,
                                         stime_t msc_timestamp) {
-  return { timestamp, 0, 1, 1, NULL, 0, 0, 0, 0, 0, msc_timestamp };
+  return { timestamp, 0, 1, 1, nullptr, 0, 0, 0, 0, 0, msc_timestamp };
 }
 
 TEST(TimestampFilterInterpreterTest, SimpleTest) {
   TimestampFilterInterpreterTestInterpreter* base_interpreter =
       new TimestampFilterInterpreterTestInterpreter;
-  TimestampFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  TimestampFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper wrapper(&interpreter);
 
   HardwareState hs[] = {
@@ -45,7 +45,7 @@ TEST(TimestampFilterInterpreterTest, SimpleTest) {
   stime_t expected_timestamps[] = { 1.000, 1.012, 1.018, 1.031 };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], NULL);
+    wrapper.SyncInterpret(&hs[i], nullptr);
     EXPECT_EQ(hs[i].timestamp, expected_timestamps[i]);
   }
 
@@ -59,7 +59,7 @@ TEST(TimestampFilterInterpreterTest, SimpleTest) {
 TEST(TimestampFilterInterpreterTest, NoMscTimestampTest) {
   TimestampFilterInterpreterTestInterpreter* base_interpreter =
       new TimestampFilterInterpreterTestInterpreter;
-  TimestampFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  TimestampFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper wrapper(&interpreter);
 
   HardwareState hs[] = {
@@ -71,7 +71,7 @@ TEST(TimestampFilterInterpreterTest, NoMscTimestampTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     stime_t expected_timestamp = hs[i].timestamp;
-    wrapper.SyncInterpret(&hs[i], NULL);
+    wrapper.SyncInterpret(&hs[i], nullptr);
     EXPECT_EQ(hs[i].timestamp, expected_timestamp);
   }
 
@@ -84,7 +84,7 @@ TEST(TimestampFilterInterpreterTest, NoMscTimestampTest) {
 TEST(TimestampFilterInterpreterTest, MscTimestampResetTest) {
   TimestampFilterInterpreterTestInterpreter* base_interpreter =
       new TimestampFilterInterpreterTestInterpreter;
-  TimestampFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  TimestampFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper wrapper(&interpreter);
 
   HardwareState hs[] = {
@@ -104,7 +104,7 @@ TEST(TimestampFilterInterpreterTest, MscTimestampResetTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], NULL);
+    wrapper.SyncInterpret(&hs[i], nullptr);
     EXPECT_EQ(hs[i].timestamp, expected_timestamps[i]);
   }
 
@@ -119,7 +119,7 @@ TEST(TimestampFilterInterpreterTest, MscTimestampResetTest) {
 TEST(TimestampFilterInterpreterTest, FakeTimestampTest) {
   TimestampFilterInterpreterTestInterpreter* base_interpreter =
       new TimestampFilterInterpreterTestInterpreter;
-  TimestampFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  TimestampFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper wrapper(&interpreter);
 
   interpreter.fake_timestamp_delta_.val_ = 0.010;
@@ -134,7 +134,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampTest) {
   stime_t expected_timestamps[] = { 1.000, 1.010, 1.020, 1.030 };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], NULL);
+    wrapper.SyncInterpret(&hs[i], nullptr);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
 
@@ -148,7 +148,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampTest) {
 TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest) {
   TimestampFilterInterpreterTestInterpreter* base_interpreter =
       new TimestampFilterInterpreterTestInterpreter;
-  TimestampFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  TimestampFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper wrapper(&interpreter);
 
   interpreter.fake_timestamp_delta_.val_ = 0.010;
@@ -170,7 +170,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], NULL);
+    wrapper.SyncInterpret(&hs[i], nullptr);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
 
@@ -185,7 +185,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest) {
 TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest) {
   TimestampFilterInterpreterTestInterpreter* base_interpreter =
       new TimestampFilterInterpreterTestInterpreter;
-  TimestampFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  TimestampFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper wrapper(&interpreter);
 
   interpreter.fake_timestamp_delta_.val_ = 0.010;
@@ -208,7 +208,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], NULL);
+    wrapper.SyncInterpret(&hs[i], nullptr);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
 

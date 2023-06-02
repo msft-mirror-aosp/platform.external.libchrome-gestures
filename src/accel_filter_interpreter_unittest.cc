@@ -26,7 +26,8 @@ class AccelFilterInterpreterTest : public ::testing::Test {};
 
 class AccelFilterInterpreterTestInterpreter : public Interpreter {
  public:
-  AccelFilterInterpreterTestInterpreter() : Interpreter(NULL, NULL, false) {}
+  AccelFilterInterpreterTestInterpreter()
+      : Interpreter(nullptr, nullptr, false) {}
 
   virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
     if (return_values_.empty())
@@ -39,7 +40,7 @@ class AccelFilterInterpreterTestInterpreter : public Interpreter {
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
-    return SyncInterpret(NULL, NULL);
+    return SyncInterpret(nullptr, nullptr);
   }
 
   Gesture return_value_;
@@ -49,7 +50,7 @@ class AccelFilterInterpreterTestInterpreter : public Interpreter {
 TEST(AccelFilterInterpreterTest, SimpleTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   accel_interpreter.scroll_x_out_scale_.val_ =
@@ -84,10 +85,10 @@ TEST(AccelFilterInterpreterTest, SimpleTest) {
                                                        -10.3,  // vy
                                                        0));  // state
 
-    Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), out);
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+    Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_EQ(nullptr, out);
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out);
     EXPECT_EQ(kGestureTypeMove, out->type);
     if (i == 1) {
       // Expect no acceleration
@@ -101,8 +102,8 @@ TEST(AccelFilterInterpreterTest, SimpleTest) {
     last_move_dx = out->details.move.dx;
     last_move_dy = out->details.move.dy;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out);
     EXPECT_EQ(kGestureTypeScroll, out->type);
     if (i == 1) {
       // Expect no acceleration
@@ -115,8 +116,8 @@ TEST(AccelFilterInterpreterTest, SimpleTest) {
     }
     last_scroll_dx = out->details.scroll.dx;
     last_scroll_dy = out->details.scroll.dy;
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out);
     EXPECT_EQ(kGestureTypeFling, out->type);
     if (i == 1) {
       // Expect no acceleration
@@ -135,7 +136,7 @@ TEST(AccelFilterInterpreterTest, SimpleTest) {
 TEST(AccelFilterInterpreterTest, TinyMoveTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
   accel_interpreter.scroll_x_out_scale_.val_ =
       accel_interpreter.scroll_y_out_scale_.val_ = 1.0;
@@ -156,18 +157,18 @@ TEST(AccelFilterInterpreterTest, TinyMoveTest) {
                                                      4,  // dx
                                                      0));  // dy
 
-  Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   EXPECT_GT(fabsf(out->details.move.dx), 2);
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeScroll, out->type);
   EXPECT_GT(fabsf(out->details.scroll.dx), 2);
   float orig_x_scroll = out->details.scroll.dx;
   accel_interpreter.scroll_x_out_scale_.val_ = 2.0;
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeScroll, out->type);
   EXPECT_FLOAT_EQ(orig_x_scroll * accel_interpreter.scroll_x_out_scale_.val_,
                   out->details.scroll.dx);
@@ -176,7 +177,7 @@ TEST(AccelFilterInterpreterTest, TinyMoveTest) {
 TEST(AccelFilterInterpreterTest, TimingTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
   accel_interpreter.scroll_x_out_scale_.val_ =
       accel_interpreter.scroll_y_out_scale_.val_ = 1.0;
@@ -211,29 +212,29 @@ TEST(AccelFilterInterpreterTest, TimingTest) {
                                                      4.1,  // dx
                                                      -10.3));  // dy
 
-  Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), out);
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_EQ(nullptr, out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   // Expect less accel for same movement over more time
   last_dx = out->details.move.dx;
   last_dy = out->details.move.dy;
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
   EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
 
 
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeScroll, out->type);
   // Expect less accel for same movement over more time
   last_dx = out->details.scroll.dx;
   last_dy = out->details.scroll.dy;
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeScroll, out->type);
   EXPECT_GT(fabsf(last_dx), fabsf(out->details.scroll.dx));
   EXPECT_GT(fabsf(last_dy), fabsf(out->details.scroll.dy));
@@ -242,7 +243,7 @@ TEST(AccelFilterInterpreterTest, TimingTest) {
 TEST(AccelFilterInterpreterTest, NotSmoothingTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
   accel_interpreter.scroll_x_out_scale_.val_ =
       accel_interpreter.scroll_y_out_scale_.val_ = 1.0;
@@ -279,22 +280,22 @@ TEST(AccelFilterInterpreterTest, NotSmoothingTest) {
                                                      /*dx=*/4.1,
                                                      /*dy=*/-10.3));
 
-  Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), out);
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_EQ(nullptr, out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   // Expect less accel for same movement over more time
   last_dx = out->details.move.dx;
   last_dy = out->details.move.dy;
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
   EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
 
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   // Expect less accel for same movement over more time
   last_dx = out->details.move.dx;
@@ -304,8 +305,8 @@ TEST(AccelFilterInterpreterTest, NotSmoothingTest) {
   ASSERT_GT(fabsf(last_dy), 81.8424);
   ASSERT_LT(fabsf(last_dy), 81.8426);
 
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
   EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
@@ -314,7 +315,7 @@ TEST(AccelFilterInterpreterTest, NotSmoothingTest) {
 TEST(AccelFilterInterpreterTest, SmoothingTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
   accel_interpreter.scroll_x_out_scale_.val_ =
       accel_interpreter.scroll_y_out_scale_.val_ = 1.0;
@@ -351,22 +352,22 @@ TEST(AccelFilterInterpreterTest, SmoothingTest) {
                                                      /*dx=*/4.1,
                                                      /*dy=*/-10.3));
 
-  Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), out);
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_EQ(nullptr, out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   // Expect less accel for same movement over more time
   last_dx = out->details.move.dx;
   last_dy = out->details.move.dy;
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
   EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
 
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   // Expect less accel for same movement over more time
   last_dx = out->details.move.dx;
@@ -376,8 +377,8 @@ TEST(AccelFilterInterpreterTest, SmoothingTest) {
   ASSERT_GT(fabsf(last_dy), 81.2855);
   ASSERT_LT(fabsf(last_dy), 81.2857);
 
-  out = interpreter.SyncInterpret(NULL, NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out);
+  out = interpreter.SyncInterpret(nullptr, nullptr);
+  ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   EXPECT_GT(fabsf(last_dx), fabsf(out->details.move.dx));
   EXPECT_GT(fabsf(last_dy), fabsf(out->details.move.dy));
@@ -398,7 +399,7 @@ TEST(AccelFilterInterpreterTest, CurveSegmentInitializerTest) {
 TEST(AccelFilterInterpreterTest, CustomAccelTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
   accel_interpreter.scroll_x_out_scale_.val_ =
       accel_interpreter.scroll_y_out_scale_.val_ = 1.0;
@@ -451,26 +452,26 @@ TEST(AccelFilterInterpreterTest, CustomAccelTest) {
                                                        0,  // dx
                                                        dist / 2.0));  // dy
 
-    Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeMove, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(expected, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeMove, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(expected, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeMove, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(expected / 2.0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeMove, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(expected / 2.0, out->details.move.dy) << "i=" << i;
@@ -504,26 +505,26 @@ TEST(AccelFilterInterpreterTest, CustomAccelTest) {
                                                        0,  // dx
                                                        dist / 2.0));  // dy
 
-    Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeSwipe, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(expected, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeSwipe, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(expected, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeSwipe, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(expected / 2.0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeSwipe, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(expected / 2.0, out->details.move.dy) << "i=" << i;
@@ -557,26 +558,26 @@ TEST(AccelFilterInterpreterTest, CustomAccelTest) {
                                                        0,  // dx
                                                        dist / 2.0));  // dy
 
-    Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeFourFingerSwipe, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(expected, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeFourFingerSwipe, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(expected, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeFourFingerSwipe, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(expected / 2.0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeFourFingerSwipe, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.move.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(expected / 2.0, out->details.move.dy) << "i=" << i;
@@ -610,26 +611,26 @@ TEST(AccelFilterInterpreterTest, CustomAccelTest) {
                                                        0,  // dx
                                                        dist / 2.0));  // dy
 
-    Gesture* out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    Gesture* out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeScroll, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(expected, out->details.scroll.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.scroll.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeScroll, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.scroll.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(expected, out->details.scroll.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeScroll, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(expected / 2.0, out->details.scroll.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.scroll.dy) << "i=" << i;
 
-    out = interpreter.SyncInterpret(NULL, NULL);
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), out) << "i=" << i;
+    out = interpreter.SyncInterpret(nullptr, nullptr);
+    ASSERT_NE(nullptr, out) << "i=" << i;
     EXPECT_EQ(kGestureTypeScroll, out->type) << "i=" << i;
     EXPECT_FLOAT_EQ(0, out->details.scroll.dx) << "i=" << i;
     EXPECT_FLOAT_EQ(expected / 2.0, out->details.scroll.dy) << "i=" << i;
@@ -639,7 +640,7 @@ TEST(AccelFilterInterpreterTest, CustomAccelTest) {
 TEST(AccelFilterInterpreterTest, UnacceleratedMouseTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   accel_interpreter.use_mouse_point_curves_.val_ = true;
@@ -674,7 +675,7 @@ TEST(AccelFilterInterpreterTest, UnacceleratedMouseTest) {
 TEST(AccelFilterInterpreterTest, UnacceleratedTouchpadTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   accel_interpreter.use_mouse_point_curves_.val_ = false;
@@ -709,7 +710,7 @@ TEST(AccelFilterInterpreterTest, UnacceleratedTouchpadTest) {
 TEST(AccelFilterInterpreterTest, TouchpadPointAccelCurveTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   size_t num_segs = AccelFilterInterpreter::kMaxCurveSegs;
@@ -796,7 +797,7 @@ TEST(AccelFilterInterpreterTest, TouchpadPointAccelCurveTest) {
 TEST(AccelFilterInterpreterTest, TouchpadScrollAccelCurveTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
-  AccelFilterInterpreter accel_interpreter(NULL, base_interpreter, NULL);
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   size_t num_segs = AccelFilterInterpreter::kMaxCurveSegs;

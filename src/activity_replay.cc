@@ -24,7 +24,7 @@ using std::string;
 namespace gestures {
 
 ActivityReplay::ActivityReplay(PropRegistry* prop_reg)
-    : log_(NULL), prop_reg_(prop_reg) {}
+    : log_(nullptr), prop_reg_(prop_reg) {}
 
 bool ActivityReplay::Parse(const string& data) {
   std::set<string> emptyset;
@@ -648,7 +648,7 @@ bool ActivityReplay::ParsePropChange(const Json::Value& entry) {
 // Replay the log and verify the output in a strict way.
 void ActivityReplay::Replay(Interpreter* interpreter,
                             MetricsProperties* mprops) {
-  interpreter->Initialize(&hwprops_, NULL, mprops, this);
+  interpreter->Initialize(&hwprops_, nullptr, mprops, this);
 
   stime_t last_timeout_req = -1.0;
   // Use last_gs to save a copy of last gesture.
@@ -722,13 +722,13 @@ bool ActivityReplay::ReplayPropChange(
     return false;
   }
   ::set<Property*> props = prop_reg_->props();
-  Property* prop = NULL;
+  Property* prop = nullptr;
   for (::set<Property*>::iterator it = props.begin(), e = props.end(); it != e;
        ++it) {
     prop = *it;
     if (strcmp(prop->name(), entry.name) == 0)
       break;
-    prop = NULL;
+    prop = nullptr;
   }
   if (!prop) {
     Err("Unable to find prop %s to set.", entry.name);

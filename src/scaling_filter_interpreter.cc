@@ -17,7 +17,7 @@ namespace gestures {
 ScalingFilterInterpreter::ScalingFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer,
     GestureInterpreterDeviceClass devclass)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       tp_x_scale_(1.0),
       tp_y_scale_(1.0),
       tp_x_translate_(0.0),
@@ -376,8 +376,8 @@ void ScalingFilterInterpreter::Initialize(const HardwareProperties* hwprops,
     hwprops->wheel_is_hi_res,
     hwprops->is_haptic_pad,
   };
-  // current metrics is no longer valid, pass metrics=NULL
-  FilterInterpreter::Initialize(&friendly_props_, NULL, mprops, consumer);
+  // current metrics is no longer valid, pass metrics=nullptr
+  FilterInterpreter::Initialize(&friendly_props_, nullptr, mprops, consumer);
 }
 
 }  // namespace gestures

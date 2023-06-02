@@ -62,7 +62,7 @@ void ActivityLog::LogHardwareState(const HardwareState& hwstate) {
   if (hwstate.finger_cnt > max_fingers_) {
     Err("Too many fingers! Max is %zu, but I got %d",
         max_fingers_, hwstate.finger_cnt);
-    entry->details.hwstate.fingers = NULL;
+    entry->details.hwstate.fingers = nullptr;
     entry->details.hwstate.finger_cnt = 0;
     return;
   }
@@ -153,8 +153,8 @@ Json::Value ActivityLog::EncodeHardwareState(const HardwareState& hwstate) {
       Json::Value(hwstate.timestamp);
   Json::Value fingers(Json::arrayValue);
   for (size_t i = 0; i < hwstate.finger_cnt; ++i) {
-    if (hwstate.fingers == NULL) {
-      Err("Have finger_cnt %d but fingers is NULL!", hwstate.finger_cnt);
+    if (hwstate.fingers == nullptr) {
+      Err("Have finger_cnt %d but fingers is null!", hwstate.finger_cnt);
       break;
     }
     const FingerState& fs = hwstate.fingers[i];

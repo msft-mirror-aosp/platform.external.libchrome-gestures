@@ -21,7 +21,7 @@ class SplitCorrectingFilterInterpreterTestInterpreter :
       public Interpreter {
  public:
   SplitCorrectingFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         expect_finger_ids_(true),
         iteration_(0),
         expect_warp_on_one_finger_only_(false) {}
@@ -65,7 +65,8 @@ namespace {
 void DoTest(InputEventWithExpectations* events, size_t events_len, bool t5r2) {
   SplitCorrectingFilterInterpreterTestInterpreter* base_interpreter
       = new SplitCorrectingFilterInterpreterTestInterpreter;
-  SplitCorrectingFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  SplitCorrectingFilterInterpreter interpreter(
+      nullptr, base_interpreter, nullptr);
   interpreter.Enable();
 
   HardwareProperties hwprops = {
@@ -161,7 +162,8 @@ TEST(SplitCorrectingFilterInterpreterTest, FalseMergeTest) {
 
   SplitCorrectingFilterInterpreterTestInterpreter* base_interpreter
       = new SplitCorrectingFilterInterpreterTestInterpreter;
-  SplitCorrectingFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  SplitCorrectingFilterInterpreter interpreter(
+      nullptr, base_interpreter, nullptr);
   interpreter.Enable();
 
   HardwareProperties hwprops = {
@@ -313,7 +315,8 @@ struct LumpyThumbSplitTestInputs {
 TEST(SplitCorrectingFilterInterpreterTest, LumpyThumbSplitTest) {
   SplitCorrectingFilterInterpreterTestInterpreter* base_interpreter
       = new SplitCorrectingFilterInterpreterTestInterpreter;
-  SplitCorrectingFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  SplitCorrectingFilterInterpreter interpreter(
+      nullptr, base_interpreter, nullptr);
   interpreter.Enable();
 
   base_interpreter->expected_ids_.insert(2);

@@ -19,7 +19,7 @@ namespace gestures {
 const static int REL_WHEEL_HI_RES_UNITS_PER_NOTCH = 120;
 
 MouseInterpreter::MouseInterpreter(PropRegistry* prop_reg, Tracer* tracer)
-    : Interpreter(NULL, tracer, false),
+    : Interpreter(nullptr, tracer, false),
       wheel_emulation_accu_x_(0.0),
       wheel_emulation_accu_y_(0.0),
       wheel_emulation_active_(false),

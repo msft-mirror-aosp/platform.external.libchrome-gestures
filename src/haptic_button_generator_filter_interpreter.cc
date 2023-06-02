@@ -16,7 +16,7 @@ namespace gestures {
 
 HapticButtonGeneratorFilterInterpreter::HapticButtonGeneratorFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       release_suppress_factor_(1.0),
       active_gesture_(false),
       active_gesture_timeout_(0.1),
@@ -52,7 +52,7 @@ void HapticButtonGeneratorFilterInterpreter::Initialize(
     MetricsProperties* mprops,
     GestureConsumer* consumer) {
   is_haptic_pad_ = hwprops->is_haptic_pad;
-  FilterInterpreter::Initialize(hwprops, NULL, mprops, consumer);
+  FilterInterpreter::Initialize(hwprops, nullptr, mprops, consumer);
 }
 
 void HapticButtonGeneratorFilterInterpreter::SyncInterpretImpl(

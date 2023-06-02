@@ -14,7 +14,7 @@ namespace gestures {
 // Takes ownership of |next|:
 SplitCorrectingFilterInterpreter::SplitCorrectingFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       enabled_(prop_reg, "Split Corrector Enabled", false),
       merge_max_separation_(prop_reg, "Split Merge Max Separation", 17.0),
       merge_max_movement_(prop_reg, "Split Merge Max Movement", 3.0),
@@ -67,7 +67,7 @@ void SplitCorrectingFilterInterpreter::MergeFingers(
     // Current state of the unmerged finger
     const FingerState* existing_contact = hwstate.GetFingerState(it->input_id);
     if (!existing_contact) {
-      Err("How is existing_contact NULL?");
+      Err("How is existing_contact null?");
       return;
     }
     // try all fingers for possible merging
@@ -288,7 +288,7 @@ const UnmergedContact* SplitCorrectingFilterInterpreter::FindUnmerged(
   for (size_t i = 0; i < arraysize(unmerged_) && unmerged_[i].Valid(); i++)
     if (unmerged_[i].input_id == input_id)
       return &unmerged_[i];
-  return NULL;
+  return nullptr;
 }
 
 const MergedContact* SplitCorrectingFilterInterpreter::FindMerged(
@@ -297,7 +297,7 @@ const MergedContact* SplitCorrectingFilterInterpreter::FindMerged(
     if (merged_[i].input_fingers[0].tracking_id == input_id ||
         merged_[i].input_fingers[1].tracking_id == input_id)
       return &merged_[i];
-  return NULL;
+  return nullptr;
 }
 
 // static

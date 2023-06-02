@@ -26,7 +26,7 @@ class LookaheadFilterInterpreterTest : public ::testing::Test {};
 class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
  public:
   LookaheadFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         timer_return_(NO_DEADLINE),
         clear_incoming_hwstates_(false), expected_id_(-1),
         expected_flags_(0), expected_flags_at_(-1),
@@ -89,7 +89,7 @@ class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
 };
 
 TEST(LookaheadFilterInterpreterTest, SimpleTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
@@ -127,12 +127,12 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
     // Expect no movement
     make_hwstate(2.010, 0, 1, 1, &fs[3]),
     make_hwstate(2.030, 0, 1, 1, &fs[4]),
-    make_hwstate(2.031, 0, 0, 0, NULL),
+    make_hwstate(2.031, 0, 0, 0, nullptr),
 
     // Expect movement b/c it's moving really fast
     make_hwstate(3.010, 0, 1, 1, &fs[5]),
     make_hwstate(3.011, 0, 1, 1, &fs[6]),
-    make_hwstate(3.030, 0, 0, 0, NULL),
+    make_hwstate(3.030, 0, 0, 0, nullptr),
   };
 
   stime_t expected_timeout = 0.0;
@@ -155,7 +155,7 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
       }
 
       interpreter.reset(new LookaheadFilterInterpreter(
-          NULL, base_interpreter, NULL));
+          nullptr, base_interpreter, nullptr));
       wrapper.Reset(interpreter.get());
       interpreter->min_delay_.val_ = 0.05;
       expected_timeout = interpreter->min_delay_.val_;
@@ -209,7 +209,7 @@ class LookaheadFilterInterpreterVariableDelayTestInterpreter
     : public Interpreter {
  public:
   LookaheadFilterInterpreterVariableDelayTestInterpreter()
-      : Interpreter(NULL, NULL, false), interpret_call_count_ (0) {}
+      : Interpreter(nullptr, nullptr, false), interpret_call_count_ (0) {}
 
   virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
     interpret_call_count_++;
@@ -230,7 +230,7 @@ class LookaheadFilterInterpreterVariableDelayTestInterpreter
 TEST(LookaheadFilterInterpreterTest, VariableDelayTest) {
   LookaheadFilterInterpreterVariableDelayTestInterpreter* base_interpreter =
       new LookaheadFilterInterpreterVariableDelayTestInterpreter;
-  LookaheadFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  LookaheadFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
 
   HardwareProperties initial_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -282,7 +282,7 @@ class LookaheadFilterInterpreterNoTapSetTestInterpreter
     : public Interpreter {
  public:
   LookaheadFilterInterpreterNoTapSetTestInterpreter()
-      : Interpreter(NULL, NULL, false), interpret_call_count_(0) {}
+      : Interpreter(nullptr, nullptr, false), interpret_call_count_(0) {}
 
   virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
     EXPECT_EQ(expected_finger_cnts_[interpret_call_count_],
@@ -306,7 +306,7 @@ class LookaheadFilterInterpreterNoTapSetTestInterpreter
 TEST(LookaheadFilterInterpreterTest, NoTapSetTest) {
   LookaheadFilterInterpreterNoTapSetTestInterpreter* base_interpreter =
       new LookaheadFilterInterpreterNoTapSetTestInterpreter;
-  LookaheadFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  LookaheadFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
   interpreter.min_delay_.val_ = 0.0;
 
   HardwareProperties initial_hwprops = {
@@ -333,7 +333,7 @@ TEST(LookaheadFilterInterpreterTest, NoTapSetTest) {
     // Expect movement to take
     make_hwstate(0.01, 0, 1, 1, &fs[0]),
     make_hwstate(0.01, 0, 1, 1, &fs[1]),
-    make_hwstate(0.03, 0, 0, 0, NULL),
+    make_hwstate(0.03, 0, 0, 0, nullptr),
     make_hwstate(1.01, 0, 1, 1, &fs[2]),
     make_hwstate(1.02, 0, 1, 1, &fs[3]),
   };
@@ -361,7 +361,7 @@ TEST(LookaheadFilterInterpreterTest, NoTapSetTest) {
 // there is a spurious callback, that we request another callback for the time
 // that remains.
 TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
@@ -378,12 +378,12 @@ TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest) {
   };
   TestInterpreterWrapper wrapper(interpreter.get(), &initial_hwprops);
 
-  HardwareState hs = make_hwstate(1, 0, 0, 0, NULL);
+  HardwareState hs = make_hwstate(1, 0, 0, 0, nullptr);
 
   base_interpreter = new LookaheadFilterInterpreterTestInterpreter;
   base_interpreter->timer_return_ = 1.0;
   interpreter.reset(new LookaheadFilterInterpreter(
-      NULL, base_interpreter, NULL));
+      nullptr, base_interpreter, nullptr));
   wrapper.Reset(interpreter.get());
   interpreter->min_delay_.val_ = 0.05;
 
@@ -415,7 +415,7 @@ TEST(LookaheadFilterInterpreterTest, TimeGoesBackwardsTest) {
                                       1.0);  // dy
   base_interpreter->return_values_.push_back(expected_movement);
   base_interpreter->return_values_.push_back(expected_movement);
-  LookaheadFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  LookaheadFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
 
   HardwareProperties initial_hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -509,7 +509,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolateHwStateTest) {
 }
 
 TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
@@ -561,18 +561,18 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
                 0,  // dx
                 3));  // dy
     interpreter.reset(new LookaheadFilterInterpreter(
-        NULL, base_interpreter, NULL));
+        nullptr, base_interpreter, nullptr));
     wrapper.Reset(interpreter.get());
     interpreter->min_delay_.val_ = 0.05;
 
     stime_t timeout = NO_DEADLINE;
     Gesture* out = wrapper.SyncInterpret(&hs[0], &timeout);
-    EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
+    EXPECT_EQ(nullptr, out);
     EXPECT_GT(timeout, 0);
     const size_t next_idx = should_interpolate ? 2 : 1;
     timeout = NO_DEADLINE;
     out = wrapper.SyncInterpret(&hs[next_idx], &timeout);
-    EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), out);
+    EXPECT_EQ(nullptr, out);
     EXPECT_GT(timeout, 0);
 
     // Fetch the gestures
@@ -581,7 +581,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
     do {
       timeout = NO_DEADLINE;
       out = wrapper.HandleTimer(now, &timeout);
-      EXPECT_NE(reinterpret_cast<Gesture*>(NULL), out);
+      EXPECT_NE(nullptr, out);
       gs_count++;
       now += timeout;
     } while(timeout > 0.0);
@@ -590,7 +590,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
 }
 
 TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
@@ -634,7 +634,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
               0,  // dx
               2));  // dy
   interpreter.reset(new LookaheadFilterInterpreter(
-      NULL, base_interpreter, NULL));
+      nullptr, base_interpreter, nullptr));
   interpreter->min_delay_.val_ = 0.017;
   wrapper.Reset(interpreter.get());
 
@@ -665,7 +665,7 @@ struct HardwareStateLastId {
 };
 
 TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
@@ -725,7 +725,7 @@ TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
               0,  // dx
               1));  // dy
   interpreter.reset(new LookaheadFilterInterpreter(
-      NULL, base_interpreter, NULL));
+      nullptr, base_interpreter, nullptr));
   wrapper.Reset(interpreter.get());
 
   for (size_t i = 0; i < arraysize(hsid); i++) {
@@ -741,7 +741,7 @@ TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
 }
 
 TEST(LookaheadFilterInterpreterTest, QuickMoveTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
@@ -784,7 +784,7 @@ TEST(LookaheadFilterInterpreterTest, QuickMoveTest) {
 
   base_interpreter = new LookaheadFilterInterpreterTestInterpreter;
   interpreter.reset(new LookaheadFilterInterpreter(
-      NULL, base_interpreter, NULL));
+      nullptr, base_interpreter, nullptr));
   wrapper.Reset(interpreter.get());
 
   stime_t timeout = NO_DEADLINE;
@@ -837,7 +837,7 @@ struct QuickSwipeTestInputs {
 // Based on a couple quick swipes of 2 fingers on Alex, makes sure that we
 // don't drumroll-separate the fingers.
 TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
@@ -878,7 +878,7 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
 
   base_interpreter = new LookaheadFilterInterpreterTestInterpreter;
   interpreter.reset(new LookaheadFilterInterpreter(
-      NULL, base_interpreter, NULL));
+      nullptr, base_interpreter, nullptr));
   wrapper.Reset(interpreter.get());
 
   interpreter->min_delay_.val_ = 0.017;
@@ -886,9 +886,9 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
 
   // Prime it w/ a dummy hardware state
   stime_t timeout = NO_DEADLINE;
-  HardwareState temp_hs = make_hwstate(0.000001, 0, 0, 0, NULL);
+  HardwareState temp_hs = make_hwstate(0.000001, 0, 0, 0, nullptr);
   wrapper.SyncInterpret(&temp_hs, &timeout);
-  wrapper.HandleTimer(temp_hs.timestamp + timeout, NULL);
+  wrapper.HandleTimer(temp_hs.timestamp + timeout, nullptr);
 
   std::set<short> input_ids;
 
@@ -934,7 +934,7 @@ struct CyapaDrumrollTestInputs {
 // Replays a couple instances of drumroll from a Cyapa system as reported by
 // Doug Anderson.
 TEST(LookaheadFilterInterpreterTest, CyapaDrumrollTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties initial_hwprops = {
@@ -1105,7 +1105,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaDrumrollTest) {
       base_interpreter = new LookaheadFilterInterpreterTestInterpreter;
       base_interpreter->expected_id_ = 1;
       interpreter.reset(new LookaheadFilterInterpreter(
-          NULL, base_interpreter, NULL));
+          nullptr, base_interpreter, nullptr));
       wrapper.Reset(interpreter.get());
     }
     if (input.jump_here_) {
@@ -1144,7 +1144,7 @@ struct CyapaQuickTwoFingerMoveTestInputs {
 TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter =
       new LookaheadFilterInterpreterTestInterpreter;
-  LookaheadFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  LookaheadFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
   interpreter.min_delay_.val_ = 0.0;
 
   HardwareProperties initial_hwprops = {
@@ -1176,7 +1176,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
   };
   // Prime it w/ a dummy hardware state
   stime_t timeout = NO_DEADLINE;
-  HardwareState temp_hs = make_hwstate(0.000001, 0, 0, 0, NULL);
+  HardwareState temp_hs = make_hwstate(0.000001, 0, 0, 0, nullptr);
   interpreter.SyncInterpret(&temp_hs, &timeout);
 
   base_interpreter->expected_ids_.insert(1);
@@ -1209,7 +1209,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
 }
 
 TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest) {
-  LookaheadFilterInterpreterTestInterpreter* base_interpreter = NULL;
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
   HardwareProperties hwprops = {
@@ -1259,7 +1259,7 @@ TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest) {
 
   base_interpreter = new LookaheadFilterInterpreterTestInterpreter;
   interpreter.reset(new LookaheadFilterInterpreter(
-      NULL, base_interpreter, NULL));
+      nullptr, base_interpreter, nullptr));
   wrapper.Reset(interpreter.get());
 
   stime_t timeout = NO_DEADLINE;

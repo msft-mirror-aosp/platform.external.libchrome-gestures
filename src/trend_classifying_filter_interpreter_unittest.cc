@@ -14,11 +14,11 @@ class TrendClassifyingFilterInterpreterTest : public ::testing::Test {};
 class TrendClassifyingFilterInterpreterTestInterpreter : public Interpreter {
  public:
   TrendClassifyingFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         handle_timer_called_(false) {}
 
   virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_NE(static_cast<HardwareState*>(NULL), hwstate);
+    EXPECT_NE(nullptr, hwstate);
     EXPECT_EQ(1, hwstate->finger_cnt);
     prev_ = hwstate->fingers[0];
   }
@@ -35,7 +35,8 @@ class TrendClassifyingFilterInterpreterTestInterpreter : public Interpreter {
 TEST(TrendClassifyingFilterInterpreterTest, SimpleTest) {
   TrendClassifyingFilterInterpreterTestInterpreter* base_interpreter =
       new TrendClassifyingFilterInterpreterTestInterpreter;
-  TrendClassifyingFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  TrendClassifyingFilterInterpreter interpreter(
+      nullptr, base_interpreter, nullptr);
 
   EXPECT_TRUE(interpreter.trend_classifying_filter_enable_.val_);
 
@@ -57,7 +58,7 @@ TEST(TrendClassifyingFilterInterpreterTest, SimpleTest) {
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
   EXPECT_FALSE(base_interpreter->handle_timer_called_);
-  wrapper.HandleTimer(0.0, NULL);
+  wrapper.HandleTimer(0.0, nullptr);
   EXPECT_TRUE(base_interpreter->handle_timer_called_);
 
   FingerState finger_states[] = {
@@ -103,7 +104,7 @@ TEST(TrendClassifyingFilterInterpreterTest, SimpleTest) {
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
     HardwareState *hwstate = &hardware_states[i];
-    wrapper.SyncInterpret(hwstate, NULL);
+    wrapper.SyncInterpret(hwstate, nullptr);
 
     for (short j = 0; i < hwstate->finger_cnt; i++) {
       FingerState *fs = &hwstate->fingers[j];

@@ -17,7 +17,7 @@ NonLinearityFilterInterpreter::NonLinearityFilterInterpreter(
                                                         PropRegistry* prop_reg,
                                                         Interpreter* next,
                                                         Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       x_range_len_(0), y_range_len_(0), p_range_len_(0),
       enabled_(prop_reg, "Enable non-linearity correction", false),
       data_location_(prop_reg, "Non-linearity correction data file", "None") {

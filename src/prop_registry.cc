@@ -67,7 +67,7 @@ void Property::DestroyProp() {
     return;
   }
   parent_->PropProvider()->free_fn(parent_->PropProviderData(), gprop_);
-  gprop_ = NULL;
+  gprop_ = nullptr;
 }
 
 void BoolProperty::CreatePropImpl() {

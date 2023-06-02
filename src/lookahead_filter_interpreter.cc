@@ -21,7 +21,7 @@ static const stime_t kMaxDelay = 0.09;  // 90ms
 
 LookaheadFilterInterpreter::LookaheadFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       last_id_(0), max_fingers_per_hwstate_(0),
       interpreter_due_deadline_(-1.0), last_interpreted_time_(-1.0),
       min_nonsuppress_speed_(prop_reg, "Input Queue Min Nonsuppression Speed",
@@ -155,10 +155,10 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
 
   auto& tail = queue_.at(-1);
   HardwareState* hs = &tail.state_;
-  QState* prev_qs = queue_.size() < 2 ? NULL : &(queue_.at(-2));
-  HardwareState* prev_hs = prev_qs ? &prev_qs->state_ : NULL;
-  QState* prev2_qs = queue_.size() < 3 ? NULL : &(queue_.at(-3));
-  HardwareState* prev2_hs = prev2_qs ? &prev2_qs->state_ : NULL;
+  QState* prev_qs = queue_.size() < 2 ? nullptr : &(queue_.at(-2));
+  HardwareState* prev_hs = prev_qs ? &prev_qs->state_ : nullptr;
+  QState* prev2_qs = queue_.size() < 3 ? nullptr : &(queue_.at(-3));
+  HardwareState* prev2_hs = prev2_qs ? &prev2_qs->state_ : nullptr;
 
   RemoveMissingIdsFromMap(&tail.output_ids_, *hs);
   float dt = prev_hs ? hs->timestamp - prev_hs->timestamp : 1.0;
@@ -191,7 +191,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
     if (new_finger)
       continue;
     if (!prev_hs) {
-      Err("How is prev_hs NULL?");
+      Err("How is prev_hs null?");
       continue;
     }
     // Consider breaking the connection between this frame and the previous
@@ -203,7 +203,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
     FingerState* prev_fs =
         prev_hs->GetFingerState(prev_qs->output_ids_[old_id]);
     if (!prev_fs) {
-      Err("How is prev_fs NULL?");
+      Err("How is prev_fs null?");
       continue;
     }
 
@@ -214,7 +214,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
     if (dist_sq > max_dist_sq)
       max_dist_sq = dist_sq;
 
-    FingerState* prev2_fs = NULL;
+    FingerState* prev2_fs = nullptr;
 
     if (prev2_hs && MapContainsKey(prev2_qs->output_ids_, old_id))
       prev2_fs = prev2_hs->GetFingerState(prev2_qs->output_ids_[old_id]);
@@ -562,7 +562,7 @@ void LookaheadFilterInterpreter::Initialize(
     Metrics* metrics,
     MetricsProperties* mprops,
     GestureConsumer* consumer) {
-  FilterInterpreter::Initialize(hwprops, NULL, mprops, consumer);
+  FilterInterpreter::Initialize(hwprops, nullptr, mprops, consumer);
   queue_.clear();
 }
 
@@ -573,7 +573,7 @@ stime_t LookaheadFilterInterpreter::ExtraVariableDelay() const {
 LookaheadFilterInterpreter::QState::QState()
     : max_fingers_(0) {
   fs_.reset();
-  state_.fingers = NULL;
+  state_.fingers = nullptr;
 }
 
 LookaheadFilterInterpreter::QState::QState(unsigned short max_fingers)

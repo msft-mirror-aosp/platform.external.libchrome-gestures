@@ -20,7 +20,7 @@ namespace gestures {
 AccelFilterInterpreter::AccelFilterInterpreter(PropRegistry* prop_reg,
                                                Interpreter* next,
                                                Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsizeof-array-div"
       // Hack: cast tp_custom_point_/mouse_custom_point_/tp_custom_scroll_
@@ -179,14 +179,14 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
 
   // CurveSegments to use
   size_t max_segs = kMaxCurveSegs;
-  CurveSegment* segs = NULL;
+  CurveSegment* segs = nullptr;
 
-  float* dx = NULL;
-  float* dy = NULL;
+  float* dx = nullptr;
+  float* dy = nullptr;
 
   // The quantities to scale:
-  float* scale_out_x = NULL;
-  float* scale_out_y = NULL;
+  float* scale_out_x = nullptr;
+  float* scale_out_y = nullptr;
 
   // We scale ordinal values of scroll/fling gestures as well because we use
   // them in Chrome for history navigation (back/forward page gesture) and
@@ -202,8 +202,8 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
   //
   // With current scroll output scaling factor (2.5), we can reduce the length
   // required to about one inch on all devices.
-  float* scale_out_x_ordinal = NULL;
-  float* scale_out_y_ordinal = NULL;
+  float* scale_out_x_ordinal = nullptr;
+  float* scale_out_y_ordinal = nullptr;
 
   // Setup the parameters for acceleration calculations based on gesture
   // type.  Use a copy of the gesture gs during the calculations and
@@ -300,7 +300,7 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
 
   // Calculate the hypotenuse to determine the actual distance traveled
   // and the magnitude/speed.
-  if (dx != NULL && dy != NULL) {
+  if (dx != nullptr && dy != nullptr) {
     if (dt < 0.00001) {
       ProduceGesture(gs);
       return;  // Avoid division by 0

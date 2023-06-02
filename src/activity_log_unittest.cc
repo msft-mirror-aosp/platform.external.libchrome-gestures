@@ -126,7 +126,7 @@ TEST(ActivityLogTest, SimpleTest) {
 }
 
 TEST(ActivityLogTest, WrapAroundTest) {
-  ActivityLog log(NULL);
+  ActivityLog log(nullptr);
   // overfill the buffer
   const size_t fill_size = (ActivityLog::kBufferSize * 3) / 2;
   for (size_t i = 0; i < fill_size; i++)
@@ -139,7 +139,7 @@ TEST(ActivityLogTest, WrapAroundTest) {
 }
 
 TEST(ActivityLogTest, VersionTest) {
-  ActivityLog log(NULL);
+  ActivityLog log(nullptr);
   string thelog = log.Encode();
   EXPECT_TRUE(thelog.find(VCSID) != string::npos);
 }

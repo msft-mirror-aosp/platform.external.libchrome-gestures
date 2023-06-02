@@ -14,11 +14,11 @@ class MetricsFilterInterpreterTest : public ::testing::Test {};
 class MetricsFilterInterpreterTestInterpreter : public Interpreter {
  public:
   MetricsFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         handle_timer_called_(false) {}
 
   virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_NE(static_cast<HardwareState*>(NULL), hwstate);
+    EXPECT_NE(nullptr, hwstate);
     EXPECT_EQ(1, hwstate->finger_cnt);
     prev_ = hwstate->fingers[0];
   }
@@ -35,7 +35,7 @@ class MetricsFilterInterpreterTestInterpreter : public Interpreter {
 TEST(MetricsFilterInterpreterTest, SimpleTestTouchpad) {
   MetricsFilterInterpreterTestInterpreter* base_interpreter =
       new MetricsFilterInterpreterTestInterpreter;
-  MetricsFilterInterpreter interpreter(NULL, base_interpreter, NULL,
+  MetricsFilterInterpreter interpreter(nullptr, base_interpreter, nullptr,
                                        GESTURES_DEVCLASS_TOUCHPAD);
 
   HardwareProperties hwprops = {
@@ -52,7 +52,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestTouchpad) {
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
   EXPECT_FALSE(base_interpreter->handle_timer_called_);
-  wrapper.HandleTimer(0.0, NULL);
+  wrapper.HandleTimer(0.0, nullptr);
   EXPECT_TRUE(base_interpreter->handle_timer_called_);
 
   FingerState finger_states[] = {
@@ -97,7 +97,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestTouchpad) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    wrapper.SyncInterpret(&hardware_states[i], NULL);
+    wrapper.SyncInterpret(&hardware_states[i], nullptr);
   }
 
   EXPECT_EQ(interpreter.devclass_, GESTURES_DEVCLASS_TOUCHPAD);
@@ -115,7 +115,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestTouchpad) {
 TEST(MetricsFilterInterpreterTest, SimpleTestMultitouchMouse) {
   MetricsFilterInterpreterTestInterpreter* base_interpreter =
       new MetricsFilterInterpreterTestInterpreter;
-  MetricsFilterInterpreter interpreter(NULL, base_interpreter, NULL,
+  MetricsFilterInterpreter interpreter(nullptr, base_interpreter, nullptr,
                                        GESTURES_DEVCLASS_MULTITOUCH_MOUSE);
 
   HardwareProperties hwprops = {
@@ -132,7 +132,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestMultitouchMouse) {
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
   EXPECT_FALSE(base_interpreter->handle_timer_called_);
-  wrapper.HandleTimer(0.0, NULL);
+  wrapper.HandleTimer(0.0, nullptr);
   EXPECT_TRUE(base_interpreter->handle_timer_called_);
 
   FingerState finger_states[] = {
@@ -177,7 +177,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestMultitouchMouse) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    wrapper.SyncInterpret(&hardware_states[i], NULL);
+    wrapper.SyncInterpret(&hardware_states[i], nullptr);
   }
 
   EXPECT_EQ(interpreter.devclass_, GESTURES_DEVCLASS_MULTITOUCH_MOUSE);
@@ -195,7 +195,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestMultitouchMouse) {
 TEST(MetricsFilterInterpreterTest, SimpleTestPointingStick) {
   MetricsFilterInterpreterTestInterpreter* base_interpreter =
       new MetricsFilterInterpreterTestInterpreter;
-  MetricsFilterInterpreter interpreter(NULL, base_interpreter, NULL,
+  MetricsFilterInterpreter interpreter(nullptr, base_interpreter, nullptr,
                                        GESTURES_DEVCLASS_POINTING_STICK);
 
   HardwareProperties hwprops = {
@@ -212,7 +212,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestPointingStick) {
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
   EXPECT_FALSE(base_interpreter->handle_timer_called_);
-  wrapper.HandleTimer(0.0, NULL);
+  wrapper.HandleTimer(0.0, nullptr);
   EXPECT_TRUE(base_interpreter->handle_timer_called_);
 
   EXPECT_EQ(interpreter.devclass_, GESTURES_DEVCLASS_POINTING_STICK);

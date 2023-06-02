@@ -14,11 +14,11 @@ class StationaryWiggleFilterInterpreterTest : public ::testing::Test {};
 class StationaryWiggleFilterInterpreterTestInterpreter : public Interpreter {
  public:
   StationaryWiggleFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         handle_timer_called_(false) {}
 
   virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_NE(static_cast<HardwareState*>(NULL), hwstate);
+    EXPECT_NE(nullptr, hwstate);
     EXPECT_EQ(1, hwstate->finger_cnt);
     prev_ = hwstate->fingers[0];
   }
@@ -53,7 +53,8 @@ TEST(StationaryWiggleFilterInterpreterTest, SimpleTest) {
 
   StationaryWiggleFilterInterpreterTestInterpreter* base_interpreter =
       new StationaryWiggleFilterInterpreterTestInterpreter;
-  StationaryWiggleFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  StationaryWiggleFilterInterpreter interpreter(
+      nullptr, base_interpreter, nullptr);
 
   EXPECT_FALSE(interpreter.enabled_.val_);
   interpreter.enabled_.val_ = true;
@@ -72,7 +73,7 @@ TEST(StationaryWiggleFilterInterpreterTest, SimpleTest) {
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
   EXPECT_FALSE(base_interpreter->handle_timer_called_);
-  wrapper.HandleTimer(0.0, NULL);
+  wrapper.HandleTimer(0.0, nullptr);
   EXPECT_TRUE(base_interpreter->handle_timer_called_);
 
   FingerState finger_states[] = {
@@ -134,7 +135,7 @@ TEST(StationaryWiggleFilterInterpreterTest, SimpleTest) {
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
     HardwareState *hwstate = &hardware_states[i];
-    wrapper.SyncInterpret(hwstate, NULL);
+    wrapper.SyncInterpret(hwstate, nullptr);
     for (int j = 0; j < hwstate->finger_cnt; ++j) {
       FingerState *fs = &hwstate->fingers[j];
       EXPECT_EQ(fs->flags & (GESTURES_FINGER_WARP_X |

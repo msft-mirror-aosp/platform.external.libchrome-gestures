@@ -15,7 +15,7 @@ namespace gestures {
 // Takes ownership of |next|:
 ClickWiggleFilterInterpreter::ClickWiggleFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       button_edge_occurred_(-1.0),
       prev_buttons_(0),
       wiggle_max_dist_(prop_reg, "Wiggle Max Distance", 5.5),

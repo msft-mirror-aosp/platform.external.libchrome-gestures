@@ -18,7 +18,7 @@ namespace {
 class FlingStopFilterInterpreterTestInterpreter : public Interpreter {
  public:
   FlingStopFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         sync_interpret_called_(false), handle_timer_called_(true),
         next_timeout_(NO_DEADLINE) {}
 
@@ -55,7 +55,7 @@ struct SimpleTestInputs {
 TEST(FlingStopFilterInterpreterTest, SimpleTest) {
   FlingStopFilterInterpreterTestInterpreter* base_interpreter =
       new FlingStopFilterInterpreterTestInterpreter;
-  FlingStopFilterInterpreter interpreter(NULL, base_interpreter, NULL,
+  FlingStopFilterInterpreter interpreter(nullptr, base_interpreter, nullptr,
                                          GESTURES_DEVCLASS_TOUCHPAD);
   TestInterpreterWrapper wrapper(&interpreter);
 
@@ -111,7 +111,7 @@ TEST(FlingStopFilterInterpreterTest, SimpleTest) {
 
     stime_t timeout = kND;
 
-    Gesture* ret = NULL;
+    Gesture* ret = nullptr;
     if (input.touch_cnt >= 0) {
       FingerState fs[5];
       memset(fs, 0, sizeof(fs));

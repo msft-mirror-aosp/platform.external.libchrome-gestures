@@ -101,7 +101,7 @@ bool FingerEnergyHistory::operator!=(const FingerEnergyHistory& that) const {
 
 StationaryWiggleFilterInterpreter::StationaryWiggleFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       enabled_(prop_reg, "Stationary Wiggle Filter Enabled", false),
       threshold_(prop_reg, "Finger Moving Energy", 0.012),
       hysteresis_(prop_reg, "Finger Moving Hysteresis", 0.006) {
