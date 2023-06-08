@@ -46,16 +46,16 @@ void Interpreter::Trace(const char* message, const char* name) {
     tracer_->Trace(message, name);
 }
 
-void Interpreter::SyncInterpret(HardwareState* hwstate,
+void Interpreter::SyncInterpret(HardwareState& hwstate,
                                     stime_t* timeout) {
   AssertWithReturn(initialized_);
-  if (enable_event_logging_ && log_.get() && hwstate) {
+  if (enable_event_logging_ && log_.get()) {
     Trace("log: start: ", "LogHardwareState");
-    log_->LogHardwareState(*hwstate);
+    log_->LogHardwareState(hwstate);
     Trace("log: end: ", "LogHardwareState");
   }
   if (own_metrics_)
-    own_metrics_->Update(*hwstate);
+    own_metrics_->Update(hwstate);
 
   Trace("SyncInterpret: start: ", name());
   SyncInterpretImpl(hwstate, timeout);

@@ -43,7 +43,7 @@ LookaheadFilterInterpreter::LookaheadFilterInterpreter(
   InitName();
 }
 
-void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                                        stime_t* timeout) {
   // Keep track of where the last node is in the current queue_
   auto const queue_was_not_empty = !queue_.empty();
@@ -51,9 +51,9 @@ void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
 
   // Allocate and initialize a new node on the end of the queue_
   auto& new_node = queue_.emplace_back(hwprops_->max_finger_cnt);
-  new_node.state_.DeepCopy(*hwstate, hwprops_->max_finger_cnt);
+  new_node.state_.DeepCopy(hwstate, hwprops_->max_finger_cnt);
   double delay = max(0.0, min<stime_t>(kMaxDelay, min_delay_.val_));
-  new_node.due_ = hwstate->timestamp + delay;
+  new_node.due_ = hwstate.timestamp + delay;
 
   if (queue_was_not_empty) {
     new_node.output_ids_ = old_back_node->output_ids_;
@@ -66,7 +66,7 @@ void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
       auto q_node_iter = queue_.begin();
       do {
         if (!q_node_iter->completed_)
-          next_->SyncInterpret(&q_node_iter->state_, &next_timeout);
+          next_->SyncInterpret(q_node_iter->state_, &next_timeout);
         ++q_node_iter;
         queue_.pop_front();
       } while (queue_.size() > 1);
@@ -79,16 +79,16 @@ void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   AttemptInterpolation();
 
   // Update the timeout and interpreter_due_deadline_ based on above processing
-  UpdateInterpreterDue(interpreter_due_deadline_, hwstate->timestamp, timeout);
+  UpdateInterpreterDue(interpreter_due_deadline_, hwstate.timestamp, timeout);
 
   // Make sure to handle any state expiration processing that is needed
-  HandleTimerImpl(hwstate->timestamp, timeout);
+  HandleTimerImpl(hwstate.timestamp, timeout);
 
   // Copy finger flags for upstream filters.
   QState& q_node = queue_.front();
-  if (q_node.state_.SameFingersAs(*hwstate)) {
-    for (size_t i = 0; i < hwstate->finger_cnt; i++) {
-      hwstate->fingers[i].flags = q_node.state_.fingers[i].flags;
+  if (q_node.state_.SameFingersAs(hwstate)) {
+    for (size_t i = 0; i < hwstate.finger_cnt; i++) {
+      hwstate.fingers[i].flags = q_node.state_.fingers[i].flags;
    }
   }
 }
@@ -473,7 +473,7 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
         node->state_.msc_timestamp,
       };
       next_timeout = NO_DEADLINE;
-      next_->SyncInterpret(&hs_copy, &next_timeout);
+      next_->SyncInterpret(hs_copy, &next_timeout);
 
       // Clear previously completed nodes, but keep at least two nodes.
       while (queue_.size() > 2 && queue_.front().completed_) {

@@ -1139,70 +1139,70 @@ ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
   keyboard_touched_timeval_low_.SetDelegate(this);
 }
 
-void ImmediateInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void ImmediateInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                              stime_t* timeout) {
   if (!state_buffer_.Get(0)->fingers) {
     Err("Must call SetHardwareProperties() before Push().");
     return;
   }
 
-  state_buffer_.PushState(*hwstate);
+  state_buffer_.PushState(hwstate);
 
-  FillOriginInfo(*hwstate);
+  FillOriginInfo(hwstate);
   result_.type = kGestureTypeNull;
-  const bool same_fingers = state_buffer_.Get(1)->SameFingersAs(*hwstate) &&
-      (hwstate->buttons_down == state_buffer_.Get(1)->buttons_down);
+  const bool same_fingers = state_buffer_.Get(1)->SameFingersAs(hwstate) &&
+      (hwstate.buttons_down == state_buffer_.Get(1)->buttons_down);
   if (!same_fingers) {
     // Fingers changed, do nothing this time
     FingerMap new_gs_fingers;
-    FingerMap gs_fingers = GetGesturingFingers(*hwstate);
+    FingerMap gs_fingers = GetGesturingFingers(hwstate);
     std::set_difference(gs_fingers.begin(), gs_fingers.end(),
                         non_gs_fingers_.begin(), non_gs_fingers_.end(),
                         std::inserter(new_gs_fingers, new_gs_fingers.begin()));
-    ResetSameFingersState(*hwstate);
-    FillStartPositions(*hwstate);
+    ResetSameFingersState(hwstate);
+    FillStartPositions(hwstate);
     if (pinch_enable_.val_ &&
-        (hwstate->finger_cnt <= 2 || new_gs_fingers.size() != 2)) {
+        (hwstate.finger_cnt <= 2 || new_gs_fingers.size() != 2)) {
       // Release the zoom lock
-      UpdatePinchState(*hwstate, true, new_gs_fingers);
+      UpdatePinchState(hwstate, true, new_gs_fingers);
     }
     moving_finger_id_ = -1;
   }
 
-  if (hwstate->finger_cnt < state_buffer_.Get(1)->finger_cnt &&
-      AnyGesturingFingerLeft(*hwstate, prev_active_gs_fingers_)) {
-    finger_leave_time_ = hwstate->timestamp;
+  if (hwstate.finger_cnt < state_buffer_.Get(1)->finger_cnt &&
+      AnyGesturingFingerLeft(hwstate, prev_active_gs_fingers_)) {
+    finger_leave_time_ = hwstate.timestamp;
   }
 
   // Check if clock changed backwards
-  if (hwstate->timestamp < state_buffer_.Get(1)->timestamp)
+  if (hwstate.timestamp < state_buffer_.Get(1)->timestamp)
     ResetTime();
 
-  UpdatePointingFingers(*hwstate);
-  UpdateThumbState(*hwstate);
-  FingerMap newly_moving_fingers = UpdateMovingFingers(*hwstate);
-  UpdateNonGsFingers(*hwstate);
+  UpdatePointingFingers(hwstate);
+  UpdateThumbState(hwstate);
+  FingerMap newly_moving_fingers = UpdateMovingFingers(hwstate);
+  UpdateNonGsFingers(hwstate);
   FingerMap new_gs_fingers;
-  FingerMap gs_fingers = GetGesturingFingers(*hwstate);
+  FingerMap gs_fingers = GetGesturingFingers(hwstate);
   std::set_difference(gs_fingers.begin(), gs_fingers.end(),
                       non_gs_fingers_.begin(), non_gs_fingers_.end(),
                       std::inserter(new_gs_fingers, new_gs_fingers.begin()));
   if (gs_fingers != prev_gs_fingers_)
-    gs_changed_time_ = hwstate->timestamp;
-  UpdateStartedMovingTime(hwstate->timestamp, gs_fingers, newly_moving_fingers);
+    gs_changed_time_ = hwstate.timestamp;
+  UpdateStartedMovingTime(hwstate.timestamp, gs_fingers, newly_moving_fingers);
 
-  UpdateButtons(*hwstate, timeout);
-  UpdateTapGesture(hwstate,
+  UpdateButtons(hwstate, timeout);
+  UpdateTapGesture(&hwstate,
                    gs_fingers,
                    same_fingers,
-                   hwstate->timestamp,
+                   hwstate.timestamp,
                    timeout);
 
   FingerMap active_gs_fingers;
-  UpdateCurrentGestureType(*hwstate, gs_fingers, &active_gs_fingers);
+  UpdateCurrentGestureType(hwstate, gs_fingers, &active_gs_fingers);
   GenerateFingerLiftGesture();
   if (result_.type == kGestureTypeNull)
-    FillResultGesture(*hwstate, active_gs_fingers);
+    FillResultGesture(hwstate, active_gs_fingers);
 
   // Prevent moves while in a tap
   if ((tap_to_click_state_ == kTtcFirstTapBegan ||

@@ -24,7 +24,7 @@ class LoggingFilterInterpreterResetLogTestInterpreter : public Interpreter {
   LoggingFilterInterpreterResetLogTestInterpreter()
       : Interpreter(nullptr, nullptr, false) {}
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate,
+  virtual void SyncInterpretImpl(HardwareState& hwstate,
                                      stime_t* timeout) {}
   virtual void SetHardwarePropertiesImpl(const HardwareProperties& hw_props) {
   }
@@ -60,17 +60,17 @@ TEST(LoggingFilterInterpreterTest, LogResetHandlerTest) {
   };
   HardwareState hardware_state = make_hwstate(200000, 0, 1, 1, &finger_state);
   stime_t timeout = NO_DEADLINE;
-  wrapper.SyncInterpret(&hardware_state, &timeout);
+  wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(interpreter.log_->size(), 1);
 
-  wrapper.SyncInterpret(&hardware_state, &timeout);
+  wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(interpreter.log_->size(), 2);
 
   // Assume the ResetLog property is set.
   interpreter.logging_reset_.HandleGesturesPropWritten();
   EXPECT_EQ(interpreter.log_->size(), 0);
 
-  wrapper.SyncInterpret(&hardware_state, &timeout);
+  wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(interpreter.log_->size(), 1);
 
   std::string str = interpreter.EncodeActivityLog();

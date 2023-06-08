@@ -28,13 +28,13 @@ class T5R2CorrectingFilterInterpreterTestInterpreter : public Interpreter {
   T5R2CorrectingFilterInterpreterTestInterpreter()
       : Interpreter(nullptr, nullptr, false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     if (expected_hardware_state_) {
-      EXPECT_EQ(expected_hardware_state_->timestamp, hwstate->timestamp);
-      EXPECT_EQ(expected_hardware_state_->buttons_down, hwstate->buttons_down);
-      EXPECT_EQ(expected_hardware_state_->finger_cnt, hwstate->finger_cnt);
-      EXPECT_EQ(expected_hardware_state_->touch_cnt, hwstate->touch_cnt);
-      EXPECT_EQ(expected_hardware_state_->fingers, hwstate->fingers);
+      EXPECT_EQ(expected_hardware_state_->timestamp, hwstate.timestamp);
+      EXPECT_EQ(expected_hardware_state_->buttons_down, hwstate.buttons_down);
+      EXPECT_EQ(expected_hardware_state_->finger_cnt, hwstate.finger_cnt);
+      EXPECT_EQ(expected_hardware_state_->touch_cnt, hwstate.touch_cnt);
+      EXPECT_EQ(expected_hardware_state_->fingers, hwstate.fingers);
     }
     if (return_values_.empty())
       return;
@@ -118,7 +118,7 @@ TEST(T5R2CorrectingFilterInterpreterTest, SimpleTest) {
       expected_hs.touch_cnt = 0;
     base_interpreter->expected_hardware_state_ = &expected_hs;
     stime_t timeout = NO_DEADLINE;
-    EXPECT_EQ(nullptr, wrapper.SyncInterpret(&hse[i].hs, &timeout));
+    EXPECT_EQ(nullptr, wrapper.SyncInterpret(hse[i].hs, &timeout));
     base_interpreter->expected_hardware_state_ = nullptr;
     EXPECT_LT(timeout, 0.0);
   }

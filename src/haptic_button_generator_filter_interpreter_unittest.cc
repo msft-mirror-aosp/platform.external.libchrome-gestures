@@ -17,7 +17,8 @@ class HapticButtonGeneratorFilterInterpreterTestInterpreter :
  public:
   HapticButtonGeneratorFilterInterpreterTestInterpreter()
       : Interpreter(nullptr, nullptr, false) {}
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     if (return_value_.type != kGestureTypeNull)
       ProduceGesture(return_value_);
   }
@@ -122,7 +123,7 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, SimpleTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs[i], &timeout);
+    wrapper.SyncInterpret(hs[i], &timeout);
     EXPECT_EQ(hs[i].buttons_down, expected_buttons[i]);
   }
 }
@@ -177,7 +178,7 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, NotHapticTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs[i], &timeout);
+    wrapper.SyncInterpret(hs[i], &timeout);
     EXPECT_EQ(hs[i].buttons_down, expected_buttons[i]);
   }
 }
@@ -253,7 +254,7 @@ TEST(HapticButtonGeneratorFilterInterpreterTest,
           static_cast<unsigned short>(input.touch_count);
       HardwareState hs = make_hwstate(input.time, 0, touch_count, touch_count,
                                       input.fs);
-      wrapper.SyncInterpret(&hs, &timeout);
+      wrapper.SyncInterpret(hs, &timeout);
       EXPECT_EQ(hs.buttons_down, input.expected_button);
     }
   }
@@ -334,7 +335,7 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, DynamicThresholdTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs[i].first, &timeout);
+    wrapper.SyncInterpret(hs[i].first, &timeout);
     EXPECT_EQ(hs[i].first.buttons_down, hs[i].second);
   }
 }
@@ -399,7 +400,7 @@ TEST(HapticButtonGeneratorFilterInterpreterTest, PalmTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs[i], &timeout);
+    wrapper.SyncInterpret(hs[i], &timeout);
     EXPECT_EQ(hs[i].buttons_down, expected_buttons[i]);
   }
 }

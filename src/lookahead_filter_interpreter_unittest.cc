@@ -32,30 +32,30 @@ class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
         expected_flags_(0), expected_flags_at_(-1),
         expected_flags_at_occurred_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    for (size_t i = 0; i < hwstate->finger_cnt; i++)
-      all_ids_.insert(hwstate->fingers[i].tracking_id);
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
+    for (size_t i = 0; i < hwstate.finger_cnt; i++)
+      all_ids_.insert(hwstate.fingers[i].tracking_id);
     if (expected_id_ >= 0) {
-      EXPECT_EQ(1, hwstate->finger_cnt);
-      EXPECT_EQ(expected_id_, hwstate->fingers[0].tracking_id);
+      EXPECT_EQ(1, hwstate.finger_cnt);
+      EXPECT_EQ(expected_id_, hwstate.fingers[0].tracking_id);
     }
     if (!expected_ids_.empty()) {
-      EXPECT_EQ(expected_ids_.size(), hwstate->finger_cnt);
+      EXPECT_EQ(expected_ids_.size(), hwstate.finger_cnt);
       for (std::set<short>::iterator it = expected_ids_.begin(),
                e = expected_ids_.end(); it != e; ++it) {
-        EXPECT_TRUE(hwstate->GetFingerState(*it)) << "Can't find ID " << *it
+        EXPECT_TRUE(hwstate.GetFingerState(*it)) << "Can't find ID " << *it
                                                   << " at "
-                                                  << hwstate->timestamp;
+                                                  << hwstate.timestamp;
       }
     }
     if (expected_flags_at_ >= 0 &&
-        DoubleEq(expected_flags_at_, hwstate->timestamp) &&
-        hwstate->finger_cnt > 0) {
-      EXPECT_EQ(expected_flags_, hwstate->fingers[0].flags);
+        DoubleEq(expected_flags_at_, hwstate.timestamp) &&
+        hwstate.finger_cnt > 0) {
+      EXPECT_EQ(expected_flags_, hwstate.fingers[0].flags);
       expected_flags_at_occurred_ = true;
     }
     if (clear_incoming_hwstates_)
-      hwstate->finger_cnt = 0;
+      hwstate.finger_cnt = 0;
     if (timer_return_ >= 0.0) {
       *timeout = timer_return_;
       timer_return_ = NO_DEADLINE;
@@ -161,7 +161,7 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
       expected_timeout = interpreter->min_delay_.val_;
     }
     stime_t timeout = NO_DEADLINE;
-    Gesture* out = wrapper.SyncInterpret(&hs[i], &timeout);
+    Gesture* out = wrapper.SyncInterpret(hs[i], &timeout);
     if (out) {
       EXPECT_EQ(kGestureTypeFling, out->type);
       EXPECT_EQ(GESTURES_FLING_TAP_DOWN, out->details.fling.fling_state);
@@ -211,10 +211,10 @@ class LookaheadFilterInterpreterVariableDelayTestInterpreter
   LookaheadFilterInterpreterVariableDelayTestInterpreter()
       : Interpreter(nullptr, nullptr, false), interpret_call_count_ (0) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     interpret_call_count_++;
-    EXPECT_EQ(1, hwstate->finger_cnt);
-    finger_ids_.insert(hwstate->fingers[0].tracking_id);
+    EXPECT_EQ(1, hwstate.finger_cnt);
+    finger_ids_.insert(hwstate.fingers[0].tracking_id);
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
@@ -263,7 +263,7 @@ TEST(LookaheadFilterInterpreterTest, VariableDelayTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs[i], &timeout);
+    wrapper.SyncInterpret(hs[i], &timeout);
     stime_t next_input = i < (arraysize(hs) - 1) ? hs[i + 1].timestamp :
         INFINITY;
     stime_t now = hs[i].timestamp;
@@ -284,16 +284,15 @@ class LookaheadFilterInterpreterNoTapSetTestInterpreter
   LookaheadFilterInterpreterNoTapSetTestInterpreter()
       : Interpreter(nullptr, nullptr, false), interpret_call_count_(0) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_EQ(expected_finger_cnts_[interpret_call_count_],
-              hwstate->finger_cnt);
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
+    EXPECT_EQ(expected_finger_cnts_[interpret_call_count_], hwstate.finger_cnt);
     interpret_call_count_++;
-    if (hwstate->finger_cnt > 0)
-      EXPECT_TRUE(hwstate->fingers[0].flags & GESTURES_FINGER_NO_TAP);
+    if (hwstate.finger_cnt > 0)
+      EXPECT_TRUE(hwstate.fingers[0].flags & GESTURES_FINGER_NO_TAP);
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
-    EXPECT_TRUE(false);
+    FAIL() << "This interpreter doesn't use timers";
   }
 
   std::set<short> finger_ids_;
@@ -344,7 +343,7 @@ TEST(LookaheadFilterInterpreterTest, NoTapSetTest) {
   for (size_t i = 0; i < arraysize(hs); i++) {
     base_interpreter->expected_finger_cnts_.push_back(hs[i].finger_cnt);
     stime_t timeout = NO_DEADLINE;
-    interpreter.SyncInterpret(&hs[i], &timeout);
+    interpreter.SyncInterpret(hs[i], &timeout);
     stime_t next_input = i < (arraysize(hs) - 1) ? hs[i + 1].timestamp :
         INFINITY;
     stime_t now = hs[i].timestamp;
@@ -388,7 +387,7 @@ TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest) {
   interpreter->min_delay_.val_ = 0.05;
 
   stime_t timeout = NO_DEADLINE;
-  Gesture* out = wrapper.SyncInterpret(&hs, &timeout);
+  Gesture* out = wrapper.SyncInterpret(hs, &timeout);
   EXPECT_EQ(nullptr, out);
   EXPECT_FLOAT_EQ(interpreter->min_delay_.val_, timeout);
 
@@ -463,7 +462,7 @@ TEST(LookaheadFilterInterpreterTest, TimeGoesBackwardsTest) {
   };
   for (size_t i = 0; i < arraysize(hs); ++i) {
     stime_t timeout_requested = -1.0;
-    Gesture* result = wrapper.SyncInterpret(&hs[i], &timeout_requested);
+    Gesture* result = wrapper.SyncInterpret(hs[i], &timeout_requested);
     if (result && result->type == kGestureTypeMove)
       return;  // Success!
   }
@@ -566,12 +565,12 @@ TEST(LookaheadFilterInterpreterTest, InterpolateTest) {
     interpreter->min_delay_.val_ = 0.05;
 
     stime_t timeout = NO_DEADLINE;
-    Gesture* out = wrapper.SyncInterpret(&hs[0], &timeout);
+    Gesture* out = wrapper.SyncInterpret(hs[0], &timeout);
     EXPECT_EQ(nullptr, out);
     EXPECT_GT(timeout, 0);
     const size_t next_idx = should_interpolate ? 2 : 1;
     timeout = NO_DEADLINE;
-    out = wrapper.SyncInterpret(&hs[next_idx], &timeout);
+    out = wrapper.SyncInterpret(hs[next_idx], &timeout);
     EXPECT_EQ(nullptr, out);
     EXPECT_GT(timeout, 0);
 
@@ -639,7 +638,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
   wrapper.Reset(interpreter.get());
 
   stime_t timeout = NO_DEADLINE;
-  Gesture* out = wrapper.SyncInterpret(&hs[0], &timeout);
+  Gesture* out = wrapper.SyncInterpret(hs[0], &timeout);
   EXPECT_EQ(nullptr, out);
   EXPECT_FLOAT_EQ(timeout, interpreter->min_delay_.val_);
 
@@ -652,7 +651,7 @@ TEST(LookaheadFilterInterpreterTest, InterpolationOverdueTest) {
   EXPECT_DOUBLE_EQ(timeout, 0.700);
 
   timeout = NO_DEADLINE;
-  out = wrapper.SyncInterpret(&hs[1], &timeout);
+  out = wrapper.SyncInterpret(hs[1], &timeout);
   ASSERT_NE(nullptr, out);
   EXPECT_EQ(kGestureTypeMove, out->type);
   EXPECT_EQ(2, out->details.move.dy);
@@ -730,7 +729,7 @@ TEST(LookaheadFilterInterpreterTest, DrumrollTest) {
 
   for (size_t i = 0; i < arraysize(hsid); i++) {
     stime_t timeout = NO_DEADLINE;
-    Gesture* out = wrapper.SyncInterpret(&hsid[i].hs, &timeout);
+    Gesture* out = wrapper.SyncInterpret(hsid[i].hs, &timeout);
     if (out) {
       EXPECT_EQ(kGestureTypeFling, out->type);
       EXPECT_EQ(GESTURES_FLING_TAP_DOWN, out->details.fling.fling_state);
@@ -791,36 +790,36 @@ TEST(LookaheadFilterInterpreterTest, QuickMoveTest) {
   const auto& queue = interpreter->queue_;
 
   // Pushing the first event
-  wrapper.SyncInterpret(&hs[0], &timeout);
+  wrapper.SyncInterpret(hs[0], &timeout);
   EXPECT_EQ(queue.size(), 1);
   EXPECT_EQ(queue.back().fs_[0].tracking_id, 1);
 
   // Expecting Drumroll detected and ID reassigned 1 -> 2.
-  wrapper.SyncInterpret(&hs[1], &timeout);
+  wrapper.SyncInterpret(hs[1], &timeout);
   EXPECT_EQ(queue.size(), 2);
   EXPECT_EQ(queue.back().fs_[0].tracking_id, 2);
 
   // Expecting Drumroll detected and ID reassigned 1 -> 3.
-  wrapper.SyncInterpret(&hs[2], &timeout);
+  wrapper.SyncInterpret(hs[2], &timeout);
   EXPECT_EQ(queue.size(), 3);
   EXPECT_EQ(queue.back().fs_[0].tracking_id, 3);
 
   // Removing the touch.
-  wrapper.SyncInterpret(&hs[3], &timeout);
+  wrapper.SyncInterpret(hs[3], &timeout);
   EXPECT_EQ(queue.size(), 4);
 
   // New event comes, old events removed from the queue.
   // New finger tracking ID assigned 2 - > 4.
-  wrapper.SyncInterpret(&hs[4], &timeout);
+  wrapper.SyncInterpret(hs[4], &timeout);
   EXPECT_EQ(queue.size(), 2);
   EXPECT_EQ(queue.back().fs_[0].tracking_id, 4);
 
   // Expecting Drumroll detected and ID reassigned 2 -> 5.
-  wrapper.SyncInterpret(&hs[5], &timeout);
+  wrapper.SyncInterpret(hs[5], &timeout);
   EXPECT_EQ(queue.back().fs_[0].tracking_id, 5);
 
   // Expecting Quick movement detected and ID correction 5 -> 4.
-  wrapper.SyncInterpret(&hs[6], &timeout);
+  wrapper.SyncInterpret(hs[6], &timeout);
   EXPECT_EQ(interpreter->queue_.at(-1).fs_[0].tracking_id, 4);
   EXPECT_EQ(interpreter->queue_.at(-2).fs_[0].tracking_id, 4);
   EXPECT_EQ(interpreter->queue_.at(-3).fs_[0].tracking_id, 4);
@@ -887,7 +886,7 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
   // Prime it w/ a dummy hardware state
   stime_t timeout = NO_DEADLINE;
   HardwareState temp_hs = make_hwstate(0.000001, 0, 0, 0, nullptr);
-  wrapper.SyncInterpret(&temp_hs, &timeout);
+  wrapper.SyncInterpret(temp_hs, &timeout);
   wrapper.HandleTimer(temp_hs.timestamp + timeout, nullptr);
 
   std::set<short> input_ids;
@@ -906,7 +905,7 @@ TEST(LookaheadFilterInterpreterTest, QuickSwipeTest) {
       input_ids.insert(fs[idx].tracking_id);
 
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs, &timeout);
+    wrapper.SyncInterpret(hs, &timeout);
     if (timeout >= 0) {
       stime_t next_timestamp = INFINITY;
       if (i < arraysize(inputs) - 1)
@@ -1114,7 +1113,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaDrumrollTest) {
       base_interpreter->expected_flags_at_ = input.now_;
     }
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs, &timeout);
+    wrapper.SyncInterpret(hs, &timeout);
     if (timeout >= 0) {
       stime_t next_timestamp = INFINITY;
       if (i < arraysize(inputs) - 1)
@@ -1177,7 +1176,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
   // Prime it w/ a dummy hardware state
   stime_t timeout = NO_DEADLINE;
   HardwareState temp_hs = make_hwstate(0.000001, 0, 0, 0, nullptr);
-  interpreter.SyncInterpret(&temp_hs, &timeout);
+  interpreter.SyncInterpret(temp_hs, &timeout);
 
   base_interpreter->expected_ids_.insert(1);
   base_interpreter->expected_ids_.insert(2);
@@ -1192,7 +1191,7 @@ TEST(LookaheadFilterInterpreterTest, CyapaQuickTwoFingerMoveTest) {
     HardwareState hs =
         make_hwstate(input.now, 0, arraysize(fs), arraysize(fs), fs);
     timeout = NO_DEADLINE;
-    interpreter.SyncInterpret(&hs, &timeout);
+    interpreter.SyncInterpret(hs, &timeout);
     if (timeout >= 0) {
       stime_t next_timestamp = INFINITY;
       if (i < arraysize(inputs) - 1)
@@ -1265,12 +1264,12 @@ TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest) {
   stime_t timeout = NO_DEADLINE;
   const auto& queue = interpreter->queue_;
 
-  wrapper.SyncInterpret(&hs[0], &timeout);
+  wrapper.SyncInterpret(hs[0], &timeout);
   EXPECT_EQ(queue.back().fs_[0].tracking_id, 20);
 
   // Test if the fingers in queue have the same tracking ids from input.
   for (size_t i = 1; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], &timeout);
+    wrapper.SyncInterpret(hs[i], &timeout);
     EXPECT_EQ(queue.back().fs_[0].tracking_id, 20);  // the same input id
     EXPECT_EQ(queue.back().fs_[1].tracking_id, 21);
   }

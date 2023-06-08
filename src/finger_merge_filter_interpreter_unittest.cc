@@ -17,10 +17,9 @@ class FingerMergeFilterInterpreterTestInterpreter : public Interpreter {
       : Interpreter(nullptr, nullptr, false),
         handle_timer_called_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_NE(nullptr, hwstate);
-    EXPECT_EQ(2, hwstate->finger_cnt);
-    prev_ = hwstate->fingers[0];
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
+    EXPECT_EQ(2, hwstate.finger_cnt);
+    prev_ = hwstate.fingers[0];
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
@@ -110,10 +109,10 @@ TEST(FingerMergeFilterInterpreterTest, SimpleTest) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    HardwareState *hwstate = &hardware_states[i];
+    HardwareState& hwstate = hardware_states[i];
     wrapper.SyncInterpret(hwstate, nullptr);
-    for (short j = 0; j < hwstate->finger_cnt; j++) {
-      FingerState *fs = hwstate->fingers;
+    for (short j = 0; j < hwstate.finger_cnt; j++) {
+      FingerState *fs = hwstate.fingers;
       EXPECT_TRUE(fs[j].flags & GESTURES_FINGER_MERGE);
     }
   }

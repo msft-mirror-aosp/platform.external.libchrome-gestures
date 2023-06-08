@@ -51,10 +51,10 @@ TEST(MultitouchMouseInterpreterTest, SimpleTest) {
   mi.scroll_manager_.horizontal_scroll_snap_slope_.val_ = 0;
   mi.scroll_manager_.vertical_scroll_snap_slope_.val_ = 100;
 
-  gs = wrapper.SyncInterpret(&hwstates[0], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[0], nullptr);
   EXPECT_EQ(nullptr, gs);
 
-  gs = wrapper.SyncInterpret(&hwstates[1], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[1], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(9, gs->details.move.dx);
@@ -62,7 +62,7 @@ TEST(MultitouchMouseInterpreterTest, SimpleTest) {
   EXPECT_EQ(200000, gs->start_time);
   EXPECT_EQ(210000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hwstates[2], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[2], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeButtonsChange, gs->type);
   EXPECT_EQ(1, gs->details.buttons.down);
@@ -70,7 +70,7 @@ TEST(MultitouchMouseInterpreterTest, SimpleTest) {
   EXPECT_GE(210000, gs->start_time);
   EXPECT_EQ(220000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hwstates[3], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[3], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeButtonsChange, gs->type);
   EXPECT_EQ(0, gs->details.buttons.down);
@@ -78,7 +78,7 @@ TEST(MultitouchMouseInterpreterTest, SimpleTest) {
   EXPECT_EQ(220000, gs->start_time);
   EXPECT_EQ(230000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hwstates[4], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[4], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
   EXPECT_EQ(6, gs->details.scroll.dx);

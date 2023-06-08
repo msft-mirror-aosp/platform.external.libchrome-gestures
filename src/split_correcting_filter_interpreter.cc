@@ -23,15 +23,15 @@ SplitCorrectingFilterInterpreter::SplitCorrectingFilterInterpreter(
 }
 
 void SplitCorrectingFilterInterpreter::SyncInterpretImpl(
-    HardwareState* hwstate,
+    HardwareState& hwstate,
     stime_t* timeout) {
   // Update internal state
   if (enabled_.val_) {
-    RemoveMissingUnmergedContacts(*hwstate);
-    MergeFingers(*hwstate);
-    UnmergeFingers(*hwstate);
-    UpdateUnmergedLocations(*hwstate);
-    SetLastTrackingIds(*hwstate);
+    RemoveMissingUnmergedContacts(hwstate);
+    MergeFingers(hwstate);
+    UnmergeFingers(hwstate);
+    UpdateUnmergedLocations(hwstate);
+    SetLastTrackingIds(hwstate);
 
     // Use internal state to update hwstate
     UpdateHwState(hwstate);
@@ -253,9 +253,9 @@ void SplitCorrectingFilterInterpreter::UnmergeFingers(
 }
 
 void SplitCorrectingFilterInterpreter::UpdateHwState(
-    HardwareState* hwstate) const {
-  for (size_t i = 0; i < hwstate->finger_cnt; i++) {
-    FingerState* fs = &hwstate->fingers[i];
+    HardwareState& hwstate) const {
+  for (size_t i = 0; i < hwstate.finger_cnt; i++) {
+    FingerState* fs = &hwstate.fingers[i];
     const UnmergedContact* unmerged = FindUnmerged(fs->tracking_id);
     if (unmerged && unmerged->Valid()) {
       // Easier case. Just update tracking id
@@ -267,7 +267,7 @@ void SplitCorrectingFilterInterpreter::UpdateHwState(
       short other_id = merged->input_fingers[0].tracking_id != fs->tracking_id ?
           merged->input_fingers[0].tracking_id :
           merged->input_fingers[1].tracking_id;
-      FingerState* other_fs = hwstate->GetFingerState(other_id);
+      FingerState* other_fs = hwstate.GetFingerState(other_id);
       if (!other_fs) {
         Err("Missing other finger state?");
         return;
@@ -280,7 +280,7 @@ void SplitCorrectingFilterInterpreter::UpdateHwState(
     Err("Neither unmerged nor merged?");
     return;
   }
-  hwstate->touch_cnt = hwstate->finger_cnt;
+  hwstate.touch_cnt = hwstate.finger_cnt;
 }
 
 const UnmergedContact* SplitCorrectingFilterInterpreter::FindUnmerged(
@@ -322,10 +322,10 @@ void SplitCorrectingFilterInterpreter::JoinFingerState(
 
 // static
 void SplitCorrectingFilterInterpreter::RemoveFingerStateFromHardwareState(
-    HardwareState* hs,
+    HardwareState& hwstate,
     FingerState* fs) {
-  std::copy(fs + 1, &hs->fingers[hs->finger_cnt], fs);
-  hs->finger_cnt--;
+  std::copy(fs + 1, &hwstate.fingers[hwstate.finger_cnt], fs);
+  hwstate.finger_cnt--;
 }
 
 void SplitCorrectingFilterInterpreter::SetLastTrackingIds(

@@ -381,7 +381,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   virtual ~ImmediateInterpreter() {}
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout);
 
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
 

@@ -25,7 +25,7 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
   virtual ~MouseInterpreter() {};
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout);
   // These functions interpret mouse events, which include button clicking and
   // mouse movement. This function needs two consecutive HardwareState. If no
   // mouse events are presented, result object is not modified. Scroll wheel

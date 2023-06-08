@@ -26,12 +26,12 @@ IntegralGestureFilterInterpreter::IntegralGestureFilterInterpreter(
 }
 
 void IntegralGestureFilterInterpreter::SyncInterpretImpl(
-    HardwareState* hwstate, stime_t* timeout) {
-  can_clear_remainders_ = hwstate->finger_cnt == 0 && hwstate->touch_cnt == 0;
+    HardwareState& hwstate, stime_t* timeout) {
+  can_clear_remainders_ = hwstate.finger_cnt == 0 && hwstate.touch_cnt == 0;
   stime_t next_timeout = NO_DEADLINE;
   next_->SyncInterpret(hwstate, &next_timeout);
   *timeout = SetNextDeadlineAndReturnTimeoutVal(
-      hwstate->timestamp, remainder_reset_deadline_, next_timeout);
+      hwstate.timestamp, remainder_reset_deadline_, next_timeout);
 }
 
 void IntegralGestureFilterInterpreter::HandleTimerImpl(

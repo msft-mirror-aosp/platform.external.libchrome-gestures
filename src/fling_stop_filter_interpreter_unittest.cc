@@ -22,7 +22,7 @@ class FlingStopFilterInterpreterTestInterpreter : public Interpreter {
         sync_interpret_called_(false), handle_timer_called_(true),
         next_timeout_(NO_DEADLINE) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     sync_interpret_called_ = true;
     *timeout = next_timeout_;
   }
@@ -118,7 +118,7 @@ TEST(FlingStopFilterInterpreterTest, SimpleTest) {
       unsigned short touch_cnt = static_cast<unsigned short>(input.touch_cnt);
       HardwareState hs = make_hwstate(input.now, 0, touch_cnt, touch_cnt, fs);
 
-      ret = wrapper.SyncInterpret(&hs, &timeout);
+      ret = wrapper.SyncInterpret(hs, &timeout);
 
       EXPECT_EQ(input.expected_call_next,
                 base_interpreter->sync_interpret_called_) << "i=" << i;

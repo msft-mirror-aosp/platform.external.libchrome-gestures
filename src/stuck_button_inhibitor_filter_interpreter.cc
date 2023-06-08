@@ -19,8 +19,8 @@ StuckButtonInhibitorFilterInterpreter::StuckButtonInhibitorFilterInterpreter(
 }
 
 void StuckButtonInhibitorFilterInterpreter::SyncInterpretImpl(
-    HardwareState* hwstate, stime_t* timeout) {
-  HandleHardwareState(*hwstate);
+    HardwareState& hwstate, stime_t* timeout) {
+  HandleHardwareState(hwstate);
   stime_t next_timeout = NO_DEADLINE;
   next_->SyncInterpret(hwstate, &next_timeout);
   HandleTimeouts(next_timeout, timeout);

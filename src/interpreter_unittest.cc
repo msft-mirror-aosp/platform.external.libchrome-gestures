@@ -45,7 +45,7 @@ class InterpreterTestInterpreter : public Interpreter {
   char* expected_interpreter_name_;
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout) {
     interpret_call_count_++;
     EXPECT_STREQ(expected_interpreter_name_, name());
     EXPECT_NE(0, bool_prop_.val_);
@@ -53,13 +53,14 @@ class InterpreterTestInterpreter : public Interpreter {
     EXPECT_NE(0, int_prop_.val_);
     EXPECT_NE("", string_prop_.val_);
     EXPECT_TRUE(expected_hwstate_);
-    EXPECT_DOUBLE_EQ(expected_hwstate_->timestamp, hwstate->timestamp);
-    EXPECT_EQ(expected_hwstate_->buttons_down, hwstate->buttons_down);
-    EXPECT_EQ(expected_hwstate_->finger_cnt, hwstate->finger_cnt);
-    EXPECT_EQ(expected_hwstate_->touch_cnt, hwstate->touch_cnt);
-    if (expected_hwstate_->finger_cnt == hwstate->finger_cnt)
+    EXPECT_DOUBLE_EQ(expected_hwstate_->timestamp, hwstate.timestamp);
+    EXPECT_EQ(expected_hwstate_->buttons_down, hwstate.buttons_down);
+    EXPECT_EQ(expected_hwstate_->finger_cnt, hwstate.finger_cnt);
+    EXPECT_EQ(expected_hwstate_->touch_cnt, hwstate.touch_cnt);
+    if (expected_hwstate_->finger_cnt == hwstate.finger_cnt) {
       for (size_t i = 0; i < expected_hwstate_->finger_cnt; i++)
-        EXPECT_TRUE(expected_hwstate_->fingers[i] == hwstate->fingers[i]);
+        EXPECT_TRUE(expected_hwstate_->fingers[i] == hwstate.fingers[i]);
+    }
     *timeout = 0.01;
     ProduceGesture(return_value_);
   }
@@ -117,7 +118,7 @@ TEST(InterpreterTest, SimpleTest) {
 
   stime_t timeout = NO_DEADLINE;
   base_interpreter->expected_hwstate_ = &hardware_state;
-  Gesture* result = wrapper.SyncInterpret(&hardware_state, &timeout);
+  Gesture* result = wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_TRUE(base_interpreter->return_value_ == *result);
   ASSERT_GT(timeout, 0);
   stime_t now = hardware_state.timestamp + timeout;
@@ -157,7 +158,7 @@ class InterpreterResetLogTestInterpreter : public Interpreter {
     log_.reset(new ActivityLog(nullptr));
   }
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate,
+  virtual void SyncInterpretImpl(HardwareState& hwstate,
                                      stime_t* timeout) {}
 
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout) {}
@@ -176,17 +177,17 @@ TEST(InterpreterTest, ResetLogTest) {
   };
   HardwareState hardware_state = make_hwstate(200000, 0, 1, 1, &finger_state);
   stime_t timeout = NO_DEADLINE;
-  wrapper.SyncInterpret(&hardware_state, &timeout);
+  wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(base_interpreter->log_->size(), 1);
 
-  wrapper.SyncInterpret(&hardware_state, &timeout);
+  wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(base_interpreter->log_->size(), 2);
 
   // Assume the ResetLog property is set.
   base_interpreter->Clear();
   EXPECT_EQ(base_interpreter->log_->size(), 0);
 
-  wrapper.SyncInterpret(&hardware_state, &timeout);
+  wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(base_interpreter->log_->size(), 1);
 }
 
@@ -202,10 +203,10 @@ TEST(InterpreterTest, LoggingDisabledByDefault) {
   };
   HardwareState hardware_state = make_hwstate(200000, 0, 1, 1, &finger_state);
   stime_t timeout = NO_DEADLINE;
-  wrapper.SyncInterpret(&hardware_state, &timeout);
+  wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(base_interpreter->log_->size(), 0);
 
-  wrapper.SyncInterpret(&hardware_state, &timeout);
+  wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(base_interpreter->log_->size(), 0);
 }
 }  // namespace gestures

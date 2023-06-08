@@ -19,19 +19,19 @@ BoxFilterInterpreter::BoxFilterInterpreter(PropRegistry* prop_reg,
   InitName();
 }
 
-void BoxFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void BoxFilterInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                              stime_t* timeout) {
   if (box_width_.val_ == 0.0 && box_height_.val_ == 0.0) {
     next_->SyncInterpret(hwstate, timeout);
     return;
   }
-  RemoveMissingIdsFromMap(&previous_output_, *hwstate);
+  RemoveMissingIdsFromMap(&previous_output_, hwstate);
 
   const float kHalfWidth = box_width_.val_ * 0.5;
   const float kHalfHeight = box_height_.val_ * 0.5;
 
-  for (size_t i = 0; i < hwstate->finger_cnt; i++) {
-    FingerState& fs = hwstate->fingers[i];
+  for (size_t i = 0; i < hwstate.finger_cnt; i++) {
+    FingerState& fs = hwstate.fingers[i];
     // If it's new, pass it through
     if (!MapContainsKey(previous_output_, fs.tracking_id))
       continue;
@@ -60,8 +60,8 @@ void BoxFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
     }
   }
 
-  for (size_t i = 0; i < hwstate->finger_cnt; i++)
-    previous_output_[hwstate->fingers[i].tracking_id] = hwstate->fingers[i];
+  for (size_t i = 0; i < hwstate.finger_cnt; i++)
+    previous_output_[hwstate.fingers[i].tracking_id] = hwstate.fingers[i];
 
   next_->SyncInterpret(hwstate, timeout);
 }

@@ -24,12 +24,12 @@ class ClickWiggleFilterInterpreterTestInterpreter : public Interpreter {
         expect_warp_(true),
         expected_fingers_(-1) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     if (expected_fingers_ >= 0)
-      EXPECT_EQ(expected_fingers_, hwstate->finger_cnt);
-    if (hwstate->finger_cnt > 0 && expect_warp_) {
-      EXPECT_TRUE(hwstate->fingers[0].flags & GESTURES_FINGER_WARP_X);
-      EXPECT_TRUE(hwstate->fingers[0].flags & GESTURES_FINGER_WARP_Y);
+      EXPECT_EQ(expected_fingers_, hwstate.finger_cnt);
+    if (hwstate.finger_cnt > 0 && expect_warp_) {
+      EXPECT_TRUE(hwstate.fingers[0].flags & GESTURES_FINGER_WARP_X);
+      EXPECT_TRUE(hwstate.fingers[0].flags & GESTURES_FINGER_WARP_Y);
     }
   }
 
@@ -123,7 +123,7 @@ TEST(ClickWiggleFilterInterpreterTest, WiggleSuppressTest) {
 
   for (size_t i = 0; i < arraysize(hardware_state); ++i)
     // Assertions happen in the base interpreter
-    wrapper.SyncInterpret(&hardware_state[i], nullptr);
+    wrapper.SyncInterpret(hardware_state[i], nullptr);
 }
 
 TEST(ClickWiggleFilterInterpreterTest, OneFingerClickSuppressTest) {
@@ -183,7 +183,7 @@ TEST(ClickWiggleFilterInterpreterTest, OneFingerClickSuppressTest) {
   for (size_t i = 0; i < arraysize(hardware_state); ++i) {
     // Assertions happen in the base interpreter
     base_interpreter->expect_warp_ = (i != 3 && i != 7);
-    wrapper.SyncInterpret(&hardware_state[i], nullptr);
+    wrapper.SyncInterpret(hardware_state[i], nullptr);
   }
 }
 
@@ -246,7 +246,7 @@ TEST(ClickWiggleFilterInterpreter, ThumbClickTest) {
     };
     HardwareState hs =
         make_hwstate(input.timestamp_, input.buttons_down_, 1, 1, &fs);
-    wrapper.SyncInterpret(&hs, nullptr);
+    wrapper.SyncInterpret(hs, nullptr);
     // Assertions tested in base interpreter
   }
 }
@@ -300,7 +300,7 @@ TEST(ClickWiggleFilterInterpreter, TimeBackwardsTest) {
     }
     if (i == arraysize(hs) - 1)
       base_interpreter->expect_warp_ = false;
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     if (i == arraysize(hs) - 1)
       EXPECT_EQ(0, fs.flags);
   }
@@ -406,7 +406,7 @@ TEST(ClickWiggleFilterInterpreter, ThumbClickWiggleWithPalmTest) {
                                     input.p0 == 0.0 ? &fs[1] : &fs[0]);
     base_interpreter->expect_warp_ = !!input.buttons_down;
     base_interpreter->expected_fingers_ = finger_count;
-    wrapper.SyncInterpret(&hs, nullptr);
+    wrapper.SyncInterpret(hs, nullptr);
   }
 }
 

@@ -45,7 +45,7 @@ TEST(TimestampFilterInterpreterTest, SimpleTest) {
   stime_t expected_timestamps[] = { 1.000, 1.012, 1.018, 1.031 };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     EXPECT_EQ(hs[i].timestamp, expected_timestamps[i]);
   }
 
@@ -71,7 +71,7 @@ TEST(TimestampFilterInterpreterTest, NoMscTimestampTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     stime_t expected_timestamp = hs[i].timestamp;
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     EXPECT_EQ(hs[i].timestamp, expected_timestamp);
   }
 
@@ -104,7 +104,7 @@ TEST(TimestampFilterInterpreterTest, MscTimestampResetTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     EXPECT_EQ(hs[i].timestamp, expected_timestamps[i]);
   }
 
@@ -134,7 +134,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampTest) {
   stime_t expected_timestamps[] = { 1.000, 1.010, 1.020, 1.030 };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
 
@@ -170,7 +170,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
 
@@ -208,7 +208,7 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     EXPECT_TRUE(DoubleEq(hs[i].timestamp, expected_timestamps[i]));
   }
 

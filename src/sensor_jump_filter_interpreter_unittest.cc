@@ -29,11 +29,10 @@ class SensorJumpFilterInterpreterTestInterpreter : public Interpreter {
         handle_timer_called_(false),
         expected_finger_cnt_(-1) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     if (expected_finger_cnt_ >= 0) {
-      EXPECT_NE(nullptr, hwstate);
-      EXPECT_EQ(1, hwstate->finger_cnt);
-      prev_ = hwstate->fingers[0];
+      EXPECT_EQ(1, hwstate.finger_cnt);
+      prev_ = hwstate.fingers[0];
     }
   }
 
@@ -98,7 +97,7 @@ TEST(SensorJumpFilterInterpreterTest, SimpleTest) {
     hs.timestamp = now;
     fs.flags = 0;
     fs.position_y = data[i].val;
-    wrapper.SyncInterpret(&hs, nullptr);
+    wrapper.SyncInterpret(hs, nullptr);
     const unsigned kFlags = GESTURES_FINGER_WARP_Y |
         GESTURES_FINGER_WARP_Y_TAP_MOVE |
         GESTURES_FINGER_WARP_TELEPORTATION;
@@ -248,7 +247,7 @@ TEST(SensorJumpFilterInterpreterTest, ActualLogTest) {
     fs[1].position_y = input.y1;
     fs[1].pressure = input.p1;
     fs[1].tracking_id = input.id1;
-    wrapper.SyncInterpret(&hs, nullptr);
+    wrapper.SyncInterpret(hs, nullptr);
     if (i != 0) {  // can't do deltas with the first input
       float dy[] = { fs[0].position_y - prev_y_out[0],
                      fs[1].position_y - prev_y_out[1] };

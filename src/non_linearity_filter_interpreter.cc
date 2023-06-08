@@ -110,10 +110,10 @@ abort_load:
   fclose(data_fd);
 }
 
-void NonLinearityFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void NonLinearityFilterInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                                       stime_t* timeout) {
-  if (enabled_.val_ && err_.get() && hwstate->finger_cnt == 1) {
-    FingerState* finger = &(hwstate->fingers[0]);
+  if (enabled_.val_ && err_.get() && hwstate.finger_cnt == 1) {
+    FingerState* finger = &(hwstate.fingers[0]);
     if (finger) {
       Error error = GetError(finger->position_x, finger->position_y,
                              finger->pressure);

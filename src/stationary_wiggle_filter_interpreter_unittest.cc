@@ -17,10 +17,9 @@ class StationaryWiggleFilterInterpreterTestInterpreter : public Interpreter {
       : Interpreter(nullptr, nullptr, false),
         handle_timer_called_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_NE(nullptr, hwstate);
-    EXPECT_EQ(1, hwstate->finger_cnt);
-    prev_ = hwstate->fingers[0];
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
+    EXPECT_EQ(1, hwstate.finger_cnt);
+    prev_ = hwstate.fingers[0];
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
@@ -134,10 +133,10 @@ TEST(StationaryWiggleFilterInterpreterTest, SimpleTest) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    HardwareState *hwstate = &hardware_states[i];
+    HardwareState& hwstate = hardware_states[i];
     wrapper.SyncInterpret(hwstate, nullptr);
-    for (int j = 0; j < hwstate->finger_cnt; ++j) {
-      FingerState *fs = &hwstate->fingers[j];
+    for (int j = 0; j < hwstate.finger_cnt; ++j) {
+      FingerState *fs = &hwstate.fingers[j];
       EXPECT_EQ(fs->flags & (GESTURES_FINGER_WARP_X |
                              GESTURES_FINGER_WARP_Y |
                              GESTURES_FINGER_INSTANTANEOUS_MOVING),

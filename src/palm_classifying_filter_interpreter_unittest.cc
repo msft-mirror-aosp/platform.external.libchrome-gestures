@@ -30,9 +30,9 @@ class PalmClassifyingFilterInterpreterTestInterpreter : public Interpreter {
       : Interpreter(nullptr, nullptr, false),
         expected_flags_(0) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    if (hwstate->finger_cnt > 0) {
-      EXPECT_EQ(expected_flags_, hwstate->fingers[0].flags);
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
+    if (hwstate.finger_cnt > 0) {
+      EXPECT_EQ(expected_flags_, hwstate.fingers[0].flags);
     }
   }
 
@@ -97,7 +97,7 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmTest) {
   };
 
   for (size_t i = 0; i < 5; ++i) {
-    wrapper.SyncInterpret(&hardware_state[i], nullptr);
+    wrapper.SyncInterpret(hardware_state[i], nullptr);
     switch (i) {
       case 0:
         EXPECT_TRUE(SetContainsValue(pci.pointing_, 1));
@@ -170,7 +170,7 @@ TEST(PalmClassifyingFilterInterpreterTest, StationaryPalmTest) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_state); ++i) {
-    wrapper.SyncInterpret(&hardware_state[i], nullptr);
+    wrapper.SyncInterpret(hardware_state[i], nullptr);
     if (i > 0) {
       // We expect after the second input frame is processed that the palm
       // is classified
@@ -302,7 +302,7 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmAtEdgeTest) {
         break;
     }
     fprintf(stderr, "iteration i = %zd\n", i);
-    wrapper.SyncInterpret(&hardware_state[i], nullptr);
+    wrapper.SyncInterpret(hardware_state[i], nullptr);
   }
 }
 
@@ -386,7 +386,7 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmReevaluateTest) {
     HardwareState hs = make_hwstate(inputs[i].now_, 0, 1, 1, &fs);
 
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs, &timeout);
+    wrapper.SyncInterpret(hs, &timeout);
     // Allow movement at first:
     stime_t age = inputs[i].now_ - inputs[0].now_;
     if (age < pci.palm_eval_timeout_.val_)
@@ -664,7 +664,7 @@ TEST(PalmClassifyingFilterInterpreterTest, LargeTouchMajorTest) {
     HardwareState hs = make_hwstate(input.now_, 0, 1, 1, &fs);
     base_interpreter->expected_flags_ =
         (GESTURES_FINGER_PALM | GESTURES_FINGER_LARGE_PALM);
-    wrapper.SyncInterpret(&hs, nullptr);
+    wrapper.SyncInterpret(hs, nullptr);
   }
 }
 

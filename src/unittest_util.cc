@@ -53,7 +53,7 @@ void TestInterpreterWrapper::Reset(Interpreter* interpreter,
   Reset(interpreter);
 }
 
-Gesture* TestInterpreterWrapper::SyncInterpret(HardwareState* state,
+Gesture* TestInterpreterWrapper::SyncInterpret(HardwareState& state,
                                                stime_t* timeout) {
   gesture_ = Gesture();
   interpreter_->SyncInterpret(state, timeout);

@@ -29,10 +29,9 @@ class BoxFilterInterpreterTestInterpreter : public Interpreter {
       : Interpreter(nullptr, nullptr, false),
         handle_timer_called_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_NE(nullptr, hwstate);
-    EXPECT_EQ(1, hwstate->finger_cnt);
-    prev_ = hwstate->fingers[0];
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
+    EXPECT_EQ(1, hwstate.finger_cnt);
+    prev_ = hwstate.fingers[0];
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
@@ -93,7 +92,7 @@ TEST(BoxFilterInterpreterTest, SimpleTest) {
     now += kTimeDelta;
     hs.timestamp = now;
     fs.position_y = data[i].in;
-    wrapper.SyncInterpret(&hs, nullptr);
+    wrapper.SyncInterpret(hs, nullptr);
     EXPECT_FLOAT_EQ(data[i].out, fs.position_y) << "i=" << i;
   }
 }

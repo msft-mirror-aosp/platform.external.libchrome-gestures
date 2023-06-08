@@ -457,7 +457,7 @@ void GestureInterpreter::PushHardwareState(HardwareState* hwstate) {
     return;
   }
   stime_t timeout = NO_DEADLINE;
-  interpreter_->SyncInterpret(hwstate, &timeout);
+  interpreter_->SyncInterpret(*hwstate, &timeout);
   if (timer_provider_ && interpret_timer_) {
     if (timeout == NO_DEADLINE) {
       timer_provider_->cancel_fn(timer_provider_data_, interpret_timer_);

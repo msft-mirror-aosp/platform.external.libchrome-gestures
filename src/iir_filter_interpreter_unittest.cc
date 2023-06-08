@@ -21,13 +21,13 @@ class IirFilterInterpreterTestInterpreter : public Interpreter {
     prev_.position_y = 0.0;
   }
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     if (sync_interpret_cnt_) {
-      EXPECT_GT(hwstate->fingers[0].position_x, prev_.position_x);
-      EXPECT_GT(hwstate->fingers[0].position_y, prev_.position_y);
+      EXPECT_GT(hwstate.fingers[0].position_x, prev_.position_x);
+      EXPECT_GT(hwstate.fingers[0].position_y, prev_.position_y);
     }
-    EXPECT_EQ(1, hwstate->finger_cnt);
-    prev_ = hwstate->fingers[0];
+    EXPECT_EQ(1, hwstate.finger_cnt);
+    prev_ = hwstate.fingers[0];
     sync_interpret_cnt_++;
   }
 
@@ -59,7 +59,7 @@ TEST(IirFilterInterpreterTest, SimpleTest) {
 
   for (size_t i = 0; i < arraysize(hs); i++) {
     unsigned expected_flags = hs[i].fingers[0].flags;
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     EXPECT_EQ(base_interpreter->prev_.flags, expected_flags);
   }
   EXPECT_EQ(arraysize(hs), base_interpreter->sync_interpret_cnt_);
@@ -90,7 +90,7 @@ TEST(IirFilterInterpreterTest, DisableIIRTest) {
   };
 
   for (size_t i = 0; i < arraysize(hs); i++) {
-    wrapper.SyncInterpret(&hs[i], nullptr);
+    wrapper.SyncInterpret(hs[i], nullptr);
     // A quick move at hs[2] and IIR will be disabled. Even though
     // hs[2] and hs[3] are close enough, the rolling average output
     // of hs[2] is smoothed that IIR is still disabled for hs[3].
@@ -134,7 +134,7 @@ TEST(IirFilterInterpreterTest, SemiMTIIRTest) {
   // For Non-SemiMT, the pressure of the finger will be different from the
   // original one after the IIR filter.
   for (size_t i = 0; i < arraysize(hs_normal); i++)
-    wrapper.SyncInterpret(&hs_normal[i], nullptr);
+    wrapper.SyncInterpret(hs_normal[i], nullptr);
   int n = arraysize(fs_normal);
   EXPECT_NE(fs_normal[n - 1].pressure, kTestPressure);
 
@@ -152,7 +152,7 @@ TEST(IirFilterInterpreterTest, SemiMTIIRTest) {
   hwprops.support_semi_mt = true;
   wrapper.Reset(&interpreter, &hwprops);
   for (size_t i = 0; i < arraysize(hs_semi_mt); i++)
-    wrapper.SyncInterpret(&hs_semi_mt[i], nullptr);
+    wrapper.SyncInterpret(hs_semi_mt[i], nullptr);
   n = arraysize(fs_semi_mt);
   EXPECT_EQ(fs_semi_mt[n - 1].pressure, kTestPressure);
 }

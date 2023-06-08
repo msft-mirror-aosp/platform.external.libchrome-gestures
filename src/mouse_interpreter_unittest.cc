@@ -39,10 +39,10 @@ TEST(MouseInterpreterTest, SimpleTest) {
 
   mi.output_mouse_wheel_gestures_.val_ = true;
 
-  gs = wrapper.SyncInterpret(&hwstates[0], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[0], nullptr);
   EXPECT_EQ(nullptr, gs);
 
-  gs = wrapper.SyncInterpret(&hwstates[1], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[1], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(9, gs->details.move.dx);
@@ -50,7 +50,7 @@ TEST(MouseInterpreterTest, SimpleTest) {
   EXPECT_EQ(200000, gs->start_time);
   EXPECT_EQ(210000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hwstates[2], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[2], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeButtonsChange, gs->type);
   EXPECT_EQ(1, gs->details.buttons.down);
@@ -58,7 +58,7 @@ TEST(MouseInterpreterTest, SimpleTest) {
   EXPECT_EQ(210000, gs->start_time);
   EXPECT_EQ(220000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hwstates[3], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[3], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeButtonsChange, gs->type);
   EXPECT_EQ(0, gs->details.buttons.down);
@@ -66,7 +66,7 @@ TEST(MouseInterpreterTest, SimpleTest) {
   EXPECT_EQ(220000, gs->start_time);
   EXPECT_EQ(230000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hwstates[4], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[4], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_LT(-1, gs->details.wheel.dx);
@@ -92,17 +92,17 @@ TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest) {
   mi.output_mouse_wheel_gestures_.val_ = true;
   mi.hi_res_scrolling_.val_ = 1;
 
-  gs = wrapper.SyncInterpret(&hwstates[0], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[0], nullptr);
   EXPECT_EQ(nullptr, gs);
 
-  gs = wrapper.SyncInterpret(&hwstates[1], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[1], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(0, gs->details.wheel.dx);
   float offset_of_8th_notch_scroll = gs->details.wheel.dy;
   EXPECT_LT(1, offset_of_8th_notch_scroll);
 
-  gs = wrapper.SyncInterpret(&hwstates[2], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[2], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(0, gs->details.wheel.dx);
@@ -110,7 +110,7 @@ TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest) {
   // change the output value.
   EXPECT_NEAR(offset_of_8th_notch_scroll, gs->details.wheel.dy, 0.1);
 
-  gs = wrapper.SyncInterpret(&hwstates[3], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[3], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(0, gs->details.wheel.dx);
@@ -118,7 +118,7 @@ TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest) {
 
   mi.hi_res_scrolling_.val_ = 0;
 
-  gs = wrapper.SyncInterpret(&hwstates[4], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[4], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(0, gs->details.wheel.dx);
@@ -144,20 +144,20 @@ TEST(MouseInterpreterTest, JankyScrollTest) {
 
   mi.output_mouse_wheel_gestures_.val_ = true;
 
-  gs = wrapper.SyncInterpret(&hwstates[0], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[0], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(0, gs->details.wheel.dx);
   // Ignore the dy from the first scroll event, as the gesture interpreter
   // hardcodes that time delta to 1 second, making it invalid for this test.
 
-  gs = wrapper.SyncInterpret(&hwstates[1], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[1], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(0, gs->details.wheel.dx);
   float scroll_offset = gs->details.wheel.dy;
 
-  gs = wrapper.SyncInterpret(&hwstates[2], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[2], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(0, gs->details.wheel.dx);
@@ -179,10 +179,10 @@ TEST(MouseInterpreterTest, WheelTickReportingHighResTest) {
   mi.output_mouse_wheel_gestures_.val_ = true;
   mi.hi_res_scrolling_.val_ = true;
 
-  gs = wrapper.SyncInterpret(&hwstates[0], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[0], nullptr);
   EXPECT_EQ(nullptr, gs);
 
-  gs = wrapper.SyncInterpret(&hwstates[1], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[1], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ( 0, gs->details.wheel.tick_120ths_dx);
@@ -204,16 +204,16 @@ TEST(MouseInterpreterTest, WheelTickReportingLowResTest) {
   mi.output_mouse_wheel_gestures_.val_ = true;
   mi.hi_res_scrolling_.val_ = false;
 
-  gs = wrapper.SyncInterpret(&hwstates[0], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[0], nullptr);
   EXPECT_EQ(nullptr, gs);
 
-  gs = wrapper.SyncInterpret(&hwstates[1], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[1], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(   0, gs->details.wheel.tick_120ths_dx);
   EXPECT_EQ(-120, gs->details.wheel.tick_120ths_dy);
 
-  gs = wrapper.SyncInterpret(&hwstates[2], nullptr);
+  gs = wrapper.SyncInterpret(hwstates[2], nullptr);
   ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
   EXPECT_EQ(120, gs->details.wheel.tick_120ths_dx);

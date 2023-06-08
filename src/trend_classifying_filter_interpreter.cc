@@ -44,9 +44,9 @@ TrendClassifyingFilterInterpreter::TrendClassifyingFilterInterpreter(
 }
 
 void TrendClassifyingFilterInterpreter::SyncInterpretImpl(
-    HardwareState* hwstate, stime_t* timeout) {
+    HardwareState& hwstate, stime_t* timeout) {
   if (trend_classifying_filter_enable_.val_)
-    UpdateFingerState(*hwstate);
+    UpdateFingerState(hwstate);
   next_->SyncInterpret(hwstate, timeout);
 }
 

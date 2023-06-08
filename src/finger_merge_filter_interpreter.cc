@@ -43,10 +43,10 @@ FingerMergeFilterInterpreter::FingerMergeFilterInterpreter(
   InitName();
 }
 
-void FingerMergeFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void FingerMergeFilterInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                                      stime_t* timeout) {
   if (finger_merge_filter_enable_.val_)
-    UpdateFingerMergeState(*hwstate);
+    UpdateFingerMergeState(hwstate);
   next_->SyncInterpret(hwstate, timeout);
 }
 

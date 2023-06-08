@@ -23,22 +23,22 @@ FlingStopFilterInterpreter::FlingStopFilterInterpreter(
   InitName();
 }
 
-void FlingStopFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void FlingStopFilterInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                                    stime_t* timeout) {
   fingers_of_last_hwstate_.clear();
-  for (int i = 0; i < hwstate->finger_cnt; i++)
-    fingers_of_last_hwstate_.insert(hwstate->fingers[i].tracking_id);
+  for (int i = 0; i < hwstate.finger_cnt; i++)
+    fingers_of_last_hwstate_.insert(hwstate.fingers[i].tracking_id);
 
-  UpdateFlingStopDeadline(*hwstate);
+  UpdateFlingStopDeadline(hwstate);
   if (fling_stop_deadline_ != NO_DEADLINE) {
-    if (!already_extended_ && NeedsExtraTime(*hwstate)) {
+    if (!already_extended_ && NeedsExtraTime(hwstate)) {
       fling_stop_deadline_ += fling_stop_extra_delay_.val_;
       already_extended_ = true;
     }
-    if (hwstate->timestamp > fling_stop_deadline_) {
+    if (hwstate.timestamp > fling_stop_deadline_) {
       // sub in a fling before processing other interpreters
       ProduceGesture(Gesture(kGestureFling, prev_timestamp_,
-                             hwstate->timestamp, 0.0, 0.0,
+                             hwstate.timestamp, 0.0, 0.0,
                              GESTURES_FLING_TAP_DOWN));
       fling_stop_already_sent_ = true;
       fling_stop_deadline_ = NO_DEADLINE;
@@ -48,7 +48,7 @@ void FlingStopFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
   stime_t next_timeout = NO_DEADLINE;
   next_->SyncInterpret(hwstate, &next_timeout);
 
-  *timeout = SetNextDeadlineAndReturnTimeoutVal(hwstate->timestamp,
+  *timeout = SetNextDeadlineAndReturnTimeoutVal(hwstate.timestamp,
                                                 fling_stop_deadline_,
                                                 next_timeout);
 }

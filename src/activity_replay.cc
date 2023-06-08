@@ -661,7 +661,7 @@ void ActivityReplay::Replay(Interpreter* interpreter,
         HardwareState hs = entry->details.hwstate;
         for (size_t i = 0; i < hs.finger_cnt; i++)
           Log("Input Finger ID: %d", hs.fingers[i].tracking_id);
-        interpreter->SyncInterpret(&hs, &last_timeout_req);
+        interpreter->SyncInterpret(hs, &last_timeout_req);
         break;
       }
       case ActivityLog::kTimerCallback: {

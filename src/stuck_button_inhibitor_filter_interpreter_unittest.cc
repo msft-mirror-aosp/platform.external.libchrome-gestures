@@ -30,7 +30,7 @@ class StuckButtonInhibitorFilterInterpreterTestInterpreter :
       : Interpreter(nullptr, nullptr, false),
         called_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     HandleTimer(0.0, timeout);
   }
 
@@ -172,7 +172,7 @@ TEST(StuckButtonInhibitorFilterInterpreterTest, SimpleTest) {
     stime_t timeout = NO_DEADLINE;
     Gesture* result = nullptr;
     if (rec.now_ < 0.0) {
-      result = wrapper.SyncInterpret(&rec.hs_, &timeout);
+      result = wrapper.SyncInterpret(rec.hs_, &timeout);
     } else {
       result = wrapper.HandleTimer(rec.now_, &timeout);
     }

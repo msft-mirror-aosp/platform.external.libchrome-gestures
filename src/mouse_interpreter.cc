@@ -55,23 +55,23 @@ MouseInterpreter::MouseInterpreter(PropRegistry* prop_reg, Tracer* tracer)
   scroll_max_allowed_input_speed_.SetDelegate(this);
 }
 
-void MouseInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void MouseInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                          stime_t* timeout) {
-  if(!EmulateScrollWheel(*hwstate)) {
+  if(!EmulateScrollWheel(hwstate)) {
     // Interpret mouse events in the order of pointer moves, scroll wheels and
     // button clicks.
-    InterpretMouseMotionEvent(prev_state_, *hwstate);
+    InterpretMouseMotionEvent(prev_state_, hwstate);
     // Note that unlike touchpad scrolls, we interpret and send separate events
     // for horizontal/vertical mouse wheel scrolls. This is partly to match what
     // the xf86-input-evdev driver does and is partly because not all code in
     // Chrome honors MouseWheelEvent that has both X and Y offsets.
-    InterpretScrollWheelEvent(*hwstate, true);
-    InterpretScrollWheelEvent(*hwstate, false);
-    InterpretMouseButtonEvent(prev_state_, *hwstate);
+    InterpretScrollWheelEvent(hwstate, true);
+    InterpretScrollWheelEvent(hwstate, false);
+    InterpretMouseButtonEvent(prev_state_, hwstate);
   }
   // Pass max_finger_cnt = 0 to DeepCopy() since we don't care fingers and
   // did not allocate any space for fingers.
-  prev_state_.DeepCopy(*hwstate, 0);
+  prev_state_.DeepCopy(hwstate, 0);
 }
 
 double MouseInterpreter::ComputeScrollAccelFactor(double input_speed) {

@@ -17,10 +17,9 @@ class MetricsFilterInterpreterTestInterpreter : public Interpreter {
       : Interpreter(nullptr, nullptr, false),
         handle_timer_called_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_NE(nullptr, hwstate);
-    EXPECT_EQ(1, hwstate->finger_cnt);
-    prev_ = hwstate->fingers[0];
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
+    EXPECT_EQ(1, hwstate.finger_cnt);
+    prev_ = hwstate.fingers[0];
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
@@ -97,7 +96,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestTouchpad) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    wrapper.SyncInterpret(&hardware_states[i], nullptr);
+    wrapper.SyncInterpret(hardware_states[i], nullptr);
   }
 
   EXPECT_EQ(interpreter.devclass_, GESTURES_DEVCLASS_TOUCHPAD);
@@ -177,7 +176,7 @@ TEST(MetricsFilterInterpreterTest, SimpleTestMultitouchMouse) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    wrapper.SyncInterpret(&hardware_states[i], nullptr);
+    wrapper.SyncInterpret(hardware_states[i], nullptr);
   }
 
   EXPECT_EQ(interpreter.devclass_, GESTURES_DEVCLASS_MULTITOUCH_MOUSE);

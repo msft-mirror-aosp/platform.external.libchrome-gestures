@@ -8,7 +8,7 @@
 
 namespace gestures {
 
-void FilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void FilterInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                           stime_t* timeout) {
   next_->SyncInterpret(hwstate, timeout);
 }
