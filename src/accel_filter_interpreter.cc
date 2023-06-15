@@ -161,185 +161,54 @@ AccelFilterInterpreter::AccelFilterInterpreter(PropRegistry* prop_reg,
 }
 
 void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
-  float x_scale;
-  float y_scale;
-  float mag;
-
-  // Check if clock changed backwards
-  if (last_end_time_ > gs.start_time)
-    last_end_time_ = -1.0;
-
-  // If dt is not reasonable, use the last seen reasonable value
-  // Otherwise, save it as the last seen reasonable value
-  float dt = gs.end_time - gs.start_time;
-  if (dt < min_reasonable_dt_.val_ || dt > max_reasonable_dt_.val_)
-    dt = last_reasonable_dt_;
-  else
-    last_reasonable_dt_ = dt;
-
-  // CurveSegments to use
-  size_t max_segs = kMaxCurveSegs;
-  CurveSegment* segs = nullptr;
-
-  float* dx = nullptr;
-  float* dy = nullptr;
-
-  // The quantities to scale:
-  float* scale_out_x = nullptr;
-  float* scale_out_y = nullptr;
-
-  // We scale ordinal values of scroll/fling gestures as well because we use
-  // them in Chrome for history navigation (back/forward page gesture) and
-  // we will easily run out of the touchpad space if we just use raw values
-  // as they are. To estimate the length one needs to scroll on the touchpad
-  // to trigger the history navigation:
-  //
-  // Pixel:
-  // 1280 (screen width in DIPs) * 0.25 (overscroll threshold) /
-  // (133 / 25.4) (conversion factor from DIP to mm) = 61.1 mm
-  // Most other low-res devices:
-  // 1366 * 0.25 / (133 / 25.4) = 65.2 mm
-  //
-  // With current scroll output scaling factor (2.5), we can reduce the length
-  // required to about one inch on all devices.
-  float* scale_out_x_ordinal = nullptr;
-  float* scale_out_y_ordinal = nullptr;
-
-  // Setup the parameters for acceleration calculations based on gesture
-  // type.  Use a copy of the gesture gs during the calculations and
+  // Use a copy of the gesture gs during the calculations and
   // adjustments so the original is left alone.
   Gesture gs_copy = gs;
-  switch (gs.type) {
-    case kGestureTypeMove:
-    case kGestureTypeSwipe:
-    case kGestureTypeFourFingerSwipe:
-      // Setup the Gesture delta fields/scaling for the gesture type
-      if (gs.type == kGestureTypeMove) {
-        scale_out_x = dx = &gs_copy.details.move.dx;
-        scale_out_y = dy = &gs_copy.details.move.dy;
-      } else if (gs.type == kGestureTypeSwipe) {
-        scale_out_x = dx = &gs_copy.details.swipe.dx;
-        scale_out_y = dy = &gs_copy.details.swipe.dy;
-      } else {
-        scale_out_x = dx = &gs_copy.details.four_finger_swipe.dx;
-        scale_out_y = dy = &gs_copy.details.four_finger_swipe.dy;
-      }
 
-      // Setup CurveSegments for the device options set
-      if (use_mouse_point_curves_.val_ && use_custom_mouse_curve_.val_) {
-        // Custom Mouse
-        segs = mouse_custom_point_;
-        max_segs = kMaxCustomCurveSegs;
-      } else if (!use_mouse_point_curves_.val_ &&
-                 use_custom_tp_point_curve_.val_) {
-        // Custom Touch
-        segs = tp_custom_point_;
-        max_segs = kMaxCustomCurveSegs;
-      } else if (use_mouse_point_curves_.val_) {
-        // Standard Mouse
-        if (!pointer_acceleration_.val_) {
-          segs = &unaccel_mouse_curves_[pointer_sensitivity_.val_ - 1];
-          max_segs = kMaxUnaccelCurveSegs;
-        } else if (use_old_mouse_point_curves_.val_) {
-          segs = old_mouse_point_curves_[pointer_sensitivity_.val_ - 1];
-        } else {
-          segs = mouse_point_curves_[pointer_sensitivity_.val_ - 1];
-        }
-      } else {
-        // Standard Touch
-        if (!pointer_acceleration_.val_) {
-          segs = &unaccel_point_curves_[pointer_sensitivity_.val_ - 1];
-          max_segs = kMaxUnaccelCurveSegs;
-        } else {
-          segs = point_curves_[pointer_sensitivity_.val_ - 1];
-        }
-      }
+  // Setup the parameters for acceleration calculations based on gesture
+  // type.
+  float* dx;
+  float* dy;
+  float x_scale;
+  float y_scale;
+  float* scale_out_x;
+  float* scale_out_y;
+  float* scale_out_x_ordinal;
+  float* scale_out_y_ordinal;
+  size_t max_segs;
+  CurveSegment* segs;
 
-      x_scale = point_x_out_scale_.val_;
-      y_scale = point_y_out_scale_.val_;
-      break;
-
-    case kGestureTypeFling:  // fall through
-    case kGestureTypeScroll:
-      // Setup the Gesture velocity/delta fields/scaling for the gesture type
-      if (gs.type == kGestureTypeFling) {
-        scale_out_x = &gs_copy.details.fling.vx;
-        scale_out_y = &gs_copy.details.fling.vy;
-        scale_out_x_ordinal = &gs_copy.details.fling.ordinal_vx;
-        scale_out_y_ordinal = &gs_copy.details.fling.ordinal_vy;
-      } else {
-        scale_out_x = dx = &gs_copy.details.scroll.dx;
-        scale_out_y = dy = &gs_copy.details.scroll.dy;
-        scale_out_x_ordinal = &gs_copy.details.scroll.ordinal_dx;
-        scale_out_y_ordinal = &gs_copy.details.scroll.ordinal_dy;
-      }
-
-      // We bypass mouse scroll events as they have a separate acceleration
-      // algorithm implemented in mouse_interpreter.
-      if (use_mouse_scroll_curves_.val_) {
-        ProduceGesture(gs);
-        return;
-      }
-
-      // Setup CurveSegments for the device options set
-      if (!use_custom_tp_scroll_curve_.val_) {
-        segs = scroll_curves_[scroll_sensitivity_.val_ - 1];
-      } else {
-        segs = tp_custom_scroll_;
-        max_segs = kMaxCustomCurveSegs;
-      }
-
-      x_scale = scroll_x_out_scale_.val_;
-      y_scale = scroll_y_out_scale_.val_;
-      break;
-
-    default:  // Nothing to accelerate
-      ProduceGesture(gs);
-      return;
+  if (!get_accel_parameters(gs_copy,
+                            dx, dy,
+                            x_scale, y_scale,
+                            scale_out_x, scale_out_y,
+                            scale_out_x_ordinal, scale_out_y_ordinal,
+                            segs, max_segs)) {
+    // It was determined no acceleration was required.
+    ProduceGesture(gs);
+    return;
   }
 
-  // Calculate the hypotenuse to determine the actual distance traveled
-  // and the magnitude/speed.
-  if (dx != nullptr && dy != nullptr) {
-    if (dt < 0.00001) {
-      ProduceGesture(gs);
-      return;  // Avoid division by 0
-    }
-    mag = sqrtf(*dx * *dx + *dy * *dy) / dt;
-  } else {
-    // FLING is the only gesture that uses vx/vy and assumes dt=1
-    float vx = gs.details.fling.vx;
-    float vy = gs.details.fling.vy;
-    mag = sqrtf(vx * vx + vy * vy);
+  float speed;
+  if (!get_actual_speed(dx, dy,
+                        gs_copy.details.fling.vx, gs_copy.details.fling.vy,
+                        get_adjusted_dt(gs),
+                        speed)) {
+    // dt was too small, don't accelerate.
+    ProduceGesture(gs);
+    return;
   }
+  smooth_speed(gs_copy, speed);
 
-  // Perform smoothing, if it is enabled.
-  if (smooth_accel_.val_) {
-    if (last_end_time_ == gs.start_time) {
-      // Average the saved magnitudes
-      last_mags_.insert(last_mags_.begin(), mag);
-      mag = std::reduce(last_mags_.begin(), last_mags_.end()) /
-            last_mags_.size();
-      // Limit the size of last_mags_ to the needed oldest mag entries
-      if (last_mags_.size() > kMaxLastMagsSize)
-        last_mags_.pop_back();
-    } else {
-      // Time stamp jump, start smoothing anew
-      last_mags_.clear();
-      last_mags_.push_back(mag);
-    }
-    last_end_time_ = gs.end_time;
-  }
-
-  // Avoid scaling if the magnitude is too small
-  if (mag < 0.00001) {
+  // Avoid scaling if the speed is too small.
+  if (speed < 0.00001) {
     if (gs.type == kGestureTypeFling)
-      ProduceGesture(gs);  // Filter out zero length gestures
-    return;  // Avoid division by 0
+      ProduceGesture(gs);  // Filter out zero length gestures.
+    return;  // Avoid division by 0.
   }
 
-  // Find the appropriate ratio and apply scaling
-  auto ratio = RatioFromAccelCurve(segs, max_segs, mag);
+  // Find the appropriate ratio and apply scaling.
+  auto ratio = RatioFromAccelCurve(segs, max_segs, speed);
   if (ratio > 0.0) {
     *scale_out_x *= ratio * x_scale;
     *scale_out_y *= ratio * y_scale;
@@ -355,16 +224,200 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
   }
 }
 
+float AccelFilterInterpreter::get_dt(const Gesture& gs) {
+  return gs.end_time - gs.start_time;
+}
+
+float AccelFilterInterpreter::get_adjusted_dt(const Gesture& gs) {
+  float dt = get_dt(gs);
+
+  // If dt is not reasonable, use the last seen reasonable value
+  // Otherwise, save it as the last seen reasonable value
+  if (dt < min_reasonable_dt_.val_ || dt > max_reasonable_dt_.val_)
+    dt = last_reasonable_dt_;
+  else
+    last_reasonable_dt_ = dt;
+
+  return dt;
+}
+
+bool AccelFilterInterpreter::get_accel_parameters(
+    Gesture& gs,
+    float*& dx, float*& dy,
+    float& x_scale, float& y_scale,
+    float*& scale_out_x, float*& scale_out_y,
+    float*& scale_out_x_ordinal, float*& scale_out_y_ordinal,
+    CurveSegment*& segs, size_t& max_segs) {
+  // CurveSegments to use.
+  max_segs = kMaxCurveSegs;
+  segs = nullptr;
+
+  dx = nullptr;
+  dy = nullptr;
+
+  // The quantities to scale.
+  scale_out_x = nullptr;
+  scale_out_y = nullptr;
+
+  // We scale ordinal values of scroll/fling gestures as well because we use
+  // them in Chrome for history navigation (back/forward page gesture) and
+  // we will easily run out of the touchpad space if we just use raw values
+  // as they are. To estimate the length one needs to scroll on the touchpad
+  // to trigger the history navigation:
+  //
+  // Pixel:
+  // 1280 (screen width in DIPs) * 0.25 (overscroll threshold) /
+  // (133 / 25.4) (conversion factor from DIP to mm) = 61.1 mm
+  // Most other low-res devices:
+  // 1366 * 0.25 / (133 / 25.4) = 65.2 mm
+  //
+  // With current scroll output scaling factor (2.5), we can reduce the length
+  // required to about one inch on all devices.
+  scale_out_x_ordinal = nullptr;
+  scale_out_y_ordinal = nullptr;
+
+  // Setup the parameters for acceleration calculations based on gesture
+  // type.
+  switch (gs.type) {
+    case kGestureTypeMove:
+    case kGestureTypeSwipe:
+    case kGestureTypeFourFingerSwipe:
+      // Setup the Gesture delta fields/scaling for the gesture type.
+      if (gs.type == kGestureTypeMove) {
+        scale_out_x = dx = &gs.details.move.dx;
+        scale_out_y = dy = &gs.details.move.dy;
+      } else if (gs.type == kGestureTypeSwipe) {
+        scale_out_x = dx = &gs.details.swipe.dx;
+        scale_out_y = dy = &gs.details.swipe.dy;
+      } else {
+        scale_out_x = dx = &gs.details.four_finger_swipe.dx;
+        scale_out_y = dy = &gs.details.four_finger_swipe.dy;
+      }
+
+      // Setup CurveSegments for the device options set.
+      if (use_mouse_point_curves_.val_ && use_custom_mouse_curve_.val_) {
+        // Custom Mouse.
+        segs = mouse_custom_point_;
+        max_segs = kMaxCustomCurveSegs;
+      } else if (!use_mouse_point_curves_.val_ &&
+                 use_custom_tp_point_curve_.val_) {
+        // Custom Touch.
+        segs = tp_custom_point_;
+        max_segs = kMaxCustomCurveSegs;
+      } else if (use_mouse_point_curves_.val_) {
+        // Standard Mouse.
+        if (!pointer_acceleration_.val_) {
+          segs = &unaccel_mouse_curves_[pointer_sensitivity_.val_ - 1];
+          max_segs = kMaxUnaccelCurveSegs;
+        } else if (use_old_mouse_point_curves_.val_) {
+          segs = old_mouse_point_curves_[pointer_sensitivity_.val_ - 1];
+        } else {
+          segs = mouse_point_curves_[pointer_sensitivity_.val_ - 1];
+        }
+      } else {
+        // Standard Touch.
+        if (!pointer_acceleration_.val_) {
+          segs = &unaccel_point_curves_[pointer_sensitivity_.val_ - 1];
+          max_segs = kMaxUnaccelCurveSegs;
+        } else {
+          segs = point_curves_[pointer_sensitivity_.val_ - 1];
+        }
+      }
+
+      x_scale = point_x_out_scale_.val_;
+      y_scale = point_y_out_scale_.val_;
+      break;
+
+    case kGestureTypeFling:
+    case kGestureTypeScroll:
+      // We bypass mouse scroll events as they have a separate acceleration
+      // algorithm implemented in mouse_interpreter.
+      if (use_mouse_scroll_curves_.val_)
+        return false;
+
+      // Setup the Gesture velocity/delta fields/scaling for the gesture type.
+      if (gs.type == kGestureTypeFling) {
+        scale_out_x = &gs.details.fling.vx;
+        scale_out_y = &gs.details.fling.vy;
+        scale_out_x_ordinal = &gs.details.fling.ordinal_vx;
+        scale_out_y_ordinal = &gs.details.fling.ordinal_vy;
+      } else {
+        scale_out_x = dx = &gs.details.scroll.dx;
+        scale_out_y = dy = &gs.details.scroll.dy;
+        scale_out_x_ordinal = &gs.details.scroll.ordinal_dx;
+        scale_out_y_ordinal = &gs.details.scroll.ordinal_dy;
+      }
+
+      // Setup CurveSegments for the device options set.
+      if (!use_custom_tp_scroll_curve_.val_) {
+        segs = scroll_curves_[scroll_sensitivity_.val_ - 1];
+      } else {
+        segs = tp_custom_scroll_;
+        max_segs = kMaxCustomCurveSegs;
+      }
+
+      x_scale = scroll_x_out_scale_.val_;
+      y_scale = scroll_y_out_scale_.val_;
+      break;
+
+    default:  // Nothing to accelerate.
+      return false;
+  }
+  return true;
+}
+
+bool AccelFilterInterpreter::get_actual_speed(
+    float* dx, float* dy,
+    float vx, float vy,
+    float dt,
+    float& speed) {
+  // Calculate the hypotenuse to determine the actual speed.
+  if (dx != nullptr && dy != nullptr) {
+    if (dt < 0.00001)
+      return false;  // Avoid division by 0.
+    speed = sqrtf(*dx * *dx + *dy * *dy) / dt;
+  } else {
+    // FLING is the only gesture that uses vx/vy and assumes dt=1.
+    speed = sqrtf(vx * vx + vy * vy);
+  }
+  return true;
+}
+
+void AccelFilterInterpreter::smooth_speed(Gesture& gs, float& speed) {
+  // Perform smoothing, if it is enabled.
+  if (smooth_accel_.val_) {
+    // Check if clock changed backwards.
+    if (last_end_time_ > gs.start_time)
+      last_end_time_ = -1.0;
+
+    if (last_end_time_ == gs.start_time) {
+      // Average the saved magnitudes.
+      last_mags_.insert(last_mags_.begin(), speed);
+      speed = std::reduce(last_mags_.begin(), last_mags_.end()) /
+              last_mags_.size();
+      // Limit the size of last_mags_ to the needed oldest mag entries.
+      if (last_mags_.size() > kMaxLastMagsSize)
+        last_mags_.pop_back();
+    } else {
+      // Time stamp jump, start smoothing anew.
+      last_mags_.clear();
+      last_mags_.push_back(speed);
+    }
+    last_end_time_ = gs.end_time;
+  }
+}
+
 float AccelFilterInterpreter::RatioFromAccelCurve(
-    CurveSegment const * segs,
+    CurveSegment const* segs,
     size_t const max_segs,
-    float const mag) {
-  if (mag <= 0.0)
+    float const speed) {
+  if (speed <= 0.0)
     return 0.0;
+
   for (size_t i = 0; i < max_segs; ++i) {
     CurveSegment const & seg = segs[i];
-    if (mag <= seg.x_) {
-      return (seg.sqr_ * mag) + seg.mul_ + (seg.int_ / mag);
+    if (speed <= seg.x_) {
+      return (seg.sqr_ * speed) + seg.mul_ + (seg.int_ / speed);
     }
   }
   return 0.0;

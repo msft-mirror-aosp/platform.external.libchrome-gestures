@@ -57,10 +57,77 @@ class AccelFilterInterpreter : public FilterInterpreter {
     double int_;  // Intercept of line
   };
 
-  // Map a magnitude/speed on a given CurveSegment array to a ratio multiplier
+  //**************************************************************************
+  // Worker Funnctions that are used internal to this class as well
+  // as giving internal information for testing/research purposes.
+
+  // Calculate the Delta Time for a given gesture.
+  //    in:     gs, provided Gesture
+  //    ret:    delta time
+  float get_dt(const Gesture& gs);
+
+  // Calculate the Delta Time and adjust the value if the calculation gives
+  // an out of bounds value.
+  //    in:     gs, provided Gesture
+  //    ret:    Reasonable Delta Time
+  float get_adjusted_dt(const Gesture& gs);
+
+  // The calculations in the ConsumeGestures is generic but works on
+  // different fields based on what the gesture is.  This worker will
+  // gather the correct values for the ConsumeGestures process.
+  //    in:     gs, provided Gesture
+  //    out:    dx, address of delta X
+  //    out:    dy, address of delta Y
+  //    out:    x_scale, value of X scaling factor
+  //    out:    y_scale, value of Y scaling factor
+  //    out:    scale_out_x, address of X value to adjust
+  //    out:    scale_out_y, address of Y value to adjust
+  //    out:    scale_out_x_ordinal, address of X orginal value to adjust
+  //    out:    scale_out_y_ordinal, address of Y orginal value to adjust
+  //    out:    segs, address of CurveSegment array to use
+  //    out:    max_segs, number of array entries of segs
+  //    ret:    true, acceleration expected
+  //            false, acceleration not expected
+  bool get_accel_parameters(
+      Gesture& gs,
+      float*& dx, float*& dy,
+      float& x_scale, float& y_scale,
+      float*& scale_out_x, float*& scale_out_y,
+      float*& scale_out_x_ordinal, float*& scale_out_y_ordinal,
+      CurveSegment*& segs, size_t& max_segs);
+
+  // Given a dx/dy/dt (non-fling motion) or, if dx and dy are nullptr,
+  // vx/vy (fling velocity) calculate the speed.
+  //    in:     dx, address of delta X
+  //    in:     dy, address of delta Y
+  //    in:     vx, value of X velocity (only valid if dx/dy are nullptr)
+  //    in:     vy, value of Y velocity (only valid if dx/dy are nullptr)
+  //    in:     dt, value of delta time (assumed 1 if dx/dy are nullptr)
+  //    out:    speed, actual distance/delta time
+  //    ret:    true, acceleration expected
+  //            false, acceleration not expected
+  bool get_actual_speed(
+      float* dx, float* dy,
+      float vx, float vy,
+      float dt,
+      float& speed);
+
+  // Speed smoothing, this is currently disabled but can be enabled by
+  // means of the smooth_accel_ Property.
+  //    in:     gs, provided Gesture
+  //    inout:  speed, actual speed on input and smoothed on output
+  void smooth_speed(Gesture& gs, float& speed);
+
+  // Map a speed on a given CurveSegment array to a ratio multiplier.
+  //    in:     segs, address of CurveSegment array being used
+  //    in:     max_segs, number of array entries in segs
+  //    in:     speed, actual distance/delta time value
+  //    ret:    determined gain to apply
   float RatioFromAccelCurve(CurveSegment const * segs,
                             size_t const max_segs,
-                            float const mag);
+                            float const speed);
+
+  //**************************************************************************
 
   static const size_t kMaxCurveSegs = 3;
   static const size_t kMaxCustomCurveSegs = 20;
