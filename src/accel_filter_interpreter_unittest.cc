@@ -747,6 +747,9 @@ TEST_F(AccelFilterInterpreterTest, TouchpadPointAccelCurveTest) {
     ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, 0.0);
     ASSERT_EQ(ratio, 0.0);
 
+    ratio = accel_interpreter.RatioFromAccelCurve(segs, 1, INFINITY);
+    ASSERT_EQ(ratio, 0.0);
+
     //    y = 32x/divisor   (x < 32)
     const float linear_until_x = 32.0;
     ASSERT_EQ(segs[0].x_, linear_until_x);
@@ -832,6 +835,9 @@ TEST_F(AccelFilterInterpreterTest, TouchpadScrollAccelCurveTest) {
     const float divisor = scroll_divisors[sensitivity - 1];
 
     ratio = accel_interpreter.RatioFromAccelCurve(segs, num_segs, 0.0);
+    ASSERT_EQ(ratio, 0.0);
+
+    ratio = accel_interpreter.RatioFromAccelCurve(segs, 1, INFINITY);
     ASSERT_EQ(ratio, 0.0);
 
     //    y = 75x/divisor   (x < 75)
