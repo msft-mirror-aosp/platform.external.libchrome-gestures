@@ -47,9 +47,7 @@ class PropertyDelegate;
 class Property {
  public:
   Property(PropRegistry* parent, const char* name)
-      : gprop_(NULL), parent_(parent), delegate_(NULL), name_(name) {}
-  Property(PropRegistry* parent, const char* name, PropertyDelegate* delegate)
-      : gprop_(NULL), parent_(parent), delegate_(delegate), name_(name) {}
+      : parent_(parent), name_(name) {}
 
   virtual ~Property() {
     if (parent_)
@@ -59,6 +57,10 @@ class Property {
   void CreateProp();
   virtual void CreatePropImpl() = 0;
   void DestroyProp();
+
+  void SetDelegate(PropertyDelegate* delegate) {
+    delegate_ = delegate;
+  }
 
   const char* name() { return name_; }
   // Returns a newly allocated Value object
@@ -79,9 +81,9 @@ class Property {
   virtual void HandleGesturesPropWritten() = 0;
 
  protected:
-  GesturesProp* gprop_;
+  GesturesProp* gprop_ = NULL;
   PropRegistry* parent_;
-  PropertyDelegate* delegate_;
+  PropertyDelegate* delegate_ = NULL;
 
  private:
   const char* name_;
@@ -91,12 +93,6 @@ class BoolProperty : public Property {
  public:
   BoolProperty(PropRegistry* reg, const char* name, GesturesPropBool val)
       : Property(reg, name), val_(val) {
-    if (parent_)
-      parent_->Register(this);
-  }
-  BoolProperty(PropRegistry* reg, const char* name, GesturesPropBool val,
-               PropertyDelegate* delegate)
-      : Property(reg, name, delegate), val_(val) {
     if (parent_)
       parent_->Register(this);
   }
@@ -116,12 +112,6 @@ class BoolArrayProperty : public Property {
     if (parent_)
       parent_->Register(this);
   }
-  BoolArrayProperty(PropRegistry* reg, const char* name, GesturesPropBool* vals,
-                    size_t count, PropertyDelegate* delegate)
-      : Property(reg, name, delegate), vals_(vals), count_(count) {
-    if (parent_)
-      parent_->Register(this);
-  }
   virtual void CreatePropImpl();
   virtual Json::Value NewValue() const;
   virtual bool SetValue(const Json::Value& list);
@@ -135,12 +125,6 @@ class DoubleProperty : public Property {
  public:
   DoubleProperty(PropRegistry* reg, const char* name, double val)
       : Property(reg, name), val_(val) {
-    if (parent_)
-      parent_->Register(this);
-  }
-  DoubleProperty(PropRegistry* reg, const char* name, double val,
-                 PropertyDelegate* delegate)
-      : Property(reg, name, delegate), val_(val) {
     if (parent_)
       parent_->Register(this);
   }
@@ -160,12 +144,6 @@ class DoubleArrayProperty : public Property {
     if (parent_)
       parent_->Register(this);
   }
-  DoubleArrayProperty(PropRegistry* reg, const char* name, double* vals,
-                      size_t count, PropertyDelegate* delegate)
-      : Property(reg, name, delegate), vals_(vals), count_(count) {
-    if (parent_)
-      parent_->Register(this);
-  }
   virtual void CreatePropImpl();
   virtual Json::Value NewValue() const;
   virtual bool SetValue(const Json::Value& list);
@@ -182,12 +160,6 @@ class IntProperty : public Property {
     if (parent_)
       parent_->Register(this);
   }
-  IntProperty(PropRegistry* reg, const char* name, int val,
-              PropertyDelegate* delegate)
-      : Property(reg, name, delegate), val_(val) {
-    if (parent_)
-      parent_->Register(this);
-  }
   virtual void CreatePropImpl();
   virtual Json::Value NewValue() const;
   virtual bool SetValue(const Json::Value& value);
@@ -198,14 +170,9 @@ class IntProperty : public Property {
 
 class IntArrayProperty : public Property {
  public:
-  IntArrayProperty(PropRegistry* reg, const char* name, int* vals, size_t count)
+  IntArrayProperty(PropRegistry* reg, const char* name, int* vals,
+                   size_t count)
       : Property(reg, name), vals_(vals), count_(count) {
-    if (parent_)
-      parent_->Register(this);
-  }
-  IntArrayProperty(PropRegistry* reg, const char* name, int* vals, size_t count,
-                   PropertyDelegate* delegate)
-      : Property(reg, name, delegate), vals_(vals), count_(count) {
     if (parent_)
       parent_->Register(this);
   }
@@ -222,12 +189,6 @@ class StringProperty : public Property {
  public:
   StringProperty(PropRegistry* reg, const char* name, const char* val)
       : Property(reg, name), val_(val) {
-    if (parent_)
-      parent_->Register(this);
-  }
-  StringProperty(PropRegistry* reg, const char* name, const char* val,
-                 PropertyDelegate* delegate)
-      : Property(reg, name, delegate), val_(val) {
     if (parent_)
       parent_->Register(this);
   }
