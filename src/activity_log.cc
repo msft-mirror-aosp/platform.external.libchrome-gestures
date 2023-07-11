@@ -58,43 +58,43 @@ void ActivityLog::SetHardwareProperties(const HardwareProperties& hwprops) {
 void ActivityLog::LogHardwareState(const HardwareState& hwstate) {
   Entry* entry = PushBack();
   entry->type = kHardwareState;
-  entry->details.hwstate = hwstate;
+  entry->hwstate = hwstate;
   if (hwstate.finger_cnt > max_fingers_) {
     Err("Too many fingers! Max is %zu, but I got %d",
         max_fingers_, hwstate.finger_cnt);
-    entry->details.hwstate.fingers = nullptr;
-    entry->details.hwstate.finger_cnt = 0;
+    entry->hwstate.fingers = nullptr;
+    entry->hwstate.finger_cnt = 0;
     return;
   }
   if (!finger_states_.get())
     return;
-  entry->details.hwstate.fingers = &finger_states_[TailIdx() * max_fingers_];
+  entry->hwstate.fingers = &finger_states_[TailIdx() * max_fingers_];
   std::copy(&hwstate.fingers[0], &hwstate.fingers[hwstate.finger_cnt],
-            entry->details.hwstate.fingers);
+            entry->hwstate.fingers);
 }
 
 void ActivityLog::LogTimerCallback(stime_t now) {
   Entry* entry = PushBack();
   entry->type = kTimerCallback;
-  entry->details.timestamp = now;
+  entry->timestamp = now;
 }
 
 void ActivityLog::LogCallbackRequest(stime_t when) {
   Entry* entry = PushBack();
   entry->type = kCallbackRequest;
-  entry->details.timestamp = when;
+  entry->timestamp = when;
 }
 
 void ActivityLog::LogGesture(const Gesture& gesture) {
   Entry* entry = PushBack();
   entry->type = kGesture;
-  entry->details.gesture = gesture;
+  entry->gesture = gesture;
 }
 
 void ActivityLog::LogPropChange(const PropChangeEntry& prop_change) {
   Entry* entry = PushBack();
   entry->type = kPropChange;
-  entry->details.prop_change = prop_change;
+  entry->prop_change = prop_change;
 }
 
 void ActivityLog::Dump(const char* filename) {
@@ -408,19 +408,21 @@ Json::Value ActivityLog::EncodeCommonInfo() {
     const Entry& entry = buffer_[(i + head_idx_) % kBufferSize];
     switch (entry.type) {
       case kHardwareState:
-        entries.append(EncodeHardwareState(entry.details.hwstate));
+        entries.append(EncodeHardwareState(entry.hwstate));
         continue;
       case kTimerCallback:
-        entries.append(EncodeTimerCallback(entry.details.timestamp));
+        entries.append(EncodeTimerCallback(entry.timestamp));
         continue;
       case kCallbackRequest:
-        entries.append(EncodeCallbackRequest(entry.details.timestamp));
+        entries.append(EncodeCallbackRequest(entry.timestamp));
         continue;
       case kGesture:
-        entries.append(EncodeGesture(entry.details.gesture));
+        entries.append(EncodeGesture(entry.gesture));
         continue;
       case kPropChange:
-        entries.append(EncodePropChange(entry.details.prop_change));
+        entries.append(EncodePropChange(entry.prop_change));
+        continue;
+      case kNoType:
         continue;
     }
     Err("Unknown entry type %d", entry.type);

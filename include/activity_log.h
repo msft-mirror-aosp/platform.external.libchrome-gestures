@@ -27,6 +27,7 @@ class ActivityLog {
   FRIEND_TEST(PropRegistryTest, PropChangeTest);
  public:
   enum EntryType {
+    kNoType = -1,
     kHardwareState = 0,
     kTimerCallback,
     kCallbackRequest,
@@ -50,13 +51,19 @@ class ActivityLog {
     } value;
   };
   struct Entry {
-    EntryType type;
-    struct details {
-      HardwareState hwstate;  // kHardwareState
-      stime_t timestamp;  // kTimerCallback, kCallbackRequest
-      Gesture gesture;  // kGesture
+    Entry() : no_type(true) {}
+    EntryType type = kNoType;
+    union {
+      // no_type is only used for Entry initialization because Gesture does
+      // not have a trivial constructor and that precludes Entry from having
+      // a trivial constructor, which is needed for the content change from
+      // being a struct to a union.
+      bool no_type;
+      HardwareState hwstate;        // kHardwareState
+      stime_t timestamp;            // kTimerCallback, kCallbackRequest
+      Gesture gesture;              // kGesture
       PropChangeEntry prop_change;  // kPropChange
-    } details;
+    };
   };
 
   explicit ActivityLog(PropRegistry* prop_reg);

@@ -658,7 +658,7 @@ void ActivityReplay::Replay(Interpreter* interpreter,
     switch (entry->type) {
       case ActivityLog::kHardwareState: {
         last_timeout_req = -1.0;
-        HardwareState hs = entry->details.hwstate;
+        HardwareState hs = entry->hwstate;
         for (size_t i = 0; i < hs.finger_cnt; i++)
           Log("Input Finger ID: %d", hs.fingers[i].tracking_id);
         interpreter->SyncInterpret(hs, &last_timeout_req);
@@ -666,23 +666,23 @@ void ActivityReplay::Replay(Interpreter* interpreter,
       }
       case ActivityLog::kTimerCallback: {
         last_timeout_req = -1.0;
-        interpreter->HandleTimer(entry->details.timestamp, &last_timeout_req);
+        interpreter->HandleTimer(entry->timestamp, &last_timeout_req);
         break;
       }
       case ActivityLog::kCallbackRequest:
-        if (!DoubleEq(last_timeout_req, entry->details.timestamp)) {
+        if (!DoubleEq(last_timeout_req, entry->timestamp)) {
           Err("Expected timeout request of %f, but log has %f (entry idx %zu)",
-              last_timeout_req, entry->details.timestamp, i);
+              last_timeout_req, entry->timestamp, i);
         }
         break;
       case ActivityLog::kGesture: {
         bool matched = false;
         while (!consumed_gestures_.empty() && !matched) {
-          if (consumed_gestures_.front() == entry->details.gesture) {
+          if (consumed_gestures_.front() == entry->gesture) {
             Log("Gesture matched:\n  Actual gesture: %s.\n"
                 "Expected gesture: %s",
                 consumed_gestures_.front().String().c_str(),
-                entry->details.gesture.String().c_str());
+                entry->gesture.String().c_str());
             matched = true;
           } else {
             Log("Unmatched actual gesture: %s\n",
@@ -693,13 +693,15 @@ void ActivityReplay::Replay(Interpreter* interpreter,
         }
         if (!matched) {
           Log("Missing logged gesture: %s",
-              entry->details.gesture.String().c_str());
+              entry->gesture.String().c_str());
           ADD_FAILURE();
         }
         break;
       }
       case ActivityLog::kPropChange:
-        ReplayPropChange(entry->details.prop_change);
+        ReplayPropChange(entry->prop_change);
+        break;
+      case ActivityLog::kNoType:
         break;
     }
   }
