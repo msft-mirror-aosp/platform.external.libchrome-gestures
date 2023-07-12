@@ -137,6 +137,11 @@ TEST(PropRegistryTest, PropChangeTest) {
   EXPECT_EQ(0, log.size());
   dp.HandleGesturesPropWritten();
   EXPECT_EQ(1, log.size());
+
+  BoolProperty bp(&reg, "there", true);
+  EXPECT_EQ(1, log.size());
+  bp.HandleGesturesPropWritten();
+  EXPECT_EQ(2, log.size());
 }
 
 // Mock GesturesPropProvider

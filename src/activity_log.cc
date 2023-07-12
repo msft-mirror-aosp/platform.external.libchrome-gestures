@@ -29,6 +29,17 @@
 using std::set;
 using std::string;
 
+namespace {
+
+// Helper to std::visit with lambdas.
+template <typename... V>
+struct Visitor : V... {};
+// Explicit deduction guide (not needed as of C++20).
+template <typename... V>
+Visitor(V...) -> Visitor<V...>;
+
+} // namespace
+
 namespace gestures {
 
 ActivityLog::ActivityLog(PropRegistry* prop_reg)
@@ -57,44 +68,40 @@ void ActivityLog::SetHardwareProperties(const HardwareProperties& hwprops) {
 
 void ActivityLog::LogHardwareState(const HardwareState& hwstate) {
   Entry* entry = PushBack();
-  entry->type = kHardwareState;
-  entry->hwstate = hwstate;
+  entry->details = hwstate;
+  HardwareState& entry_hwstate = std::get<HardwareState>(entry->details);
   if (hwstate.finger_cnt > max_fingers_) {
     Err("Too many fingers! Max is %zu, but I got %d",
         max_fingers_, hwstate.finger_cnt);
-    entry->hwstate.fingers = nullptr;
-    entry->hwstate.finger_cnt = 0;
+    entry_hwstate.fingers = nullptr;
+    entry_hwstate.finger_cnt = 0;
     return;
   }
   if (!finger_states_.get())
     return;
-  entry->hwstate.fingers = &finger_states_[TailIdx() * max_fingers_];
+  entry_hwstate.fingers = &finger_states_[TailIdx() * max_fingers_];
   std::copy(&hwstate.fingers[0], &hwstate.fingers[hwstate.finger_cnt],
-            entry->hwstate.fingers);
+            entry_hwstate.fingers);
 }
 
 void ActivityLog::LogTimerCallback(stime_t now) {
   Entry* entry = PushBack();
-  entry->type = kTimerCallback;
-  entry->timestamp = now;
+  entry->details = TimerCallbackEntry{now};
 }
 
 void ActivityLog::LogCallbackRequest(stime_t when) {
   Entry* entry = PushBack();
-  entry->type = kCallbackRequest;
-  entry->timestamp = when;
+  entry->details = CallbackRequestEntry{when};
 }
 
 void ActivityLog::LogGesture(const Gesture& gesture) {
   Entry* entry = PushBack();
-  entry->type = kGesture;
-  entry->gesture = gesture;
+  entry->details = gesture;
 }
 
 void ActivityLog::LogPropChange(const PropChangeEntry& prop_change) {
   Entry* entry = PushBack();
-  entry->type = kPropChange;
-  entry->prop_change = prop_change;
+  entry->details = prop_change;
 }
 
 void ActivityLog::Dump(const char* filename) {
@@ -298,24 +305,28 @@ Json::Value ActivityLog::EncodePropChange(const PropChangeEntry& prop_change) {
   ret[kKeyPropChangeName] = Json::Value(prop_change.name);
   Json::Value val;
   Json::Value type;
-  switch (prop_change.type) {
-    case PropChangeEntry::kBoolProp:
-      val = Json::Value(static_cast<bool>(prop_change.value.bool_val));
-      type = Json::Value(kValuePropChangeTypeBool);
-      break;
-    case PropChangeEntry::kDoubleProp:
-      val = Json::Value(prop_change.value.double_val);
-      type = Json::Value(kValuePropChangeTypeDouble);
-      break;
-    case PropChangeEntry::kIntProp:
-      val = Json::Value(prop_change.value.int_val);
-      type = Json::Value(kValuePropChangeTypeInt);
-      break;
-    case PropChangeEntry::kShortProp:
-      val = Json::Value(prop_change.value.short_val);
-      type = Json::Value(kValuePropChangeTypeShort);
-      break;
-  }
+  std::visit(
+    Visitor {
+      [&val, &type](GesturesPropBool value) {
+        val = Json::Value(value);
+        type = Json::Value(kValuePropChangeTypeBool);
+      },
+      [&val, &type](double value) {
+        val = Json::Value(value);
+        type = Json::Value(kValuePropChangeTypeDouble);
+      },
+      [&val, &type](int value) {
+        val = Json::Value(value);
+        type = Json::Value(kValuePropChangeTypeInt);
+      },
+      [&val, &type](short value) {
+        val = Json::Value(value);
+        type = Json::Value(kValuePropChangeTypeShort);
+      },
+      [](auto arg) {
+        Err("Invalid value type");
+      }
+    }, prop_change.value);
   if (!val.isNull())
     ret[kKeyPropChangeValue] = val;
   if (!type.isNull())
@@ -338,30 +349,30 @@ Json::Value ActivityLog::EncodePropRegistry() {
 
 Json::Value ActivityLog::EncodeCommonInfo() {
   Json::Value root(Json::objectValue);
-
   Json::Value entries(Json::arrayValue);
   for (size_t i = 0; i < size_; ++i) {
     const Entry& entry = buffer_[(i + head_idx_) % kBufferSize];
-    switch (entry.type) {
-      case kHardwareState:
-        entries.append(EncodeHardwareState(entry.hwstate));
-        continue;
-      case kTimerCallback:
-        entries.append(EncodeTimerCallback(entry.timestamp));
-        continue;
-      case kCallbackRequest:
-        entries.append(EncodeCallbackRequest(entry.timestamp));
-        continue;
-      case kGesture:
-        entries.append(EncodeGesture(entry.gesture));
-        continue;
-      case kPropChange:
-        entries.append(EncodePropChange(entry.prop_change));
-        continue;
-      case kNoType:
-        continue;
-    }
-    Err("Unknown entry type %d", entry.type);
+    std::visit(
+      Visitor {
+        [this, &entries](HardwareState hwstate) {
+          entries.append(EncodeHardwareState(hwstate));
+        },
+        [this, &entries](TimerCallbackEntry now) {
+          entries.append(EncodeTimerCallback(now.timestamp));
+        },
+        [this, &entries](CallbackRequestEntry when) {
+          entries.append(EncodeCallbackRequest(when.timestamp));
+        },
+        [this, &entries](Gesture gesture) {
+          entries.append(EncodeGesture(gesture));
+        },
+        [this, &entries](PropChangeEntry prop_change) {
+          entries.append(EncodePropChange(prop_change));
+        },
+        [](auto arg) {
+          Err("Unknown entry type");
+        }
+      }, entry.details);
   }
   root[kKeyRoot] = entries;
   root[kKeyHardwarePropRoot] = EncodeHardwareProperties();
