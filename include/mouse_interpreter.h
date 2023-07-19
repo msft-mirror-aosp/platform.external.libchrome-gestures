@@ -17,6 +17,7 @@ namespace gestures {
 class MouseInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(MouseInterpreterTest, SimpleTest);
   FRIEND_TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest);
+  FRIEND_TEST(MouseInterpreterTest, ScrollAccelerationOnAndOffTest);
   FRIEND_TEST(MouseInterpreterTest, JankyScrollTest);
   FRIEND_TEST(MouseInterpreterTest, WheelTickReportingHighResTest);
   FRIEND_TEST(MouseInterpreterTest, WheelTickReportingLowResTest);
@@ -73,6 +74,12 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
 
   // Reverse wheel scrolling.
   BoolProperty reverse_scrolling_;
+
+  // Mouse scroll acceleration.
+  BoolProperty scroll_acceleration_;
+
+  // Mouse scroll sensitivity 1..5.
+  IntProperty scroll_sensitivity_;
 
   // Enable high-resolution scrolling.
   BoolProperty hi_res_scrolling_;

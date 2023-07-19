@@ -127,6 +127,63 @@ TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest) {
   EXPECT_NEAR(offset_of_high_res_scroll, gs->details.wheel.dy, 0.1);
 }
 
+TEST(MouseInterpreterTest, ScrollAccelerationOnAndOffTest) {
+  HardwareProperties hwprops = make_hwprops_for_mouse(1, 1);
+  MouseInterpreter mi(nullptr, nullptr);
+  TestInterpreterWrapper wrapper(&mi, &hwprops);
+  Gesture* gs;
+
+  HardwareState hwstates[] = {
+    { 200000, 0, 0, 0, nullptr, 0, 0,  0, 0, 0, 0.0 },
+    { 210000, 0, 0, 0, nullptr, 0, 0,  5, 0, 0, 0.0 },
+    { 220000, 0, 0, 0, nullptr, 0, 0,  5, 0, 0, 0.0 },
+    { 230000, 0, 0, 0, nullptr, 0, 0, 10, 0, 0, 0.0 },
+    { 240000, 0, 0, 0, nullptr, 0, 0, 10, 0, 0, 0.0 },
+  };
+
+  // Scroll acceleration is on.
+  mi.scroll_acceleration_.val_ = true;
+  mi.output_mouse_wheel_gestures_.val_ = true;
+  mi.hi_res_scrolling_.val_ = false;
+
+  gs = wrapper.SyncInterpret(hwstates[0], nullptr);
+  EXPECT_EQ(nullptr, gs);
+
+  gs = wrapper.SyncInterpret(hwstates[1], nullptr);
+  ASSERT_NE(nullptr, gs);
+  EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
+  EXPECT_NE(0, gs->details.scroll.dy);
+
+  float offset_when_acceleration_on = gs->details.scroll.dy;
+
+  gs = wrapper.SyncInterpret(hwstates[2], nullptr);
+  ASSERT_NE(nullptr, gs);
+  EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
+  EXPECT_NE(0, gs->details.scroll.dy);
+  // When acceleration is on, the offset is related to scroll speed. Though
+  // the wheel displacement are both 5, since the scroll speeds are different,
+  // the offset are different.
+  EXPECT_NE(offset_when_acceleration_on, gs->details.scroll.dy);
+
+  // Turn scroll acceleration off.
+  mi.scroll_acceleration_.val_ = false;
+
+  gs = wrapper.SyncInterpret(hwstates[3], nullptr);
+  ASSERT_NE(nullptr, gs);
+  EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
+  EXPECT_NE(0, gs->details.scroll.dy);
+
+  float offset_when_acceleration_off = gs->details.scroll.dy;
+
+  gs = wrapper.SyncInterpret(hwstates[4], nullptr);
+  ASSERT_NE(nullptr, gs);
+  EXPECT_EQ(kGestureTypeMouseWheel, gs->type);
+  EXPECT_NE(0, gs->details.scroll.dy);
+  // When acceleration is off, the offset is not related to scroll speed.
+  // Same wheel displacement yields to same offset.
+  EXPECT_EQ(offset_when_acceleration_off, gs->details.scroll.dy);
+}
+
 TEST(MouseInterpreterTest, JankyScrollTest) {
   HardwareProperties hwprops = make_hwprops_for_mouse(1, 0);
   MouseInterpreter mi(nullptr, nullptr);
