@@ -28,26 +28,32 @@ void TimestampFilterInterpreter::SyncInterpretImpl(
     HardwareState& hwstate, stime_t* timeout) {
   const char name[] = "TimestampFilterInterpreter::SyncInterpretImpl";
   LogHardwareStatePre(name, hwstate);
+  auto debug_data = ActivityLog::TimestampHardwareStateDebug{};
 
   if (fake_timestamp_delta_.val_ == 0.0)
-    ChangeTimestampDefault(hwstate);
+    ChangeTimestampDefault(hwstate, debug_data);
   else
-    ChangeTimestampUsingFake(hwstate);
+    ChangeTimestampUsingFake(hwstate, debug_data);
 
+  LogDebugData(debug_data);
   LogHardwareStatePost(name, hwstate);
   next_->SyncInterpret(hwstate, timeout);
 }
 
 void TimestampFilterInterpreter::ChangeTimestampDefault(
-    HardwareState& hwstate) {
+    HardwareState& hwstate,
+    ActivityLog::TimestampHardwareStateDebug& debug_data) {
   // Check if this is the first event or there has been a jump backwards.
+  debug_data.prev_msc_timestamp_in = prev_msc_timestamp_;
   if (prev_msc_timestamp_ < 0.0 ||
       hwstate.msc_timestamp == 0.0 ||
       hwstate.msc_timestamp < prev_msc_timestamp_) {
     msc_timestamp_offset_ = hwstate.timestamp - hwstate.msc_timestamp;
     max_skew_ = 0.0;
+    debug_data.was_first_or_backward = true;
   }
   prev_msc_timestamp_ = hwstate.msc_timestamp;
+  debug_data.prev_msc_timestamp_out = prev_msc_timestamp_;
 
   stime_t new_timestamp = hwstate.msc_timestamp + msc_timestamp_offset_;
   skew_ = new_timestamp - hwstate.timestamp;
@@ -55,20 +61,30 @@ void TimestampFilterInterpreter::ChangeTimestampDefault(
   hwstate.timestamp = new_timestamp;
 
   hwstate.msc_timestamp = 0.0;
+  debug_data.skew = skew_;
+  debug_data.max_skew = max_skew_;
 }
 
 void TimestampFilterInterpreter::ChangeTimestampUsingFake(
-    HardwareState& hwstate) {
+    HardwareState& hwstate,
+    ActivityLog::TimestampHardwareStateDebug& debug_data) {
+  debug_data.is_using_fake = true;
+  debug_data.fake_timestamp_in = fake_timestamp_;
+  debug_data.fake_timestamp_delta = fake_timestamp_delta_.val_;
   fake_timestamp_ += fake_timestamp_delta_.val_;
   if (fabs(fake_timestamp_ - hwstate.timestamp) >
       fake_timestamp_max_divergence_) {
     fake_timestamp_ = hwstate.timestamp;
     max_skew_ = 0.0;
+    debug_data.was_divergence_reset = true;
   }
+  debug_data.fake_timestamp_out = fake_timestamp_;
 
   skew_ = fake_timestamp_ - hwstate.timestamp;
   max_skew_ = std::max(max_skew_, skew_);
   hwstate.timestamp = fake_timestamp_;
+  debug_data.skew = skew_;
+  debug_data.max_skew = max_skew_;
 }
 
 void TimestampFilterInterpreter::HandleTimerImpl(stime_t now,

@@ -100,6 +100,24 @@ class ActivityLog {
   struct TimestampGestureDebug {
     stime_t skew;
   };
+  struct TimestampHardwareStateDebug {
+    bool is_using_fake;
+    union {
+      struct {
+        bool was_first_or_backward;
+        stime_t prev_msc_timestamp_in;
+        stime_t prev_msc_timestamp_out;
+      };
+      struct {
+        bool was_divergence_reset;
+        stime_t fake_timestamp_in;
+        stime_t fake_timestamp_delta;
+        stime_t fake_timestamp_out;
+      };
+    };
+    stime_t skew;
+    stime_t max_skew;
+  };
 
   struct Entry {
     std::variant<HardwareState,
@@ -114,7 +132,8 @@ class ActivityLog {
                  HandleTimerPre,
                  HandleTimerPost,
                  AccelGestureDebug,
-                 TimestampGestureDebug> details;
+                 TimestampGestureDebug,
+                 TimestampHardwareStateDebug> details;
   };
 
   explicit ActivityLog(PropRegistry* prop_reg);
@@ -300,7 +319,17 @@ class ActivityLog {
 
   // Timestamp Debug Data keys:
   static const char kKeyTimestampGestureDebug[];
+  static const char kKeyTimestampHardwareStateDebug[];
+  static const char kKeyTimestampDebugIsUsingFake[];
+  static const char kKeyTimestampDebugWasFirstOrBackward[];
+  static const char kKeyTimestampDebugPrevMscTimestampIn[];
+  static const char kKeyTimestampDebugPrevMscTimestampOut[];
+  static const char kKeyTimestampDebugWasDivergenceReset[];
+  static const char kKeyTimestampDebugFakeTimestampIn[];
+  static const char kKeyTimestampDebugFakeTimestampDelta[];
+  static const char kKeyTimestampDebugFakeTimestampOut[];
   static const char kKeyTimestampDebugSkew[];
+  static const char kKeyTimestampDebugMaxSkew[];
 
  private:
   // Extends the tail of the buffer by one element and returns that new element.
@@ -316,6 +345,8 @@ class ActivityLog {
   Json::Value EncodeHardwareState(const HardwareState& hwstate);
   Json::Value EncodeHardwareState(const HardwareStatePre& hwstate);
   Json::Value EncodeHardwareState(const HardwareStatePost& hwstate);
+  Json::Value EncodeHardwareStateDebug(
+      const TimestampHardwareStateDebug& debug_data);
 
   Json::Value EncodeTimerCallback(stime_t timestamp);
   Json::Value EncodeHandleTimer(const HandleTimerPre& handle);

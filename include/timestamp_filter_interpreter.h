@@ -28,6 +28,7 @@ class TimestampFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest);
   FRIEND_TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest);
   FRIEND_TEST(TimestampFilterInterpreterTest, GestureDebugTest);
+  FRIEND_TEST(TimestampFilterInterpreterParmTest, TimestampDebugLoggingTest);
  public:
   // Takes ownership of |next|:
   explicit TimestampFilterInterpreter(PropRegistry* prop_reg,
@@ -57,13 +58,17 @@ class TimestampFilterInterpreter : public FilterInterpreter {
   //   - hwstate.timestamp uses CLOCK_MONOTONIC as the time base, possibly with
   //     fine tuning provided by MSC_TIMESTAMP.
   //   - hwstate.msc_timestamp should not be used.
-  void ChangeTimestampDefault(HardwareState& hwstate);
+  void ChangeTimestampDefault(
+      HardwareState& hwstate,
+      ActivityLog::TimestampHardwareStateDebug& debug_data);
 
   // If neither hwstate.timestamp nor hwstate.msc_timestamp has reliable
   // deltas, we use fake_timestamp_delta_ as the delta between consecutive
   // reports, but don't allow our faked timestamp to diverge too far from
   // hwstate.timestamp.
-  void ChangeTimestampUsingFake(HardwareState& hwstate);
+  void ChangeTimestampUsingFake(
+      HardwareState& hwstate,
+      ActivityLog::TimestampHardwareStateDebug& debug_data);
 
   void ConsumeGesture(const Gesture& gs);
 

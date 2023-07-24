@@ -41,6 +41,7 @@ class Interpreter {
   FRIEND_TEST(InterpreterTest, LogHardwareStateTest);
   FRIEND_TEST(InterpreterTest, LogGestureTest);
   FRIEND_TEST(InterpreterTest, LogHandleTimerTest);
+  FRIEND_TEST(TimestampFilterInterpreterParmTest, TimestampDebugLoggingTest);
  public:
   Interpreter(PropRegistry* prop_reg, Tracer* tracer, bool force_log_creation);
   virtual ~Interpreter();

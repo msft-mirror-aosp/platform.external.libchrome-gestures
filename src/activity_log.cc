@@ -474,6 +474,33 @@ Json::Value ActivityLog::EncodeGestureDebug(
   return ret;
 }
 
+Json::Value ActivityLog::EncodeHardwareStateDebug(
+    const TimestampHardwareStateDebug& debug_data) {
+  Json::Value ret(Json::objectValue);
+  ret[kKeyType] = Json::Value(kKeyTimestampHardwareStateDebug);
+  ret[kKeyTimestampDebugIsUsingFake] = Json::Value(debug_data.is_using_fake);
+  if (debug_data.is_using_fake) {
+    ret[kKeyTimestampDebugWasFirstOrBackward] =
+        Json::Value(debug_data.was_first_or_backward);
+    ret[kKeyTimestampDebugPrevMscTimestampIn] =
+        Json::Value(debug_data.prev_msc_timestamp_in);
+    ret[kKeyTimestampDebugPrevMscTimestampOut] =
+        Json::Value(debug_data.prev_msc_timestamp_out);
+  } else {
+    ret[kKeyTimestampDebugWasDivergenceReset] =
+        Json::Value(debug_data.was_divergence_reset);
+    ret[kKeyTimestampDebugFakeTimestampIn] =
+        Json::Value(debug_data.fake_timestamp_in);
+    ret[kKeyTimestampDebugFakeTimestampDelta] =
+        Json::Value(debug_data.fake_timestamp_delta);
+    ret[kKeyTimestampDebugFakeTimestampOut] =
+        Json::Value(debug_data.fake_timestamp_out);
+  }
+  ret[kKeyTimestampDebugSkew] = Json::Value(debug_data.skew);
+  ret[kKeyTimestampDebugMaxSkew] = Json::Value(debug_data.max_skew);
+  return ret;
+}
+
 Json::Value ActivityLog::EncodePropRegistry() {
   Json::Value ret(Json::objectValue);
   if (!prop_reg_)
@@ -532,6 +559,9 @@ Json::Value ActivityLog::EncodeCommonInfo() {
         },
         [this, &entries](TimestampGestureDebug debug_data) {
           entries.append(EncodeGestureDebug(debug_data));
+        },
+        [this, &entries](TimestampHardwareStateDebug debug_data) {
+          entries.append(EncodeHardwareStateDebug(debug_data));
         },
         [](auto arg) {
           Err("Unknown entry type");
@@ -695,6 +725,24 @@ const char ActivityLog::kKeyAccelDebugGainX[] = "gainX";
 const char ActivityLog::kKeyAccelDebugGainY[] = "gainY";
 
 const char ActivityLog::kKeyTimestampGestureDebug[] = "debugTimestampGesture";
+const char ActivityLog::kKeyTimestampHardwareStateDebug[] =
+    "debugTimestampHardwareState";
+const char ActivityLog::kKeyTimestampDebugIsUsingFake[] = "isUsingFake";
+const char ActivityLog::kKeyTimestampDebugWasFirstOrBackward[] =
+    "wasFirstOrBackward";
+const char ActivityLog::kKeyTimestampDebugPrevMscTimestampIn[] =
+    "prevMscTimestampIn";
+const char ActivityLog::kKeyTimestampDebugPrevMscTimestampOut[] =
+    "prevMscTimestampOut";
+const char ActivityLog::kKeyTimestampDebugWasDivergenceReset[] =
+    "wasDivergenceReset";
+const char ActivityLog::kKeyTimestampDebugFakeTimestampIn[] =
+    "fakeTimestampIn";
+const char ActivityLog::kKeyTimestampDebugFakeTimestampDelta[] =
+    "fakeTimestampDelta";
+const char ActivityLog::kKeyTimestampDebugFakeTimestampOut[] =
+    "fakeTimestampOut";
 const char ActivityLog::kKeyTimestampDebugSkew[] = "skew";
+const char ActivityLog::kKeyTimestampDebugMaxSkew[] = "maxSkew";
 
 }  // namespace gestures
