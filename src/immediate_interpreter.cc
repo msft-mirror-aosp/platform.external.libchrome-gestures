@@ -1182,11 +1182,11 @@ void ImmediateInterpreter::SyncInterpretImpl(HardwareState& hwstate,
   UpdateThumbState(hwstate);
   FingerMap newly_moving_fingers = UpdateMovingFingers(hwstate);
   UpdateNonGsFingers(hwstate);
-  FingerMap new_gs_fingers;
-  FingerMap gs_fingers = GetGesturingFingers(hwstate);
-  std::set_difference(gs_fingers.begin(), gs_fingers.end(),
+  FingerMap gs_fingers;
+  FingerMap old_gs_fingers = GetGesturingFingers(hwstate);
+  std::set_difference(old_gs_fingers.begin(), old_gs_fingers.end(),
                       non_gs_fingers_.begin(), non_gs_fingers_.end(),
-                      std::inserter(new_gs_fingers, new_gs_fingers.begin()));
+                      std::inserter(gs_fingers, gs_fingers.begin()));
   if (gs_fingers != prev_gs_fingers_)
     gs_changed_time_ = hwstate.timestamp;
   UpdateStartedMovingTime(hwstate.timestamp, gs_fingers, newly_moving_fingers);
