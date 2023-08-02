@@ -120,16 +120,16 @@ class AccelFilterInterpreter : public FilterInterpreter {
   // means of the smooth_accel_ Property.
   //    in:     gs, provided Gesture
   //    inout:  speed, actual speed on input and smoothed on output
-  void smooth_speed(Gesture& gs, float& speed);
+  void smooth_speed(const Gesture& gs, float& speed);
 
   // Map a speed on a given CurveSegment array to a ratio multiplier.
   //    in:     segs, address of CurveSegment array being used
   //    in:     max_segs, number of array entries in segs
   //    in:     speed, actual distance/delta time value
   //    ret:    determined gain to apply
-  float RatioFromAccelCurve(CurveSegment const * segs,
-                            size_t const max_segs,
-                            float const speed);
+  float RatioFromAccelCurve(const CurveSegment* segs,
+                            const size_t max_segs,
+                            const float speed);
 
   //**************************************************************************
 

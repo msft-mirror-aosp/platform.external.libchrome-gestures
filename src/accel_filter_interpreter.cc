@@ -191,14 +191,14 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
 
   float speed;
   if (!get_actual_speed(dx, dy,
-                        gs_copy.details.fling.vx, gs_copy.details.fling.vy,
+                        gs.details.fling.vx, gs.details.fling.vy,
                         get_adjusted_dt(gs),
                         speed)) {
     // dt was too small, don't accelerate.
     ProduceGesture(gs);
     return;
   }
-  smooth_speed(gs_copy, speed);
+  smooth_speed(gs, speed);
 
   // Avoid scaling if the speed is too small.
   if (speed < 0.00001) {
@@ -383,7 +383,7 @@ bool AccelFilterInterpreter::get_actual_speed(
   return true;
 }
 
-void AccelFilterInterpreter::smooth_speed(Gesture& gs, float& speed) {
+void AccelFilterInterpreter::smooth_speed(const Gesture& gs, float& speed) {
   // Perform smoothing, if it is enabled.
   if (smooth_accel_.val_) {
     // Check if clock changed backwards.
@@ -408,14 +408,14 @@ void AccelFilterInterpreter::smooth_speed(Gesture& gs, float& speed) {
 }
 
 float AccelFilterInterpreter::RatioFromAccelCurve(
-    CurveSegment const* segs,
-    size_t const max_segs,
-    float const speed) {
+    const CurveSegment* segs,
+    const size_t max_segs,
+    const float speed) {
   if (speed <= 0.0)
     return 0.0;
 
   for (size_t i = 0; i < max_segs; ++i) {
-    CurveSegment const & seg = segs[i];
+    const CurveSegment& seg = segs[i];
     if (speed <= seg.x_) {
       return (seg.sqr_ * speed) + seg.mul_ + (seg.int_ / speed);
     }
