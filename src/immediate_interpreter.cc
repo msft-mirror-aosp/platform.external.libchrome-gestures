@@ -1146,6 +1146,9 @@ ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
 
 void ImmediateInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                              stime_t* timeout) {
+  const char name[] = "ImmediateInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
   if (!state_buffer_.Get(0).fingers) {
     Err("Must call SetHardwareProperties() before Push().");
     return;
@@ -1225,11 +1228,16 @@ void ImmediateInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                         active_gs_fingers.begin(), active_gs_fingers.end(),
                         std::inserter(non_gs_fingers_,
                         non_gs_fingers_.begin()));
+    LogGestureProduce(name, result_);
     ProduceGesture(result_);
   }
+  LogHardwareStatePost(name, hwstate);
 }
 
 void ImmediateInterpreter::HandleTimerImpl(stime_t now, stime_t* timeout) {
+  const char name[] = "ImmediateInterpreter::HandleTimerImpl";
+  LogHandleTimerPre(name, now, timeout);
+
   result_.type = kGestureTypeNull;
   // Tap-to-click always aborts when real button(s) are being used, so we
   // don't need to worry about conflicts with these two types of callback.
@@ -1239,8 +1247,11 @@ void ImmediateInterpreter::HandleTimerImpl(stime_t now, stime_t* timeout) {
                    false,
                    now,
                    timeout);
-  if (result_.type != kGestureTypeNull)
+  if (result_.type != kGestureTypeNull) {
+    LogGestureProduce(name, result_);
     ProduceGesture(result_);
+  }
+  LogHandleTimerPost(name, now, timeout);
 }
 
 void ImmediateInterpreter::FillOriginInfo(
