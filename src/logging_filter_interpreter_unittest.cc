@@ -40,6 +40,10 @@ TEST(LoggingFilterInterpreterTest, LogResetHandlerTest) {
   interpreter.event_logging_enable_.SetValue(Json::Value(true));
   interpreter.BoolWasWritten(&interpreter.event_logging_enable_);
 
+  interpreter.event_debug_enable_.SetValue(Json::Value(true));
+  interpreter.BoolWasWritten(&interpreter.event_debug_enable_);
+  EXPECT_TRUE(interpreter.EventDebugIsEnabled());
+
   HardwareProperties hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
     10,  // x res (pixels/mm)

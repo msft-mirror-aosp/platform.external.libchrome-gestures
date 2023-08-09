@@ -90,11 +90,17 @@ class Interpreter {
                                  stime_t* timeout) {}
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout) {}
 
+  bool EventDebugIsEnabled();
+  void SetEventDebugEnabled(bool enabled);
+
+  bool EventLoggingIsEnabled();
   void SetEventLoggingEnabled(bool enabled);
 
  private:
   const char* name_;
   Tracer* tracer_;
+
+  bool enable_event_debug_ = false;
   bool enable_event_logging_ = false;
 
   void LogOutputs(const Gesture* result, stime_t* timeout, const char* action);

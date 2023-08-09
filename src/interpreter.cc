@@ -49,7 +49,7 @@ void Interpreter::Trace(const char* message, const char* name) {
 void Interpreter::SyncInterpret(HardwareState& hwstate,
                                     stime_t* timeout) {
   AssertWithReturn(initialized_);
-  if (enable_event_logging_ && log_.get()) {
+  if (EventLoggingIsEnabled()) {
     Trace("log: start: ", "LogHardwareState");
     log_->LogHardwareState(hwstate);
     Trace("log: end: ", "LogHardwareState");
@@ -65,7 +65,7 @@ void Interpreter::SyncInterpret(HardwareState& hwstate,
 
 void Interpreter::HandleTimer(stime_t now, stime_t* timeout) {
   AssertWithReturn(initialized_);
-  if (enable_event_logging_ && log_.get()) {
+  if (EventLoggingIsEnabled()) {
     Trace("log: start: ", "LogTimerCallback");
     log_->LogTimerCallback(now);
     Trace("log: end: ", "LogTimerCallback");
@@ -144,6 +144,18 @@ void Interpreter::InitName() {
   }
 }
 
+bool Interpreter::EventDebugIsEnabled() {
+  return enable_event_debug_ && EventLoggingIsEnabled();
+}
+
+void Interpreter::SetEventDebugEnabled(bool enabled) {
+  enable_event_debug_ = enabled;
+}
+
+bool Interpreter::EventLoggingIsEnabled() {
+  return enable_event_logging_ && log_.get();
+}
+
 void Interpreter::SetEventLoggingEnabled(bool enabled) {
   // TODO(b/185844310): log an event when touch logging is enabled or disabled.
   enable_event_logging_ = enabled;
@@ -152,7 +164,7 @@ void Interpreter::SetEventLoggingEnabled(bool enabled) {
 void Interpreter::LogOutputs(const Gesture* result,
                              stime_t* timeout,
                              const char* action) {
-  if (!enable_event_logging_ || !log_.get())
+  if (!EventLoggingIsEnabled())
     return;
   Trace("log: start: ", action);
   if (result)
