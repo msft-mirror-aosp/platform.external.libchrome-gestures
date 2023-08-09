@@ -736,12 +736,12 @@ bool ActivityReplay::ReplayPropChange(
   for (::set<Property*>::iterator it = props.begin(), e = props.end(); it != e;
        ++it) {
     prop = *it;
-    if (strcmp(prop->name(), entry.name) == 0)
+    if (strcmp(prop->name(), entry.name.c_str()) == 0)
       break;
     prop = nullptr;
   }
   if (!prop) {
-    Err("Unable to find prop %s to set.", entry.name);
+    Err("Unable to find prop %s to set.", entry.name.c_str());
     return false;
   }
   bool valid_property = true;

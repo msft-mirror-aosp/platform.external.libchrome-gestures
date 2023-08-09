@@ -43,7 +43,7 @@ class ActivityLog {
     stime_t timestamp;
   };
   struct PropChangeEntry {
-    const char* name;
+    std::string name;
     // No string variant because string values can't change
     std::variant<GesturesPropBool,
                  double,
