@@ -174,6 +174,18 @@ void Interpreter::LogOutputs(const Gesture* result,
   Trace("log: end: ", action);
 }
 
+void Interpreter::LogGestureConsume(
+    const std::string& name, const Gesture& gesture) {
+  if (EventDebugIsEnabled())
+    log_->LogGestureConsume(name, gesture);
+}
+
+void Interpreter::LogGestureProduce(
+    const std::string& name, const Gesture& gesture) {
+  if (EventDebugIsEnabled())
+    log_->LogGestureProduce(name, gesture);
+}
+
 void Interpreter::LogHardwareStatePre(
     const std::string& name, const HardwareState& hwstate) {
   if (EventDebugIsEnabled())

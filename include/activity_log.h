@@ -33,6 +33,8 @@ class ActivityLog {
   FRIEND_TEST(ActivityLogTest, EncodePropChangeDoubleTest);
   FRIEND_TEST(ActivityLogTest, EncodePropChangeIntTest);
   FRIEND_TEST(ActivityLogTest, EncodePropChangeShortTest);
+  FRIEND_TEST(ActivityLogTest, GestureConsumeTest);
+  FRIEND_TEST(ActivityLogTest, GestureProduceTest);
   FRIEND_TEST(ActivityLogTest, HardwareStatePreTest);
   FRIEND_TEST(ActivityLogTest, HardwareStatePostTest);
   FRIEND_TEST(LoggingFilterInterpreterTest, SimpleTest);
@@ -61,6 +63,14 @@ class ActivityLog {
     std::string name;
     HardwareState hwstate;
   };
+  struct GestureConsume {
+    std::string name;
+    Gesture gesture;
+  };
+  struct GestureProduce {
+    std::string name;
+    Gesture gesture;
+  };
 
   struct Entry {
     std::variant<HardwareState,
@@ -69,7 +79,9 @@ class ActivityLog {
                  Gesture,
                  PropChangeEntry,
                  HardwareStatePre,
-                 HardwareStatePost> details;
+                 HardwareStatePost,
+                 GestureConsume,
+                 GestureProduce> details;
   };
 
   explicit ActivityLog(PropRegistry* prop_reg);
@@ -83,6 +95,8 @@ class ActivityLog {
   void LogPropChange(const PropChangeEntry& prop_change);
 
   // Debug extensions for Log*()
+  void LogGestureConsume(const std::string& name, const Gesture& gesture);
+  void LogGestureProduce(const std::string& name, const Gesture& gesture);
   void LogHardwareStatePre(const std::string& name,
                            const HardwareState& hwstate);
   void LogHardwareStatePost(const std::string& name,
@@ -113,6 +127,8 @@ class ActivityLog {
   static const char kKeyTimerCallback[];
   static const char kKeyCallbackRequest[];
   static const char kKeyGesture[];
+  static const char kKeyGestureConsume[];
+  static const char kKeyGestureProduce[];
   static const char kKeyPropChange[];
   // HardwareState keys:
   static const char kKeyHardwareStateTimestamp[];
@@ -234,7 +250,12 @@ class ActivityLog {
 
   Json::Value EncodeTimerCallback(stime_t timestamp);
   Json::Value EncodeCallbackRequest(stime_t timestamp);
+
+  Json::Value EncodeGestureCommon(const Gesture& gesture);
   Json::Value EncodeGesture(const Gesture& gesture);
+  Json::Value EncodeGesture(const GestureConsume& gesture);
+  Json::Value EncodeGesture(const GestureProduce& gesture);
+
   Json::Value EncodePropChange(const PropChangeEntry& prop_change);
 
   // Encode user-configurable properties

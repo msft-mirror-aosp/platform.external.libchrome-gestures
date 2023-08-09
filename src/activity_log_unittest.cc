@@ -352,4 +352,81 @@ TEST(ActivityLogTest, HardwareStatePostTest) {
   log.Clear();
 }
 
+
+TEST(ActivityLogTest, GestureConsumeTest) {
+  PropRegistry prop_reg;
+  ActivityLog log(&prop_reg);
+  ActivityLog::Entry* entry;
+  Json::Value result;
+
+  EXPECT_EQ(0, log.size());
+
+  // Build and log a GestureConsume structure
+  Gesture move(kGestureMove, 1.0, 2.0, 773, 4.0);
+  log.LogGestureConsume("ActivityLogTest_GestureTest", move);
+  ASSERT_EQ(1, log.size());
+  entry = log.GetEntry(0);
+  ASSERT_TRUE(std::holds_alternative<ActivityLog::GestureConsume>
+                (entry->details));
+
+  // Encode the GestureConsume into Json
+  result = log.EncodeCommonInfo();
+  result = result[ActivityLog::kKeyRoot][0];
+
+  // Verify the Json information
+  EXPECT_EQ(result[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyGestureConsume));
+  EXPECT_EQ(result[ActivityLog::kKeyMethodName],
+            Json::Value("ActivityLogTest_GestureTest"));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureType],
+            Json::Value(ActivityLog::kValueGestureTypeMove));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureMoveDX],
+            Json::Value(move.details.move.dx));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureMoveDY],
+            Json::Value(move.details.move.dy));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureMoveOrdinalDX],
+            Json::Value(move.details.move.ordinal_dx));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureMoveOrdinalDY],
+            Json::Value(move.details.move.ordinal_dy));
+  log.Clear();
+}
+
+TEST(ActivityLogTest, GestureProduceTest) {
+  PropRegistry prop_reg;
+  ActivityLog log(&prop_reg);
+  ActivityLog::Entry* entry;
+  Json::Value result;
+
+  EXPECT_EQ(0, log.size());
+
+  // Build and log a GestureProduce structure
+  Gesture scroll(kGestureScroll, 1.0, 2.0, 312, 4.0);
+  log.LogGestureProduce("ActivityLogTest_GestureTest", scroll);
+  ASSERT_EQ(1, log.size());
+  entry = log.GetEntry(0);
+  ASSERT_TRUE(std::holds_alternative<ActivityLog::GestureProduce>
+                (entry->details));
+
+  // Encode the GestureProduce into Json
+  result = log.EncodeCommonInfo();
+  result = result[ActivityLog::kKeyRoot][0];
+
+  // Verify the Json information
+  EXPECT_EQ(result[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyGestureProduce));
+  EXPECT_EQ(result[ActivityLog::kKeyMethodName],
+            Json::Value("ActivityLogTest_GestureTest"));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureType],
+            Json::Value(ActivityLog::kValueGestureTypeScroll));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureScrollDX],
+            Json::Value(scroll.details.scroll.dx));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureScrollDY],
+            Json::Value(scroll.details.scroll.dy));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureScrollOrdinalDX],
+            Json::Value(scroll.details.scroll.ordinal_dx));
+  EXPECT_EQ(result[ActivityLog::kKeyGestureScrollOrdinalDY],
+            Json::Value(scroll.details.scroll.ordinal_dy));
+  log.Clear();
+}
+
 }  // namespace gestures

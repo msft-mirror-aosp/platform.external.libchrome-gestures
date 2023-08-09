@@ -241,4 +241,27 @@ TEST(InterpreterTest, LogHardwareStateTest) {
   EXPECT_EQ(base_interpreter->log_->size(), 2);
 }
 
+TEST(InterpreterTest, LogGestureTest) {
+  PropRegistry prop_reg;
+  InterpreterResetLogTestInterpreter* base_interpreter =
+      new InterpreterResetLogTestInterpreter();
+
+  Gesture move(kGestureMove, 1.0, 2.0, 773, 4.0);
+
+  base_interpreter->SetEventLoggingEnabled(false);
+  base_interpreter->SetEventDebugEnabled(false);
+  base_interpreter->LogGestureConsume("InterpreterTest_LogGestureTest", move);
+  EXPECT_EQ(base_interpreter->log_->size(), 0);
+  base_interpreter->LogGestureProduce("InterpreterTest_LogGestureTest", move);
+  EXPECT_EQ(base_interpreter->log_->size(), 0);
+
+
+  base_interpreter->SetEventLoggingEnabled(true);
+  base_interpreter->SetEventDebugEnabled(true);
+  base_interpreter->LogGestureConsume("InterpreterTest_LogGestureTest", move);
+  EXPECT_EQ(base_interpreter->log_->size(), 1);
+  base_interpreter->LogGestureProduce("InterpreterTest_LogGestureTest", move);
+  EXPECT_EQ(base_interpreter->log_->size(), 2);
+}
+
 }  // namespace gestures

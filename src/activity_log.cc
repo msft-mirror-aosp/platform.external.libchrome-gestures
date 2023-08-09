@@ -99,6 +99,20 @@ void ActivityLog::LogPropChange(const PropChangeEntry& prop_change) {
   entry->details = prop_change;
 }
 
+void ActivityLog::LogGestureConsume(
+    const std::string& name, const Gesture& gesture) {
+  GestureConsume gesture_consume { name, gesture };
+  Entry* entry = PushBack();
+  entry->details = gesture_consume;
+}
+
+void ActivityLog::LogGestureProduce(
+    const std::string& name, const Gesture& gesture) {
+  GestureProduce gesture_produce { name, gesture };
+  Entry* entry = PushBack();
+  entry->details = gesture_produce;
+}
+
 void ActivityLog::LogHardwareStatePre(const std::string& name,
                                       const HardwareState& hwstate) {
   HardwareStatePre hwstate_pre { name, hwstate };
@@ -222,9 +236,8 @@ Json::Value ActivityLog::EncodeCallbackRequest(stime_t timestamp) {
   return ret;
 }
 
-Json::Value ActivityLog::EncodeGesture(const Gesture& gesture) {
+Json::Value ActivityLog::EncodeGestureCommon(const Gesture& gesture) {
   Json::Value ret(Json::objectValue);
-  ret[kKeyType] = Json::Value(kKeyGesture);
   ret[kKeyGestureStartTime] = Json::Value(gesture.start_time);
   ret[kKeyGestureEndTime] = Json::Value(gesture.end_time);
 
@@ -330,6 +343,26 @@ Json::Value ActivityLog::EncodeGesture(const Gesture& gesture) {
   return ret;
 }
 
+Json::Value ActivityLog::EncodeGesture(const Gesture& gesture) {
+  auto ret = EncodeGestureCommon(gesture);
+  ret[kKeyType] = Json::Value(kKeyGesture);
+  return ret;
+}
+
+Json::Value ActivityLog::EncodeGesture(const GestureConsume& gesture_consume) {
+  auto ret = EncodeGestureCommon(gesture_consume.gesture);
+  ret[kKeyType] = Json::Value(kKeyGestureConsume);
+  ret[kKeyMethodName] = Json::Value(gesture_consume.name);
+  return ret;
+}
+
+Json::Value ActivityLog::EncodeGesture(const GestureProduce& gesture_produce) {
+  auto ret = EncodeGestureCommon(gesture_produce.gesture);
+  ret[kKeyType] = Json::Value(kKeyGestureProduce);
+  ret[kKeyMethodName] = Json::Value(gesture_produce.name);
+  return ret;
+}
+
 Json::Value ActivityLog::EncodePropChange(const PropChangeEntry& prop_change) {
   Json::Value ret(Json::objectValue);
   ret[kKeyType] = Json::Value(kKeyPropChange);
@@ -403,6 +436,12 @@ Json::Value ActivityLog::EncodeCommonInfo() {
         [this, &entries](Gesture gesture) {
           entries.append(EncodeGesture(gesture));
         },
+        [this, &entries](GestureConsume gesture) {
+          entries.append(EncodeGesture(gesture));
+        },
+        [this, &entries](GestureProduce gesture) {
+          entries.append(EncodeGesture(gesture));
+        },
         [this, &entries](PropChangeEntry prop_change) {
           entries.append(EncodePropChange(prop_change));
         },
@@ -444,6 +483,8 @@ const char ActivityLog::kKeyHardwareStatePost[] = "debugHardwareStatePost";
 const char ActivityLog::kKeyTimerCallback[] = "timerCallback";
 const char ActivityLog::kKeyCallbackRequest[] = "callbackRequest";
 const char ActivityLog::kKeyGesture[] = "gesture";
+const char ActivityLog::kKeyGestureConsume[] = "debugGestureConsume";
+const char ActivityLog::kKeyGestureProduce[] = "debugGestureProduce";
 const char ActivityLog::kKeyPropChange[] = "propertyChange";
 const char ActivityLog::kKeyHardwareStateTimestamp[] = "timestamp";
 const char ActivityLog::kKeyHardwareStateButtonsDown[] = "buttonsDown";

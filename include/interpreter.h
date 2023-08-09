@@ -39,6 +39,7 @@ class Interpreter {
   FRIEND_TEST(InterpreterTest, LoggingDisabledByDefault);
   FRIEND_TEST(LoggingFilterInterpreterTest, LogResetHandlerTest);
   FRIEND_TEST(InterpreterTest, LogHardwareStateTest);
+  FRIEND_TEST(InterpreterTest, LogGestureTest);
  public:
   Interpreter(PropRegistry* prop_reg, Tracer* tracer, bool force_log_creation);
   virtual ~Interpreter();
@@ -97,6 +98,8 @@ class Interpreter {
   bool EventLoggingIsEnabled();
   void SetEventLoggingEnabled(bool enabled);
 
+  void LogGestureConsume(const std::string& name, const Gesture& gesture);
+  void LogGestureProduce(const std::string& name, const Gesture& gesture);
   void LogHardwareStatePre(const std::string& name,
                            const HardwareState& hwstate);
   void LogHardwareStatePost(const std::string& name,
