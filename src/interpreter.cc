@@ -173,4 +173,17 @@ void Interpreter::LogOutputs(const Gesture* result,
     log_->LogCallbackRequest(*timeout);
   Trace("log: end: ", action);
 }
+
+void Interpreter::LogHardwareStatePre(
+    const std::string& name, const HardwareState& hwstate) {
+  if (EventDebugIsEnabled())
+    log_->LogHardwareStatePre(name, hwstate);
+}
+
+void Interpreter::LogHardwareStatePost(
+    const std::string& name, const HardwareState& hwstate) {
+  if (EventDebugIsEnabled())
+    log_->LogHardwareStatePost(name, hwstate);
+}
+
 }  // namespace gestures

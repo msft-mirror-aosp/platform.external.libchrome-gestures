@@ -99,6 +99,20 @@ void ActivityLog::LogPropChange(const PropChangeEntry& prop_change) {
   entry->details = prop_change;
 }
 
+void ActivityLog::LogHardwareStatePre(const std::string& name,
+                                      const HardwareState& hwstate) {
+  HardwareStatePre hwstate_pre { name, hwstate };
+  Entry* entry = PushBack();
+  entry->details = hwstate_pre;
+}
+
+void ActivityLog::LogHardwareStatePost(const std::string& name,
+                                       const HardwareState& hwstate) {
+  HardwareStatePost hwstate_post { name, hwstate };
+  Entry* entry = PushBack();
+  entry->details = hwstate_post;
+}
+
 void ActivityLog::Dump(const char* filename) {
   string data = Encode();
   WriteFile(filename, data.c_str(), data.size());
@@ -138,9 +152,9 @@ Json::Value ActivityLog::EncodeHardwareProperties() const {
   return ret;
 }
 
-Json::Value ActivityLog::EncodeHardwareState(const HardwareState& hwstate) {
+Json::Value ActivityLog::EncodeHardwareStateCommon(
+    const HardwareState& hwstate) {
   Json::Value ret(Json::objectValue);
-  ret[kKeyType] = Json::Value(kKeyHardwareState);
   ret[kKeyHardwareStateButtonsDown] = Json::Value(hwstate.buttons_down);
   ret[kKeyHardwareStateTouchCnt] = Json::Value(hwstate.touch_cnt);
   ret[kKeyHardwareStateTimestamp] = Json::Value(hwstate.timestamp);
@@ -169,6 +183,28 @@ Json::Value ActivityLog::EncodeHardwareState(const HardwareState& hwstate) {
   ret[kKeyHardwareStateRelY] = Json::Value(hwstate.rel_y);
   ret[kKeyHardwareStateRelWheel] = Json::Value(hwstate.rel_wheel);
   ret[kKeyHardwareStateRelHWheel] = Json::Value(hwstate.rel_hwheel);
+  return ret;
+}
+
+Json::Value ActivityLog::EncodeHardwareState(const HardwareState& hwstate) {
+  auto ret = EncodeHardwareStateCommon(hwstate);
+  ret[kKeyType] = Json::Value(kKeyHardwareState);
+  return ret;
+}
+
+Json::Value ActivityLog::EncodeHardwareState(
+    const HardwareStatePre& pre_hwstate) {
+  auto ret = EncodeHardwareStateCommon(pre_hwstate.hwstate);
+  ret[kKeyType] = Json::Value(kKeyHardwareStatePre);
+  ret[kKeyMethodName] = Json::Value(pre_hwstate.name);
+  return ret;
+}
+
+Json::Value ActivityLog::EncodeHardwareState(
+    const HardwareStatePost& post_hwstate) {
+  auto ret = EncodeHardwareStateCommon(post_hwstate.hwstate);
+  ret[kKeyType] = Json::Value(kKeyHardwareStatePost);
+  ret[kKeyMethodName] = Json::Value(post_hwstate.name);
   return ret;
 }
 
@@ -352,6 +388,12 @@ Json::Value ActivityLog::EncodeCommonInfo() {
         [this, &entries](HardwareState hwstate) {
           entries.append(EncodeHardwareState(hwstate));
         },
+        [this, &entries](HardwareStatePre hwstate) {
+          entries.append(EncodeHardwareState(hwstate));
+        },
+        [this, &entries](HardwareStatePost hwstate) {
+          entries.append(EncodeHardwareState(hwstate));
+        },
         [this, &entries](TimerCallbackEntry now) {
           entries.append(EncodeTimerCallback(now.timestamp));
         },
@@ -395,7 +437,10 @@ const char ActivityLog::kKeyInterpreterName[] = "interpreterName";
 const char ActivityLog::kKeyNext[] = "nextLayer";
 const char ActivityLog::kKeyRoot[] = "entries";
 const char ActivityLog::kKeyType[] = "type";
+const char ActivityLog::kKeyMethodName[] = "methodName";
 const char ActivityLog::kKeyHardwareState[] = "hardwareState";
+const char ActivityLog::kKeyHardwareStatePre[] = "debugHardwareStatePre";
+const char ActivityLog::kKeyHardwareStatePost[] = "debugHardwareStatePost";
 const char ActivityLog::kKeyTimerCallback[] = "timerCallback";
 const char ActivityLog::kKeyCallbackRequest[] = "callbackRequest";
 const char ActivityLog::kKeyGesture[] = "gesture";

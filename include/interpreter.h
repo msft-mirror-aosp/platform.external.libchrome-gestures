@@ -38,6 +38,7 @@ class Interpreter {
   FRIEND_TEST(InterpreterTest, ResetLogTest);
   FRIEND_TEST(InterpreterTest, LoggingDisabledByDefault);
   FRIEND_TEST(LoggingFilterInterpreterTest, LogResetHandlerTest);
+  FRIEND_TEST(InterpreterTest, LogHardwareStateTest);
  public:
   Interpreter(PropRegistry* prop_reg, Tracer* tracer, bool force_log_creation);
   virtual ~Interpreter();
@@ -95,6 +96,11 @@ class Interpreter {
 
   bool EventLoggingIsEnabled();
   void SetEventLoggingEnabled(bool enabled);
+
+  void LogHardwareStatePre(const std::string& name,
+                           const HardwareState& hwstate);
+  void LogHardwareStatePost(const std::string& name,
+                            const HardwareState& hwstate);
 
  private:
   const char* name_;

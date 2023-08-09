@@ -33,6 +33,8 @@ class ActivityLog {
   FRIEND_TEST(ActivityLogTest, EncodePropChangeDoubleTest);
   FRIEND_TEST(ActivityLogTest, EncodePropChangeIntTest);
   FRIEND_TEST(ActivityLogTest, EncodePropChangeShortTest);
+  FRIEND_TEST(ActivityLogTest, HardwareStatePreTest);
+  FRIEND_TEST(ActivityLogTest, HardwareStatePostTest);
   FRIEND_TEST(LoggingFilterInterpreterTest, SimpleTest);
   FRIEND_TEST(PropRegistryTest, PropChangeTest);
  public:
@@ -50,12 +52,24 @@ class ActivityLog {
                  int,
                  short> value;
   };
+
+  struct HardwareStatePre {
+    std::string name;
+    HardwareState hwstate;
+  };
+  struct HardwareStatePost {
+    std::string name;
+    HardwareState hwstate;
+  };
+
   struct Entry {
     std::variant<HardwareState,
                  TimerCallbackEntry,
                  CallbackRequestEntry,
                  Gesture,
-                 PropChangeEntry> details;
+                 PropChangeEntry,
+                 HardwareStatePre,
+                 HardwareStatePost> details;
   };
 
   explicit ActivityLog(PropRegistry* prop_reg);
@@ -67,6 +81,12 @@ class ActivityLog {
   void LogCallbackRequest(stime_t when);
   void LogGesture(const Gesture& gesture);
   void LogPropChange(const PropChangeEntry& prop_change);
+
+  // Debug extensions for Log*()
+  void LogHardwareStatePre(const std::string& name,
+                           const HardwareState& hwstate);
+  void LogHardwareStatePost(const std::string& name,
+                            const HardwareState& hwstate);
 
   // Dump allocates, and thus must not be called on a signal handler.
   void Dump(const char* filename);
@@ -86,7 +106,10 @@ class ActivityLog {
   static const char kKeyNext[];
   static const char kKeyRoot[];
   static const char kKeyType[];
+  static const char kKeyMethodName[];
   static const char kKeyHardwareState[];
+  static const char kKeyHardwareStatePre[];
+  static const char kKeyHardwareStatePost[];
   static const char kKeyTimerCallback[];
   static const char kKeyCallbackRequest[];
   static const char kKeyGesture[];
@@ -203,7 +226,12 @@ class ActivityLog {
 
   // JSON-encoders for various types
   Json::Value EncodeHardwareProperties() const;
+
+  Json::Value EncodeHardwareStateCommon(const HardwareState& hwstate);
   Json::Value EncodeHardwareState(const HardwareState& hwstate);
+  Json::Value EncodeHardwareState(const HardwareStatePre& hwstate);
+  Json::Value EncodeHardwareState(const HardwareStatePost& hwstate);
+
   Json::Value EncodeTimerCallback(stime_t timestamp);
   Json::Value EncodeCallbackRequest(stime_t timestamp);
   Json::Value EncodeGesture(const Gesture& gesture);

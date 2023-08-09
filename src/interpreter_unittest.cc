@@ -209,4 +209,36 @@ TEST(InterpreterTest, LoggingDisabledByDefault) {
   wrapper.SyncInterpret(hardware_state, &timeout);
   EXPECT_EQ(base_interpreter->log_->size(), 0);
 }
+
+TEST(InterpreterTest, LogHardwareStateTest) {
+  PropRegistry prop_reg;
+  InterpreterResetLogTestInterpreter* base_interpreter =
+      new InterpreterResetLogTestInterpreter();
+
+  FingerState fs = { 0.0, 0.0, 0.0, 0.0, 9.0, 0.0, 3.0, 4.0, 22, 0 };
+  HardwareState hs = make_hwstate(1.0, 0, 1, 1, &fs);
+
+  base_interpreter->SetEventLoggingEnabled(false);
+  base_interpreter->SetEventDebugEnabled(false);
+
+  base_interpreter->LogHardwareStatePre(
+      "InterpreterTest_LogHardwareStateTest", hs);
+  EXPECT_EQ(base_interpreter->log_->size(), 0);
+
+  base_interpreter->LogHardwareStatePost(
+      "InterpreterTest_LogHardwareStateTest", hs);
+  EXPECT_EQ(base_interpreter->log_->size(), 0);
+
+  base_interpreter->SetEventLoggingEnabled(true);
+  base_interpreter->SetEventDebugEnabled(true);
+
+  base_interpreter->LogHardwareStatePre(
+      "InterpreterTest_LogHardwareStateTest", hs);
+  EXPECT_EQ(base_interpreter->log_->size(), 1);
+
+  base_interpreter->LogHardwareStatePost(
+      "InterpreterTest_LogHardwareStateTest", hs);
+  EXPECT_EQ(base_interpreter->log_->size(), 2);
+}
+
 }  // namespace gestures

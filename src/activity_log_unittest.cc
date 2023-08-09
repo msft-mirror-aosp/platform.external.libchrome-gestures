@@ -222,4 +222,134 @@ TEST(ActivityLogTest, EncodePropChangeShortTest) {
             ActivityLog::kValuePropChangeTypeShort);
 }
 
+TEST(ActivityLogTest, HardwareStatePreTest) {
+  PropRegistry prop_reg;
+  ActivityLog log(&prop_reg);
+
+  HardwareProperties hwprops = {
+    6011,  // left edge
+    6012,  // top edge
+    6013,  // right edge
+    6014,  // bottom edge
+    6015,  // x pixels/TP width
+    6016,  // y pixels/TP height
+    6017,  // x screen DPI
+    6018,  // y screen DPI
+    6019,  // orientation minimum
+    6020,  // orientation maximum
+    6021,  // max fingers
+    6022,  // max touch
+    1,  // t5r2
+    0,  // semi-mt
+    1,  // is button pad,
+    0,  // has wheel
+    0,  // vertical wheel is high resolution
+    0,  // is haptic pad
+  };
+  log.SetHardwareProperties(hwprops);
+
+  FingerState fs = { 0.0, 0.0, 0.0, 0.0, 9.0, 0.0, 3.0, 4.0, 22, 0 };
+  HardwareState hs = make_hwstate(1.0, 0, 1, 1, &fs);
+
+  ActivityLog::Entry* entry;
+  Json::Value result;
+
+  EXPECT_EQ(0, log.size());
+
+  // Build and log a HardwareStatePre structure
+  log.LogHardwareStatePre("ActivityLogTest_HwStateTest", hs);
+  ASSERT_EQ(1, log.size());
+  entry = log.GetEntry(0);
+  ASSERT_TRUE(std::holds_alternative<ActivityLog::HardwareStatePre>
+                (entry->details));
+
+  // Encode the HardwareStatePre into Json
+  result = log.EncodeCommonInfo();
+  result = result[ActivityLog::kKeyRoot][0];
+
+  // Verify the Json information
+  EXPECT_EQ(result[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyHardwareStatePre));
+  EXPECT_EQ(result[ActivityLog::kKeyMethodName],
+            Json::Value("ActivityLogTest_HwStateTest"));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateButtonsDown],
+            Json::Value(hs.buttons_down));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateTouchCnt],
+            Json::Value(hs.touch_cnt));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateTimestamp],
+            Json::Value(hs.timestamp));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateRelX], Json::Value(hs.rel_x));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateRelY], Json::Value(hs.rel_y));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateRelWheel],
+            Json::Value(hs.rel_wheel));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateRelHWheel],
+            Json::Value(hs.rel_hwheel));
+  log.Clear();
+}
+
+TEST(ActivityLogTest, HardwareStatePostTest) {
+  PropRegistry prop_reg;
+  ActivityLog log(&prop_reg);
+
+  HardwareProperties hwprops = {
+    6011,  // left edge
+    6012,  // top edge
+    6013,  // right edge
+    6014,  // bottom edge
+    6015,  // x pixels/TP width
+    6016,  // y pixels/TP height
+    6017,  // x screen DPI
+    6018,  // y screen DPI
+    6019,  // orientation minimum
+    6020,  // orientation maximum
+    6021,  // max fingers
+    6022,  // max touch
+    1,  // t5r2
+    0,  // semi-mt
+    1,  // is button pad,
+    0,  // has wheel
+    0,  // vertical wheel is high resolution
+    0,  // is haptic pad
+  };
+  log.SetHardwareProperties(hwprops);
+
+  FingerState fs = { 0.0, 0.0, 0.0, 0.0, 9.0, 0.0, 3.0, 4.0, 22, 0 };
+  HardwareState hs = make_hwstate(1.0, 0, 1, 1, &fs);
+
+  ActivityLog::Entry* entry;
+  Json::Value result;
+
+  EXPECT_EQ(0, log.size());
+
+  // Build and log a HardwareStatePost structure
+  log.LogHardwareStatePost("ActivityLogTest_HwStateTest", hs);
+  ASSERT_EQ(1, log.size());
+  entry = log.GetEntry(0);
+  ASSERT_TRUE(std::holds_alternative<ActivityLog::HardwareStatePost>
+                (entry->details));
+
+  // Encode the HardwareStatePost into Json
+  result = log.EncodeCommonInfo();
+  result = result[ActivityLog::kKeyRoot][0];
+
+  // Verify the Json information
+  EXPECT_EQ(result[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyHardwareStatePost));
+  EXPECT_EQ(result[ActivityLog::kKeyMethodName],
+            Json::Value("ActivityLogTest_HwStateTest"));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateButtonsDown],
+            Json::Value(hs.buttons_down));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateTouchCnt],
+            Json::Value(hs.touch_cnt));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateTimestamp],
+            Json::Value(hs.timestamp));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateRelX], Json::Value(hs.rel_x));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateRelY], Json::Value(hs.rel_y));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateRelWheel],
+            Json::Value(hs.rel_wheel));
+  EXPECT_EQ(result[ActivityLog::kKeyHardwareStateRelHWheel],
+            Json::Value(hs.rel_hwheel));
+  log.Clear();
+}
+
 }  // namespace gestures
