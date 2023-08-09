@@ -71,6 +71,18 @@ class ActivityLog {
     std::string name;
     Gesture gesture;
   };
+  struct HandleTimerPre {
+    std::string name;
+    bool timeout_is_present;
+    stime_t now;
+    stime_t timeout;
+  };
+  struct HandleTimerPost {
+    std::string name;
+    bool timeout_is_present;
+    stime_t now;
+    stime_t timeout;
+  };
 
   struct Entry {
     std::variant<HardwareState,
@@ -81,7 +93,9 @@ class ActivityLog {
                  HardwareStatePre,
                  HardwareStatePost,
                  GestureConsume,
-                 GestureProduce> details;
+                 GestureProduce,
+                 HandleTimerPre,
+                 HandleTimerPost> details;
   };
 
   explicit ActivityLog(PropRegistry* prop_reg);
@@ -101,6 +115,10 @@ class ActivityLog {
                            const HardwareState& hwstate);
   void LogHardwareStatePost(const std::string& name,
                             const HardwareState& hwstate);
+  void LogHandleTimerPre(const std::string& name,
+                         stime_t now, const stime_t* timeout);
+  void LogHandleTimerPost(const std::string& name,
+                          stime_t now, const stime_t* timeout);
 
   // Dump allocates, and thus must not be called on a signal handler.
   void Dump(const char* filename);
@@ -130,6 +148,8 @@ class ActivityLog {
   static const char kKeyGestureConsume[];
   static const char kKeyGestureProduce[];
   static const char kKeyPropChange[];
+  static const char kKeyHandleTimerPre[];
+  static const char kKeyHandleTimerPost[];
   // HardwareState keys:
   static const char kKeyHardwareStateTimestamp[];
   static const char kKeyHardwareStateButtonsDown[];
@@ -150,6 +170,9 @@ class ActivityLog {
   static const char kKeyFingerStatePositionY[];
   static const char kKeyFingerStateTrackingId[];
   static const char kKeyFingerStateFlags[];
+  // HandleTimer keys:
+  static const char kKeyHandleTimerNow[];
+  static const char kKeyHandleTimerTimeout[];
   // TimerCallback keys:
   static const char kKeyTimerCallbackNow[];
   // CallbackRequest keys:
@@ -249,6 +272,8 @@ class ActivityLog {
   Json::Value EncodeHardwareState(const HardwareStatePost& hwstate);
 
   Json::Value EncodeTimerCallback(stime_t timestamp);
+  Json::Value EncodeHandleTimer(const HandleTimerPre& handle);
+  Json::Value EncodeHandleTimer(const HandleTimerPost& handle);
   Json::Value EncodeCallbackRequest(stime_t timestamp);
 
   Json::Value EncodeGestureCommon(const Gesture& gesture);

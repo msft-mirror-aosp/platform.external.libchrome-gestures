@@ -198,4 +198,16 @@ void Interpreter::LogHardwareStatePost(
     log_->LogHardwareStatePost(name, hwstate);
 }
 
+void Interpreter::LogHandleTimerPre(
+    const std::string& name, stime_t now, const stime_t* timeout) {
+  if (EventDebugIsEnabled())
+    log_->LogHandleTimerPre(name, now, timeout);
+}
+
+void Interpreter::LogHandleTimerPost(
+    const std::string& name, stime_t now, const stime_t* timeout) {
+  if (EventDebugIsEnabled())
+    log_->LogHandleTimerPost(name, now, timeout);
+}
+
 }  // namespace gestures

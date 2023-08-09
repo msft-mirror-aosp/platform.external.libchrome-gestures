@@ -40,6 +40,7 @@ class Interpreter {
   FRIEND_TEST(LoggingFilterInterpreterTest, LogResetHandlerTest);
   FRIEND_TEST(InterpreterTest, LogHardwareStateTest);
   FRIEND_TEST(InterpreterTest, LogGestureTest);
+  FRIEND_TEST(InterpreterTest, LogHandleTimerTest);
  public:
   Interpreter(PropRegistry* prop_reg, Tracer* tracer, bool force_log_creation);
   virtual ~Interpreter();
@@ -104,6 +105,10 @@ class Interpreter {
                            const HardwareState& hwstate);
   void LogHardwareStatePost(const std::string& name,
                             const HardwareState& hwstate);
+  void LogHandleTimerPre(const std::string& name,
+                         stime_t now, const stime_t* timeout);
+  void LogHandleTimerPost(const std::string& name,
+                          stime_t now, const stime_t* timeout);
 
  private:
   const char* name_;

@@ -429,4 +429,66 @@ TEST(ActivityLogTest, GestureProduceTest) {
   log.Clear();
 }
 
+TEST(ActivityLogTest, HandleTimerPreTest) {
+  PropRegistry prop_reg;
+  ActivityLog log(&prop_reg);
+  ActivityLog::Entry* entry;
+  Json::Value result;
+  stime_t timeout = 1;
+
+  EXPECT_EQ(0, log.size());
+
+  // Build and log a HandleTimerPre structure
+  log.LogHandleTimerPre("ActivityLogTest_HandleTimerTest", 0, &timeout);
+  EXPECT_EQ(1, log.size());
+  entry = log.GetEntry(0);
+  EXPECT_TRUE(std::holds_alternative<ActivityLog::HandleTimerPre>
+                (entry->details));
+
+  // Encode the HandleTimerPre into Json
+  result = log.EncodeCommonInfo();
+  result = result[ActivityLog::kKeyRoot][0];
+
+  // Verify the Json information
+  EXPECT_EQ(result[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyHandleTimerPre));
+  EXPECT_EQ(result[ActivityLog::kKeyMethodName],
+            Json::Value("ActivityLogTest_HandleTimerTest"));
+  EXPECT_EQ(result[ActivityLog::kKeyHandleTimerNow],
+            Json::Value(static_cast<stime_t>(0)));
+  EXPECT_EQ(result[ActivityLog::kKeyHandleTimerTimeout], Json::Value(timeout));
+  log.Clear();
+}
+
+TEST(ActivityLogTest, HandleTimerPostTest) {
+  PropRegistry prop_reg;
+  ActivityLog log(&prop_reg);
+  ActivityLog::Entry* entry;
+  Json::Value result;
+  stime_t timeout = 1;
+
+  EXPECT_EQ(0, log.size());
+
+  // Build and log a HandleTimerPost structure
+  log.LogHandleTimerPost("ActivityLogTest_HandleTimerTest", 0, &timeout);
+  EXPECT_EQ(1, log.size());
+  entry = log.GetEntry(0);
+  EXPECT_TRUE(std::holds_alternative<ActivityLog::HandleTimerPost>
+                (entry->details));
+
+  // Encode the HandleTimerPost into Json
+  result = log.EncodeCommonInfo();
+  result = result[ActivityLog::kKeyRoot][0];
+
+  // Verify the Json information
+  EXPECT_EQ(result[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyHandleTimerPost));
+  EXPECT_EQ(result[ActivityLog::kKeyMethodName],
+            Json::Value("ActivityLogTest_HandleTimerTest"));
+  EXPECT_EQ(result[ActivityLog::kKeyHandleTimerNow],
+            Json::Value(static_cast<stime_t>(0)));
+  EXPECT_EQ(result[ActivityLog::kKeyHandleTimerTimeout], Json::Value(timeout));
+  log.Clear();
+}
+
 }  // namespace gestures

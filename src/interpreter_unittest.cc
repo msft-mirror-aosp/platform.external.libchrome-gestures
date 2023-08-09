@@ -67,6 +67,7 @@ class InterpreterTestInterpreter : public Interpreter {
 
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout) {
     handle_timer_call_count_++;
+    Interpreter::HandleTimerImpl(now, timeout);
     ProduceGesture(return_value_);
   }
 };
@@ -261,6 +262,24 @@ TEST(InterpreterTest, LogGestureTest) {
   base_interpreter->LogGestureConsume("InterpreterTest_LogGestureTest", move);
   EXPECT_EQ(base_interpreter->log_->size(), 1);
   base_interpreter->LogGestureProduce("InterpreterTest_LogGestureTest", move);
+  EXPECT_EQ(base_interpreter->log_->size(), 2);
+}
+
+TEST(InterpreterTest, LogHandleTimerTest) {
+  PropRegistry prop_reg;
+  InterpreterResetLogTestInterpreter* base_interpreter =
+      new InterpreterResetLogTestInterpreter();
+  base_interpreter->SetEventLoggingEnabled(true);
+  base_interpreter->SetEventDebugEnabled(true);
+
+  stime_t timeout = 10;
+
+  base_interpreter->LogHandleTimerPre("InterpreterTest_LogHandleTimerTest",
+        0, &timeout);
+  EXPECT_EQ(base_interpreter->log_->size(), 1);
+
+  base_interpreter->LogHandleTimerPost("InterpreterTest_LogHandleTimerTest",
+        0, &timeout);
   EXPECT_EQ(base_interpreter->log_->size(), 2);
 }
 

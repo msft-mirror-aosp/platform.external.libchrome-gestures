@@ -127,6 +127,28 @@ void ActivityLog::LogHardwareStatePost(const std::string& name,
   entry->details = hwstate_post;
 }
 
+void ActivityLog::LogHandleTimerPre(const std::string& name,
+                                    stime_t now, const stime_t* timeout) {
+  HandleTimerPre handle;
+  handle.name = name;
+  handle.now = now;
+  handle.timeout_is_present = (timeout != nullptr);
+  handle.timeout = (timeout == nullptr) ? 0 : *timeout;
+  Entry* entry = PushBack();
+  entry->details = handle;
+}
+
+void ActivityLog::LogHandleTimerPost(const std::string& name,
+                                     stime_t now, const stime_t* timeout) {
+  HandleTimerPost handle;
+  handle.name = name;
+  handle.now = now;
+  handle.timeout_is_present = (timeout != nullptr);
+  handle.timeout = (timeout == nullptr) ? 0 : *timeout;
+  Entry* entry = PushBack();
+  entry->details = handle;
+}
+
 void ActivityLog::Dump(const char* filename) {
   string data = Encode();
   WriteFile(filename, data.c_str(), data.size());
@@ -219,6 +241,26 @@ Json::Value ActivityLog::EncodeHardwareState(
   auto ret = EncodeHardwareStateCommon(post_hwstate.hwstate);
   ret[kKeyType] = Json::Value(kKeyHardwareStatePost);
   ret[kKeyMethodName] = Json::Value(post_hwstate.name);
+  return ret;
+}
+
+Json::Value ActivityLog::EncodeHandleTimer(const HandleTimerPre& handle) {
+  Json::Value ret(Json::objectValue);
+  ret[kKeyType] = Json::Value(kKeyHandleTimerPre);
+  ret[kKeyMethodName] = Json::Value(handle.name);
+  ret[kKeyHandleTimerNow] = Json::Value(handle.now);
+  if (handle.timeout_is_present)
+    ret[kKeyHandleTimerTimeout] = Json::Value(handle.timeout);
+  return ret;
+}
+
+Json::Value ActivityLog::EncodeHandleTimer(const HandleTimerPost& handle) {
+  Json::Value ret(Json::objectValue);
+  ret[kKeyType] = Json::Value(kKeyHandleTimerPost);
+  ret[kKeyMethodName] = Json::Value(handle.name);
+  ret[kKeyHandleTimerNow] = Json::Value(handle.now);
+  if (handle.timeout_is_present)
+    ret[kKeyHandleTimerTimeout] = Json::Value(handle.timeout);
   return ret;
 }
 
@@ -445,6 +487,12 @@ Json::Value ActivityLog::EncodeCommonInfo() {
         [this, &entries](PropChangeEntry prop_change) {
           entries.append(EncodePropChange(prop_change));
         },
+        [this, &entries](HandleTimerPre handle) {
+          entries.append(EncodeHandleTimer(handle));
+        },
+        [this, &entries](HandleTimerPost handle) {
+          entries.append(EncodeHandleTimer(handle));
+        },
         [](auto arg) {
           Err("Unknown entry type");
         }
@@ -485,6 +533,10 @@ const char ActivityLog::kKeyCallbackRequest[] = "callbackRequest";
 const char ActivityLog::kKeyGesture[] = "gesture";
 const char ActivityLog::kKeyGestureConsume[] = "debugGestureConsume";
 const char ActivityLog::kKeyGestureProduce[] = "debugGestureProduce";
+const char ActivityLog::kKeyHandleTimerPre[] = "debugHandleTimerPre";
+const char ActivityLog::kKeyHandleTimerPost[] = "debugHandleTimerPost";
+const char ActivityLog::kKeyHandleTimerNow[] = "now";
+const char ActivityLog::kKeyHandleTimerTimeout[] = "timeout";
 const char ActivityLog::kKeyPropChange[] = "propertyChange";
 const char ActivityLog::kKeyHardwareStateTimestamp[] = "timestamp";
 const char ActivityLog::kKeyHardwareStateButtonsDown[] = "buttonsDown";
