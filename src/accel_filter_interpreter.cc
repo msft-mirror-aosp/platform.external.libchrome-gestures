@@ -161,12 +161,14 @@ AccelFilterInterpreter::AccelFilterInterpreter(PropRegistry* prop_reg,
 }
 
 void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
+  char const name[] = "AccelFilterInterpreter::ConsumeGesture";
+  LogGestureConsume(name, gs);
+
   // Use a copy of the gesture gs during the calculations and
   // adjustments so the original is left alone.
   Gesture gs_copy = gs;
 
-  // Setup the parameters for acceleration calculations based on gesture
-  // type.
+  // Setup the parameters for acceleration calculations based on gesture type.
   float* dx;
   float* dy;
   float x_scale;
@@ -185,6 +187,7 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
                             scale_out_x_ordinal, scale_out_y_ordinal,
                             segs, max_segs)) {
     // It was determined no acceleration was required.
+    LogGestureProduce(name, gs);
     ProduceGesture(gs);
     return;
   }
@@ -195,6 +198,7 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
                         get_adjusted_dt(gs),
                         speed)) {
     // dt was too small, don't accelerate.
+    LogGestureProduce(name, gs);
     ProduceGesture(gs);
     return;
   }
@@ -202,8 +206,10 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
 
   // Avoid scaling if the speed is too small.
   if (speed < 0.00001) {
-    if (gs.type == kGestureTypeFling)
+    if (gs.type == kGestureTypeFling) {
+      LogGestureProduce(name, gs);
       ProduceGesture(gs);  // Filter out zero length gestures.
+    }
     return;  // Avoid division by 0.
   }
 
@@ -220,6 +226,7 @@ void AccelFilterInterpreter::ConsumeGesture(const Gesture& gs) {
       *scale_out_x_ordinal *= x_scale;
       *scale_out_y_ordinal *= y_scale;
     }
+    LogGestureProduce(name, gs);
     ProduceGesture(gs_copy);
   }
 }
