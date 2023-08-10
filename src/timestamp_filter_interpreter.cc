@@ -26,10 +26,15 @@ TimestampFilterInterpreter::TimestampFilterInterpreter(
 
 void TimestampFilterInterpreter::SyncInterpretImpl(
     HardwareState& hwstate, stime_t* timeout) {
+  const char name[] = "TimestampFilterInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
   if (fake_timestamp_delta_.val_ == 0.0)
     ChangeTimestampDefault(hwstate);
   else
     ChangeTimestampUsingFake(hwstate);
+
+  LogHardwareStatePost(name, hwstate);
   next_->SyncInterpret(hwstate, timeout);
 }
 
@@ -68,17 +73,28 @@ void TimestampFilterInterpreter::ChangeTimestampUsingFake(
 
 void TimestampFilterInterpreter::HandleTimerImpl(stime_t now,
                                                  stime_t* timeout) {
+  const char name[] = "TimestampFilterInterpreter::HandleTimerImpl";
+  LogHandleTimerPre(name, now, timeout);
+
   // Adjust the timestamp by the largest skew_ since reset. This ensures that
   // the callback isn't ignored because it looks like it's coming too early.
-  next_->HandleTimer(now + max_skew_, timeout);
+  now += max_skew_;
+  next_->HandleTimer(now, timeout);
+
+  LogHandleTimerPost(name, now, timeout);
 }
 
 void TimestampFilterInterpreter::ConsumeGesture(const Gesture& gs) {
+  const char name[] = "TimestampFilterInterpreter::ConsumeGesture";
+  LogGestureConsume(name, gs);
+
   // Adjust gesture timestamp by latest skew to match browser clock
-  Gesture copy = gs;
-  copy.start_time -= skew_;
-  copy.end_time -= skew_;
-  ProduceGesture(copy);
+  Gesture gs_copy = gs;
+  gs_copy.start_time -= skew_;
+  gs_copy.end_time -= skew_;
+
+  LogGestureProduce(name, gs_copy);
+  ProduceGesture(gs_copy);
 }
 
 }  // namespace gestures
