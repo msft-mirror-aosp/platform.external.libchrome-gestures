@@ -466,6 +466,14 @@ Json::Value ActivityLog::EncodeGestureDebug(
   return ret;
 }
 
+Json::Value ActivityLog::EncodeGestureDebug(
+    const TimestampGestureDebug& debug_data) {
+  Json::Value ret(Json::objectValue);
+  ret[kKeyType] = Json::Value(kKeyTimestampGestureDebug);
+  ret[kKeyTimestampDebugSkew] = Json::Value(debug_data.skew);
+  return ret;
+}
+
 Json::Value ActivityLog::EncodePropRegistry() {
   Json::Value ret(Json::objectValue);
   if (!prop_reg_)
@@ -520,6 +528,9 @@ Json::Value ActivityLog::EncodeCommonInfo() {
           entries.append(EncodeHandleTimer(handle));
         },
         [this, &entries](AccelGestureDebug debug_data) {
+          entries.append(EncodeGestureDebug(debug_data));
+        },
+        [this, &entries](TimestampGestureDebug debug_data) {
           entries.append(EncodeGestureDebug(debug_data));
         },
         [](auto arg) {
@@ -682,5 +693,8 @@ const char ActivityLog::kKeyAccelDebugSpeed[] = "speed";
 const char ActivityLog::kKeyAccelDebugSmoothSpeed[] = "smoothSpeed";
 const char ActivityLog::kKeyAccelDebugGainX[] = "gainX";
 const char ActivityLog::kKeyAccelDebugGainY[] = "gainY";
+
+const char ActivityLog::kKeyTimestampGestureDebug[] = "debugTimestampGesture";
+const char ActivityLog::kKeyTimestampDebugSkew[] = "skew";
 
 }  // namespace gestures

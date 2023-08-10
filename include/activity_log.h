@@ -97,6 +97,9 @@ class ActivityLog {
     float smoothed_speed;
     float gain_x, gain_y;
   };
+  struct TimestampGestureDebug {
+    stime_t skew;
+  };
 
   struct Entry {
     std::variant<HardwareState,
@@ -110,7 +113,8 @@ class ActivityLog {
                  GestureProduce,
                  HandleTimerPre,
                  HandleTimerPost,
-                 AccelGestureDebug> details;
+                 AccelGestureDebug,
+                 TimestampGestureDebug> details;
   };
 
   explicit ActivityLog(PropRegistry* prop_reg);
@@ -294,6 +298,10 @@ class ActivityLog {
   static const char kKeyAccelDebugGainX[];
   static const char kKeyAccelDebugGainY[];
 
+  // Timestamp Debug Data keys:
+  static const char kKeyTimestampGestureDebug[];
+  static const char kKeyTimestampDebugSkew[];
+
  private:
   // Extends the tail of the buffer by one element and returns that new element.
   // This may cause an older element to be overwritten if the buffer is full.
@@ -319,6 +327,7 @@ class ActivityLog {
   Json::Value EncodeGesture(const GestureConsume& gesture);
   Json::Value EncodeGesture(const GestureProduce& gesture);
   Json::Value EncodeGestureDebug(const AccelGestureDebug& debug_data);
+  Json::Value EncodeGestureDebug(const TimestampGestureDebug& debug_data);
 
   Json::Value EncodePropChange(const PropChangeEntry& prop_change);
 

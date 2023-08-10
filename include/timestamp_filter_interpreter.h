@@ -27,6 +27,7 @@ class TimestampFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(TimestampFilterInterpreterTest, FakeTimestampTest);
   FRIEND_TEST(TimestampFilterInterpreterTest, FakeTimestampJumpForwardTest);
   FRIEND_TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest);
+  FRIEND_TEST(TimestampFilterInterpreterTest, GestureDebugTest);
  public:
   // Takes ownership of |next|:
   explicit TimestampFilterInterpreter(PropRegistry* prop_reg,
@@ -65,6 +66,12 @@ class TimestampFilterInterpreter : public FilterInterpreter {
   void ChangeTimestampUsingFake(HardwareState& hwstate);
 
   void ConsumeGesture(const Gesture& gs);
+
+  template<typename T>
+  void LogDebugData(const T& debug_data) {
+    if (EventDebugIsEnabled())
+      log_->LogDebugData(debug_data);
+  }
 
   stime_t prev_msc_timestamp_;
 

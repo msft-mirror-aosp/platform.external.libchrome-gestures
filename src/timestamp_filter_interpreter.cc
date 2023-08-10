@@ -87,14 +87,16 @@ void TimestampFilterInterpreter::HandleTimerImpl(stime_t now,
 void TimestampFilterInterpreter::ConsumeGesture(const Gesture& gs) {
   const char name[] = "TimestampFilterInterpreter::ConsumeGesture";
   LogGestureConsume(name, gs);
+  auto debug_data = ActivityLog::TimestampGestureDebug{ skew_ };
 
   // Adjust gesture timestamp by latest skew to match browser clock
-  Gesture gs_copy = gs;
-  gs_copy.start_time -= skew_;
-  gs_copy.end_time -= skew_;
+  Gesture copy = gs;
+  copy.start_time -= skew_;
+  copy.end_time -= skew_;
 
-  LogGestureProduce(name, gs_copy);
-  ProduceGesture(gs_copy);
+  LogDebugData(debug_data);
+  LogGestureProduce(name, copy);
+  ProduceGesture(copy);
 }
 
 }  // namespace gestures

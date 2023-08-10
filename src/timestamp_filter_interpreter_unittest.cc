@@ -219,4 +219,41 @@ TEST(TimestampFilterInterpreterTest, FakeTimestampFallBackwardTest) {
   // the last reset.
   EXPECT_FLOAT_EQ(adjusted_timestamp, 2.025);
 }
+
+TEST(TimestampFilterInterpreterTest, GestureDebugTest) {
+  PropRegistry prop_reg;
+  TimestampFilterInterpreter interpreter(&prop_reg, nullptr, nullptr);
+
+  interpreter.SetEventLoggingEnabled(true);
+  interpreter.SetEventDebugEnabled(true);
+  interpreter.log_.reset(new ActivityLog(&prop_reg));
+
+  EXPECT_EQ(interpreter.log_->size(), 0);
+  interpreter.ConsumeGesture(Gesture(kGestureButtonsChange,
+                                     1,  // start time
+                                     2,  // end time
+                                     0, // down
+                                     0, // up
+                                     false)); // is_tap
+
+  // Encode the log into Json
+  Json::Value node;
+  Json::Value tree = interpreter.log_->EncodeCommonInfo();
+
+  // Verify the Json information
+  EXPECT_EQ(interpreter.log_->size(), 3);
+  node = tree[ActivityLog::kKeyRoot][0];
+  EXPECT_EQ(node[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyGestureConsume));
+  node = tree[ActivityLog::kKeyRoot][1];
+  EXPECT_EQ(node[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyTimestampGestureDebug));
+  EXPECT_EQ(node[ActivityLog::kKeyTimestampDebugSkew],
+            Json::Value(interpreter.skew_));
+  node = tree[ActivityLog::kKeyRoot][2];
+  EXPECT_EQ(node[ActivityLog::kKeyType],
+            Json::Value(ActivityLog::kKeyGestureProduce));
+  interpreter.log_->Clear();
+}
+
 }  // namespace gestures
