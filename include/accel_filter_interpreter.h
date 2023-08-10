@@ -38,6 +38,7 @@ class AccelFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(AccelFilterInterpreterTest, UnacceleratedTouchpadTest);
   FRIEND_TEST(AccelFilterInterpreterTest, TouchpadPointAccelCurveTest);
   FRIEND_TEST(AccelFilterInterpreterTest, TouchpadScrollAccelCurveTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, AccelDebugDataTest);
  public:
   // Takes ownership of |next|:
   AccelFilterInterpreter(PropRegistry* prop_reg, Interpreter* next,
@@ -130,6 +131,12 @@ class AccelFilterInterpreter : public FilterInterpreter {
   float RatioFromAccelCurve(const CurveSegment* segs,
                             const size_t max_segs,
                             const float speed);
+
+  template<typename T>
+  void LogDebugData(const T& debug_data) {
+    if (EventDebugIsEnabled())
+      log_->LogDebugData(debug_data);
+  }
 
   //**************************************************************************
 

@@ -440,6 +440,32 @@ Json::Value ActivityLog::EncodePropChange(const PropChangeEntry& prop_change) {
   return ret;
 }
 
+Json::Value ActivityLog::EncodeGestureDebug(
+    const AccelGestureDebug& debug_data) {
+  Json::Value ret(Json::objectValue);
+  ret[kKeyType] = Json::Value(kKeyAccelGestureDebug);
+  ret[kKeyAccelDebugDroppedGesture] = Json::Value(debug_data.dropped_gesture);
+  if (debug_data.no_accel_for_gesture_type)
+    ret[kKeyAccelDebugNoAccelGestureType] = Json::Value(true);
+  else if (debug_data.no_accel_for_small_dt)
+    ret[kKeyAccelDebugNoAccelSmallDt] = Json::Value(true);
+  else if (debug_data.no_accel_for_small_speed)
+    ret[kKeyAccelDebugNoAccelSmallSpeed] = Json::Value(true);
+  else if (debug_data.no_accel_for_bad_gain)
+    ret[kKeyAccelDebugNoAccelBadGain] = Json::Value(true);
+  ret[kKeyAccelDebugXYAreVelocity] = Json::Value(debug_data.x_y_are_velocity);
+  ret[kKeyAccelDebugXScale] = Json::Value(debug_data.x_scale);
+  ret[kKeyAccelDebugYScale] = Json::Value(debug_data.y_scale);
+  ret[kKeyAccelDebugDt] = Json::Value(debug_data.dt);
+  ret[kKeyAccelDebugAdjustedDt] = Json::Value(debug_data.adjusted_dt);
+  ret[kKeyAccelDebugSpeed] = Json::Value(debug_data.speed);
+  if (debug_data.speed != debug_data.smoothed_speed)
+    ret[kKeyAccelDebugSmoothSpeed] = Json::Value(debug_data.smoothed_speed);
+  ret[kKeyAccelDebugGainX] = Json::Value(debug_data.gain_x);
+  ret[kKeyAccelDebugGainY] = Json::Value(debug_data.gain_y);
+  return ret;
+}
+
 Json::Value ActivityLog::EncodePropRegistry() {
   Json::Value ret(Json::objectValue);
   if (!prop_reg_)
@@ -492,6 +518,9 @@ Json::Value ActivityLog::EncodeCommonInfo() {
         },
         [this, &entries](HandleTimerPost handle) {
           entries.append(EncodeHandleTimer(handle));
+        },
+        [this, &entries](AccelGestureDebug debug_data) {
+          entries.append(EncodeGestureDebug(debug_data));
         },
         [](auto arg) {
           Err("Unknown entry type");
@@ -637,5 +666,21 @@ const char ActivityLog::kKeyHardwarePropHasWheel[] = "hasWheel";
 
 const char ActivityLog::kKeyProperties[] = "properties";
 
+const char ActivityLog::kKeyAccelGestureDebug[] = "debugAccelGesture";
+const char ActivityLog::kKeyAccelDebugNoAccelBadGain[] = "noAccelBadGain";
+const char ActivityLog::kKeyAccelDebugNoAccelGestureType[] = "noAccelBadType";
+const char ActivityLog::kKeyAccelDebugNoAccelSmallDt[] = "noAccelSmallDt";
+const char ActivityLog::kKeyAccelDebugNoAccelSmallSpeed[] =
+    "noAccelSmallSpeed";
+const char ActivityLog::kKeyAccelDebugDroppedGesture[] = "gestureDropped";
+const char ActivityLog::kKeyAccelDebugXYAreVelocity[] = "XYAreVelocity";
+const char ActivityLog::kKeyAccelDebugXScale[] = "XScale";
+const char ActivityLog::kKeyAccelDebugYScale[] = "YScale";
+const char ActivityLog::kKeyAccelDebugDt[] = "dt";
+const char ActivityLog::kKeyAccelDebugAdjustedDt[] = "adjDt";
+const char ActivityLog::kKeyAccelDebugSpeed[] = "speed";
+const char ActivityLog::kKeyAccelDebugSmoothSpeed[] = "smoothSpeed";
+const char ActivityLog::kKeyAccelDebugGainX[] = "gainX";
+const char ActivityLog::kKeyAccelDebugGainY[] = "gainY";
 
 }  // namespace gestures

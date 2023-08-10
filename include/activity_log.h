@@ -83,6 +83,20 @@ class ActivityLog {
     stime_t now;
     stime_t timeout;
   };
+  struct AccelGestureDebug {
+    bool no_accel_for_gesture_type;
+    bool no_accel_for_small_dt;
+    bool no_accel_for_small_speed;
+    bool no_accel_for_bad_gain;
+    bool dropped_gesture;
+    bool x_y_are_velocity;
+    float x_scale, y_scale;
+    float dt;
+    float adjusted_dt;
+    float speed;
+    float smoothed_speed;
+    float gain_x, gain_y;
+  };
 
   struct Entry {
     std::variant<HardwareState,
@@ -95,7 +109,8 @@ class ActivityLog {
                  GestureConsume,
                  GestureProduce,
                  HandleTimerPre,
-                 HandleTimerPost> details;
+                 HandleTimerPost,
+                 AccelGestureDebug> details;
   };
 
   explicit ActivityLog(PropRegistry* prop_reg);
@@ -119,6 +134,12 @@ class ActivityLog {
                          stime_t now, const stime_t* timeout);
   void LogHandleTimerPost(const std::string& name,
                           stime_t now, const stime_t* timeout);
+
+  template<typename T>
+  void LogDebugData(const T& debug_data) {
+    Entry* entry = PushBack();
+    entry->details = debug_data;
+  }
 
   // Dump allocates, and thus must not be called on a signal handler.
   void Dump(const char* filename);
@@ -256,6 +277,23 @@ class ActivityLog {
 
   static const char kKeyProperties[];
 
+  // AccelFilterInterpreter Debug Data keys:
+  static const char kKeyAccelGestureDebug[];
+  static const char kKeyAccelDebugNoAccelBadGain[];
+  static const char kKeyAccelDebugNoAccelGestureType[];
+  static const char kKeyAccelDebugNoAccelSmallDt[];
+  static const char kKeyAccelDebugNoAccelSmallSpeed[];
+  static const char kKeyAccelDebugDroppedGesture[];
+  static const char kKeyAccelDebugXYAreVelocity[];
+  static const char kKeyAccelDebugXScale[];
+  static const char kKeyAccelDebugYScale[];
+  static const char kKeyAccelDebugDt[];
+  static const char kKeyAccelDebugAdjustedDt[];
+  static const char kKeyAccelDebugSpeed[];
+  static const char kKeyAccelDebugSmoothSpeed[];
+  static const char kKeyAccelDebugGainX[];
+  static const char kKeyAccelDebugGainY[];
+
  private:
   // Extends the tail of the buffer by one element and returns that new element.
   // This may cause an older element to be overwritten if the buffer is full.
@@ -280,6 +318,7 @@ class ActivityLog {
   Json::Value EncodeGesture(const Gesture& gesture);
   Json::Value EncodeGesture(const GestureConsume& gesture);
   Json::Value EncodeGesture(const GestureProduce& gesture);
+  Json::Value EncodeGestureDebug(const AccelGestureDebug& debug_data);
 
   Json::Value EncodePropChange(const PropChangeEntry& prop_change);
 
