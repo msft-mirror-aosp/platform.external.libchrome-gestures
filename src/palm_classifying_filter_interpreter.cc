@@ -45,12 +45,17 @@ PalmClassifyingFilterInterpreter::PalmClassifyingFilterInterpreter(
 void PalmClassifyingFilterInterpreter::SyncInterpretImpl(
     HardwareState& hwstate,
     stime_t* timeout) {
+  const char name[] = "PalmClassifyingFilterInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
   FillOriginInfo(hwstate);
   FillMaxPressureWidthInfo(hwstate);
   UpdateDistanceInfo(hwstate);
   UpdatePalmState(hwstate);
   UpdatePalmFlags(hwstate);
   FillPrevInfo(hwstate);
+
+  LogHardwareStatePost(name, hwstate);
   if (next_.get())
     next_->SyncInterpret(hwstate, timeout);
 }
