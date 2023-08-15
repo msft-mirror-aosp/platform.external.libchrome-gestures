@@ -396,6 +396,8 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
 
   stime_t tap_max_finger_age() const { return tap_max_finger_age_.val_; }
 
+  bool device_reports_pressure() const { return hwprops_->reports_pressure; }
+
   stime_t finger_origin_timestamp(short finger_id) const {
     return origin_timestamps_.at(finger_id);
   }

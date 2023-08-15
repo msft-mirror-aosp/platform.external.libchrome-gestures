@@ -1822,6 +1822,32 @@ protected:
     run_test(states_with_thumbs, "with resting thumb");
   }
 
+  // Removes pressure data from the states, then tests them.
+  void run_test_without_pressure_data(const std::vector<HWStateGs>& states) {
+    HardwareProperties hwprops = hwprops_;
+    hwprops.reports_pressure = false;
+
+    std::vector<HWStateGs> states_without_pressure = states;
+    std::vector<std::vector<FingerState>> finger_states(states.size());
+    for (size_t i = 0; i < states_without_pressure.size(); i++) {
+      HWStateGs& state = states_without_pressure[i];
+      if (state.hws.finger_cnt == 0) {
+        continue;
+      }
+      for (size_t j = 0; j < state.hws.finger_cnt; j++) {
+        FingerState fs_without_pressure = state.hws.fingers[j];
+        fs_without_pressure.pressure = 0;
+        finger_states[i].push_back(fs_without_pressure);
+      }
+      state.hws.fingers = &finger_states[i][0];
+    }
+
+    ii_.reset(new ImmediateInterpreter(nullptr, nullptr));
+    TestInterpreterWrapper wrapper(ii_.get(), &hwprops);
+    set_gesture_properties();
+    check_hwstates(states_without_pressure, "without pressure data");
+  }
+
   std::unique_ptr<ImmediateInterpreter> ii_;
   bool tap_drag_enable_ = true;
   double tap_timeout_ = 0.05;
@@ -1855,6 +1881,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapWithoutDraggingEnabled) {
@@ -1866,6 +1893,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapWithoutDraggingEnabled) {
   tap_drag_enable_ = false;
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapWithClick) {
@@ -1877,6 +1905,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapWithClick) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerSwipe) {
@@ -1893,6 +1922,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerSwipe) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, DoubleOneFingerTap) {
@@ -1909,6 +1939,7 @@ TEST_F(TapToClickStateMachineTest, DoubleOneFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, TripleOneFingerTap) {
@@ -1928,6 +1959,7 @@ TEST_F(TapToClickStateMachineTest, TripleOneFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapAndDrag) {
@@ -1948,6 +1980,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapAndDrag) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapThenMoveAfterDelayDoesNotDrag) {
@@ -1968,6 +2001,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapThenMoveAfterDelayDoesNotDrag) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 
@@ -1989,6 +2023,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapAndMoveDrags) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapDragLock) {
@@ -2016,6 +2051,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapDragLock) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerLongPress) {
@@ -2029,6 +2065,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerLongPress) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapThenLongPress) {
@@ -2046,6 +2083,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapThenLongPress) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, TwoFingerTap) {
@@ -2060,6 +2098,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, ThreeFingerTap) {
@@ -2075,6 +2114,7 @@ TEST_F(TapToClickStateMachineTest, ThreeFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest,
@@ -2109,6 +2149,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingerScroll) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapThenTwoFingerTap) {
@@ -2127,6 +2168,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapThenTwoFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapThenMultiFrameTwoFingerTap) {
@@ -2145,6 +2187,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapThenMultiFrameTwoFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, TwoFingerTapThenOneFingerTap) {
@@ -2162,6 +2205,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingerTapThenOneFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, ThreeFingerTapThenOneFingerTap) {
@@ -2180,6 +2224,7 @@ TEST_F(TapToClickStateMachineTest, ThreeFingerTapThenOneFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, DoubleTwoFingerTap) {
@@ -2198,6 +2243,7 @@ TEST_F(TapToClickStateMachineTest, DoubleTwoFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, DrumrollSeparationOnFastSwipe) {
@@ -2212,6 +2258,7 @@ TEST_F(TapToClickStateMachineTest, DrumrollSeparationOnFastSwipe) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapThenTwoFingerDrag) {
@@ -2234,6 +2281,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapThenTwoFingerDrag) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapThenMultiFrameTwoFingerDrag) {
@@ -2255,6 +2303,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapThenMultiFrameTwoFingerDrag) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapAndDragWithExtraFingerLater) {
@@ -2277,6 +2326,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapAndDragWithExtraFingerLater) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, TwoFingerTapThenOneFingerDrag) {
@@ -2299,6 +2349,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingerTapThenOneFingerDrag) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, TwoFingerTapAndDrag) {
@@ -2324,6 +2375,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingerTapAndDrag) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerDragThenTwoFingerTap) {
@@ -2350,6 +2402,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerDragThenTwoFingerTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, SlowDoubleTap) {
@@ -2367,6 +2420,7 @@ TEST_F(TapToClickStateMachineTest, SlowDoubleTap) {
   tap_timeout_ = 0.11;
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, TwoFingerTapWithVeryCloseFingersIgnored) {
@@ -2380,6 +2434,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingerTapWithVeryCloseFingersIgnored) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, VeryLightTapIgnored) {
@@ -2431,6 +2486,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingerTapTooFarApartGivesLeftClick) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, TwoFingersMergingDoesntClick) {
@@ -2447,6 +2503,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingersMergingDoesntClick) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerMarkedAsPalmIgnored) {
@@ -2459,6 +2516,7 @@ TEST_F(TapToClickStateMachineTest, OneFingerMarkedAsPalmIgnored) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest,
@@ -2494,6 +2552,7 @@ TEST_F(TapToClickStateMachineTest, TwoFingerClickNotRegisteredAsTap) {
   };
   run_test(states);
   run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
 }
 
 TEST_F(TapToClickStateMachineTest, T5R2TwoFingerTapWithRestingThumb) {
