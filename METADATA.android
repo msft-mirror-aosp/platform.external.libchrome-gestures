@@ -7,6 +7,6 @@ third_party {
     value: "https://chromium.googlesource.com/chromiumos/platform/gestures/"
   }
   version: "892eebd8564250c7cfd3798f361feb229ba3f718"
-  last_upgrade_date { year: 2023 month: 08 day: 14  }
+  last_upgrade_date { year: 2023 month: 8 day: 14  }
   license_type: NOTICE
 }
