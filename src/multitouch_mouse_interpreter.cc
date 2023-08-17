@@ -62,6 +62,9 @@ void MultitouchMouseInterpreter::ProduceGesture(const Gesture& gesture) {
 
 void MultitouchMouseInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                                        stime_t* timeout) {
+  const char name[] = "MultitouchMouseInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
   if (!state_buffer_.Get(0).fingers) {
     Err("Must call SetHardwareProperties() before interpreting anything.");
     return;
@@ -154,6 +157,8 @@ void MultitouchMouseInterpreter::SyncInterpretImpl(HardwareState& hwstate,
 
   prev_gs_fingers_ = gs_fingers_;
   prev_gesture_type_ = current_gesture_type_;
+
+  LogHardwareStatePost(name, hwstate);
 }
 
 void MultitouchMouseInterpreter::Initialize(
@@ -166,6 +171,8 @@ void MultitouchMouseInterpreter::Initialize(
 }
 
 void MultitouchMouseInterpreter::InterpretMultitouchEvent() {
+  const char name[] = "MultitouchMouseInterpreter::InterpretMultitouchEvent";
+
   Gesture result;
 
   // If a gesturing finger just left, do fling/lift
@@ -234,8 +241,10 @@ void MultitouchMouseInterpreter::InterpretMultitouchEvent() {
   }
   scroll_manager_.UpdateScrollEventBuffer(current_gesture_type_,
                                           &scroll_buffer_);
-  if (result.type != kGestureTypeNull)
+  if (result.type != kGestureTypeNull) {
+    LogGestureProduce(name, result);
     ProduceGesture(result);
+  }
   prev_result_ = result;
 }
 
