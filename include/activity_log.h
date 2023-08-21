@@ -136,6 +136,39 @@ class ActivityLog {
                  TimestampHardwareStateDebug> details;
   };
 
+  enum class EventDebug {
+    // Base Event Types
+    Gesture = 0,
+    HardwareState,
+    HandleTimer,
+    // FilterInterpreter Debug Detail Event Types
+    Accel,
+    Box,
+    ClickWiggle,
+    FingerMerge,
+    FlingStop,
+    HapticButtonGenerator,
+    Iir,
+    IntegratGesture,
+    Logging,
+    Lookahead,
+    Metrics,
+    NonLinearity,
+    PalmClassifying,
+    Scaling,
+    SensorJump,
+    SplitCorrecting,
+    StationaryWiggle,
+    StuckButtonInhibitor,
+    T5R2Correcting,
+    Timestamp,
+    TrendClassifying,
+    // Interpreter Debug Detail Event Types
+    ImmediateInterpreter,
+    MouseInterpreter,
+    MultitouchMouseInterpreter,
+  };
+
   explicit ActivityLog(PropRegistry* prop_reg);
   void SetHardwareProperties(const HardwareProperties& hwprops);
 

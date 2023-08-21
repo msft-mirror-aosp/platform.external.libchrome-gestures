@@ -211,6 +211,22 @@ TEST(InterpreterTest, LoggingDisabledByDefault) {
   EXPECT_EQ(base_interpreter->log_->size(), 0);
 }
 
+TEST(InterpreterTest, EventDebugLoggingEnableTest) {
+  InterpreterResetLogTestInterpreter* base_interpreter =
+      new InterpreterResetLogTestInterpreter();
+
+  base_interpreter->SetEventDebugLoggingEnabled(0);
+  EXPECT_EQ(base_interpreter->GetEventDebugLoggingEnabled(), 0);
+
+  using EventDebug = ActivityLog::EventDebug;
+  base_interpreter->EventDebugLoggingEnable(EventDebug::HardwareState);
+  EXPECT_EQ(base_interpreter->GetEventDebugLoggingEnabled(),
+            1 << static_cast<int>(EventDebug::HardwareState));
+
+  base_interpreter->EventDebugLoggingDisable(EventDebug::HardwareState);
+  EXPECT_EQ(base_interpreter->GetEventDebugLoggingEnabled(), 0);
+}
+
 TEST(InterpreterTest, LogHardwareStateTest) {
   PropRegistry prop_reg;
   InterpreterResetLogTestInterpreter* base_interpreter =
@@ -220,7 +236,7 @@ TEST(InterpreterTest, LogHardwareStateTest) {
   HardwareState hs = make_hwstate(1.0, 0, 1, 1, &fs);
 
   base_interpreter->SetEventLoggingEnabled(false);
-  base_interpreter->SetEventDebugEnabled(false);
+  base_interpreter->SetEventDebugLoggingEnabled(0);
 
   base_interpreter->LogHardwareStatePre(
       "InterpreterTest_LogHardwareStateTest", hs);
@@ -230,8 +246,9 @@ TEST(InterpreterTest, LogHardwareStateTest) {
       "InterpreterTest_LogHardwareStateTest", hs);
   EXPECT_EQ(base_interpreter->log_->size(), 0);
 
+  using EventDebug = ActivityLog::EventDebug;
   base_interpreter->SetEventLoggingEnabled(true);
-  base_interpreter->SetEventDebugEnabled(true);
+  base_interpreter->EventDebugLoggingEnable(EventDebug::HardwareState);
 
   base_interpreter->LogHardwareStatePre(
       "InterpreterTest_LogHardwareStateTest", hs);
@@ -250,15 +267,16 @@ TEST(InterpreterTest, LogGestureTest) {
   Gesture move(kGestureMove, 1.0, 2.0, 773, 4.0);
 
   base_interpreter->SetEventLoggingEnabled(false);
-  base_interpreter->SetEventDebugEnabled(false);
+  base_interpreter->SetEventDebugLoggingEnabled(0);
   base_interpreter->LogGestureConsume("InterpreterTest_LogGestureTest", move);
   EXPECT_EQ(base_interpreter->log_->size(), 0);
   base_interpreter->LogGestureProduce("InterpreterTest_LogGestureTest", move);
   EXPECT_EQ(base_interpreter->log_->size(), 0);
 
 
+  using EventDebug = ActivityLog::EventDebug;
   base_interpreter->SetEventLoggingEnabled(true);
-  base_interpreter->SetEventDebugEnabled(true);
+  base_interpreter->EventDebugLoggingEnable(EventDebug::Gesture);
   base_interpreter->LogGestureConsume("InterpreterTest_LogGestureTest", move);
   EXPECT_EQ(base_interpreter->log_->size(), 1);
   base_interpreter->LogGestureProduce("InterpreterTest_LogGestureTest", move);
@@ -269,8 +287,10 @@ TEST(InterpreterTest, LogHandleTimerTest) {
   PropRegistry prop_reg;
   InterpreterResetLogTestInterpreter* base_interpreter =
       new InterpreterResetLogTestInterpreter();
+
+  using EventDebug = ActivityLog::EventDebug;
   base_interpreter->SetEventLoggingEnabled(true);
-  base_interpreter->SetEventDebugEnabled(true);
+  base_interpreter->EventDebugLoggingEnable(EventDebug::HandleTimer);
 
   stime_t timeout = 10;
 

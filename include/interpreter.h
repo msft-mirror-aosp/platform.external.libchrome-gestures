@@ -38,6 +38,7 @@ class Interpreter {
   FRIEND_TEST(InterpreterTest, ResetLogTest);
   FRIEND_TEST(InterpreterTest, LoggingDisabledByDefault);
   FRIEND_TEST(LoggingFilterInterpreterTest, LogResetHandlerTest);
+  FRIEND_TEST(InterpreterTest, EventDebugLoggingEnableTest);
   FRIEND_TEST(InterpreterTest, LogHardwareStateTest);
   FRIEND_TEST(InterpreterTest, LogGestureTest);
   FRIEND_TEST(InterpreterTest, LogHandleTimerTest);
@@ -94,11 +95,14 @@ class Interpreter {
                                  stime_t* timeout) {}
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout) {}
 
-  bool EventDebugIsEnabled();
-  void SetEventDebugEnabled(bool enabled);
-
   bool EventLoggingIsEnabled();
   void SetEventLoggingEnabled(bool enabled);
+
+  bool EventDebugLoggingIsEnabled(ActivityLog::EventDebug event);
+  uint32_t GetEventDebugLoggingEnabled();
+  void SetEventDebugLoggingEnabled(uint32_t enabled);
+  void EventDebugLoggingDisable(ActivityLog::EventDebug event);
+  void EventDebugLoggingEnable(ActivityLog::EventDebug event);
 
   void LogGestureConsume(const std::string& name, const Gesture& gesture);
   void LogGestureProduce(const std::string& name, const Gesture& gesture);
@@ -115,8 +119,8 @@ class Interpreter {
   const char* name_;
   Tracer* tracer_;
 
-  bool enable_event_debug_ = false;
   bool enable_event_logging_ = false;
+  uint32_t enable_event_debug_logging_ = 0;
 
   void LogOutputs(const Gesture* result, stime_t* timeout, const char* action);
 };

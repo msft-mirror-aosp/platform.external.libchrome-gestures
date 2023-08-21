@@ -22,6 +22,8 @@ using std::vector;
 
 namespace gestures {
 
+using EventDebug = ActivityLog::EventDebug;
+
 class AccelFilterInterpreterTest : public ::testing::Test {
  protected:
   HardwareState empty_hwstate_ = {};
@@ -186,7 +188,8 @@ TEST_F(AccelFilterInterpreterTest, BadGestureTest) {
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   accel_interpreter.SetEventLoggingEnabled(true);
-  accel_interpreter.SetEventDebugEnabled(true);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Gesture);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Accel);
   accel_interpreter.log_.reset(new ActivityLog(&prop_reg));
 
   // AccelFilterInterpreter should not add gain to a ButtonsChange gesture.
@@ -237,7 +240,8 @@ TEST_F(AccelFilterInterpreterTest, BadDeltaTTest) {
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   accel_interpreter.SetEventLoggingEnabled(true);
-  accel_interpreter.SetEventDebugEnabled(true);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Gesture);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Accel);
   accel_interpreter.log_.reset(new ActivityLog(&prop_reg));
 
   // Change the bounds for reasonable minimum Dt.  This will allow the filter
@@ -295,7 +299,8 @@ TEST_F(AccelFilterInterpreterTest, BadSpeedFlingTest) {
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   accel_interpreter.SetEventLoggingEnabled(true);
-  accel_interpreter.SetEventDebugEnabled(true);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Gesture);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Accel);
   accel_interpreter.log_.reset(new ActivityLog(&prop_reg));
 
   // Change the bounds for reasonable maximum Dt.  This will allow the filter
@@ -353,7 +358,8 @@ TEST_F(AccelFilterInterpreterTest, BadSpeedMoveTest) {
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   accel_interpreter.SetEventLoggingEnabled(true);
-  accel_interpreter.SetEventDebugEnabled(true);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Gesture);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Accel);
   accel_interpreter.log_.reset(new ActivityLog(&prop_reg));
 
   // Change the bounds for reasonable maximum Dt.  This will allow the filter
@@ -1113,7 +1119,9 @@ TEST_F(AccelFilterInterpreterTest, AccelDebugDataTest) {
   TestInterpreterWrapper interpreter(&accel_interpreter);
 
   accel_interpreter.SetEventLoggingEnabled(true);
-  accel_interpreter.SetEventDebugEnabled(true);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Gesture);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::HardwareState);
+  accel_interpreter.EventDebugLoggingEnable(EventDebug::Accel);
   accel_interpreter.log_.reset(new ActivityLog(&prop_reg));
 
   accel_interpreter.scroll_x_out_scale_.val_ =

@@ -40,9 +40,15 @@ TEST(LoggingFilterInterpreterTest, LogResetHandlerTest) {
   interpreter.event_logging_enable_.SetValue(Json::Value(true));
   interpreter.BoolWasWritten(&interpreter.event_logging_enable_);
 
-  interpreter.event_debug_enable_.SetValue(Json::Value(true));
-  interpreter.BoolWasWritten(&interpreter.event_debug_enable_);
-  EXPECT_TRUE(interpreter.EventDebugIsEnabled());
+  using EventDebug = ActivityLog::EventDebug;
+  EXPECT_EQ(interpreter.enable_event_debug_logging_, 0);
+  interpreter.event_debug_logging_enable_.SetValue(
+    Json::Value((1 << static_cast<int>(EventDebug::Gesture)) |
+                (1 << static_cast<int>(EventDebug::HardwareState))));
+  interpreter.IntWasWritten(&interpreter.event_debug_logging_enable_);
+  EXPECT_EQ(interpreter.enable_event_debug_logging_,
+            (1 << static_cast<int>(EventDebug::Gesture)) |
+            (1 << static_cast<int>(EventDebug::HardwareState)));
 
   HardwareProperties hwprops = {
     0, 0, 100, 100,  // left, top, right, bottom
@@ -81,7 +87,8 @@ TEST(LoggingFilterInterpreterTest, LogResetHandlerTest) {
   EXPECT_NE(0, str.size());
 
   const char* filename = "testlog.dump";
-  interpreter.Dump(filename);
+  interpreter.log_location_.SetValue(Json::Value(filename));
+  interpreter.IntWasWritten(&interpreter.logging_notify_);
 
   std::string read_str = "";
   bool couldRead = ReadFileToString(filename, &read_str);

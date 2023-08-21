@@ -134,7 +134,8 @@ class AccelFilterInterpreter : public FilterInterpreter {
 
   template<typename T>
   void LogDebugData(const T& debug_data) {
-    if (EventDebugIsEnabled())
+    using EventDebug = ActivityLog::EventDebug;
+    if (EventDebugLoggingIsEnabled(EventDebug::Accel))
       log_->LogDebugData(debug_data);
   }
 

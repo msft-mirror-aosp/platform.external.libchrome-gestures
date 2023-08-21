@@ -20,6 +20,8 @@ using std::string;
 
 namespace gestures {
 
+using EventDebug = ActivityLog::EventDebug;
+
 Interpreter::Interpreter(PropRegistry* prop_reg,
                          Tracer* tracer,
                          bool force_log_creation)
@@ -144,14 +146,6 @@ void Interpreter::InitName() {
   }
 }
 
-bool Interpreter::EventDebugIsEnabled() {
-  return enable_event_debug_ && EventLoggingIsEnabled();
-}
-
-void Interpreter::SetEventDebugEnabled(bool enabled) {
-  enable_event_debug_ = enabled;
-}
-
 bool Interpreter::EventLoggingIsEnabled() {
   return enable_event_logging_ && log_.get();
 }
@@ -159,6 +153,27 @@ bool Interpreter::EventLoggingIsEnabled() {
 void Interpreter::SetEventLoggingEnabled(bool enabled) {
   // TODO(b/185844310): log an event when touch logging is enabled or disabled.
   enable_event_logging_ = enabled;
+}
+
+bool Interpreter::EventDebugLoggingIsEnabled(ActivityLog::EventDebug event) {
+  return EventLoggingIsEnabled() &&
+         (enable_event_debug_logging_ & (1 << static_cast<int>(event)));
+}
+
+uint32_t Interpreter::GetEventDebugLoggingEnabled() {
+  return enable_event_debug_logging_;
+}
+
+void Interpreter::SetEventDebugLoggingEnabled(uint32_t enabled) {
+  enable_event_debug_logging_ = enabled;
+}
+
+void Interpreter::EventDebugLoggingDisable(ActivityLog::EventDebug event) {
+  enable_event_debug_logging_ &= ~(1 << static_cast<int>(event));
+}
+
+void Interpreter::EventDebugLoggingEnable(ActivityLog::EventDebug event) {
+  enable_event_debug_logging_ |= (1 << static_cast<int>(event));
 }
 
 void Interpreter::LogOutputs(const Gesture* result,
@@ -176,37 +191,37 @@ void Interpreter::LogOutputs(const Gesture* result,
 
 void Interpreter::LogGestureConsume(
     const std::string& name, const Gesture& gesture) {
-  if (EventDebugIsEnabled())
+  if (EventDebugLoggingIsEnabled(EventDebug::Gesture))
     log_->LogGestureConsume(name, gesture);
 }
 
 void Interpreter::LogGestureProduce(
     const std::string& name, const Gesture& gesture) {
-  if (EventDebugIsEnabled())
+  if (EventDebugLoggingIsEnabled(EventDebug::Gesture))
     log_->LogGestureProduce(name, gesture);
 }
 
 void Interpreter::LogHardwareStatePre(
     const std::string& name, const HardwareState& hwstate) {
-  if (EventDebugIsEnabled())
+  if (EventDebugLoggingIsEnabled(EventDebug::HardwareState))
     log_->LogHardwareStatePre(name, hwstate);
 }
 
 void Interpreter::LogHardwareStatePost(
     const std::string& name, const HardwareState& hwstate) {
-  if (EventDebugIsEnabled())
+  if (EventDebugLoggingIsEnabled(EventDebug::HardwareState))
     log_->LogHardwareStatePost(name, hwstate);
 }
 
 void Interpreter::LogHandleTimerPre(
     const std::string& name, stime_t now, const stime_t* timeout) {
-  if (EventDebugIsEnabled())
+  if (EventDebugLoggingIsEnabled(EventDebug::HandleTimer))
     log_->LogHandleTimerPre(name, now, timeout);
 }
 
 void Interpreter::LogHandleTimerPost(
     const std::string& name, stime_t now, const stime_t* timeout) {
-  if (EventDebugIsEnabled())
+  if (EventDebugLoggingIsEnabled(EventDebug::HandleTimer))
     log_->LogHandleTimerPost(name, now, timeout);
 }
 

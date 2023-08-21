@@ -12,6 +12,8 @@
 
 namespace gestures {
 
+using EventDebug = ActivityLog::EventDebug;
+
 class TimestampFilterInterpreterTest : public ::testing::Test {};
 class TimestampFilterInterpreterParmTest :
           public TimestampFilterInterpreterTest,
@@ -228,8 +230,12 @@ TEST(TimestampFilterInterpreterTest, GestureDebugTest) {
   PropRegistry prop_reg;
   TimestampFilterInterpreter interpreter(&prop_reg, nullptr, nullptr);
 
+  using EventDebug = ActivityLog::EventDebug;
   interpreter.SetEventLoggingEnabled(true);
-  interpreter.SetEventDebugEnabled(true);
+  interpreter.EventDebugLoggingEnable(EventDebug::Gesture);
+  interpreter.EventDebugLoggingEnable(EventDebug::HardwareState);
+  interpreter.EventDebugLoggingEnable(EventDebug::HandleTimer);
+  interpreter.EventDebugLoggingEnable(EventDebug::Timestamp);
   interpreter.log_.reset(new ActivityLog(&prop_reg));
 
   EXPECT_EQ(interpreter.log_->size(), 0);
@@ -268,7 +274,10 @@ TEST_P(TimestampFilterInterpreterParmTest, TimestampDebugLoggingTest) {
   TestInterpreterWrapper wrapper(&interpreter);
 
   interpreter.SetEventLoggingEnabled(true);
-  interpreter.SetEventDebugEnabled(true);
+  interpreter.EventDebugLoggingEnable(EventDebug::Gesture);
+  interpreter.EventDebugLoggingEnable(EventDebug::HardwareState);
+  interpreter.EventDebugLoggingEnable(EventDebug::HandleTimer);
+  interpreter.EventDebugLoggingEnable(EventDebug::Timestamp);
   interpreter.log_.reset(new ActivityLog(&prop_reg));
   interpreter.fake_timestamp_delta_.val_ = GetParam();
 

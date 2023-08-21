@@ -226,8 +226,9 @@ TEST(IntegralGestureFilterInterpreterTestInterpreter, ConsumeGesture) {
       new IntegralGestureFilterInterpreterTestInterpreter;
   IntegralGestureFilterInterpreter interpreter(base_interpreter, nullptr);
 
+  using EventDebug = ActivityLog::EventDebug;
   interpreter.SetEventLoggingEnabled(true);
-  interpreter.SetEventDebugEnabled(true);
+  interpreter.EventDebugLoggingEnable(EventDebug::Gesture);
   interpreter.log_.reset(new ActivityLog(&prop_reg));
 
   Gesture move(kGestureMove, 0, 0.1, 5, 6);

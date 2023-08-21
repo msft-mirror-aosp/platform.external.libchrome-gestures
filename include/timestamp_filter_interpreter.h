@@ -74,7 +74,8 @@ class TimestampFilterInterpreter : public FilterInterpreter {
 
   template<typename T>
   void LogDebugData(const T& debug_data) {
-    if (EventDebugIsEnabled())
+    using EventDebug = ActivityLog::EventDebug;
+    if (EventDebugLoggingIsEnabled(EventDebug::Timestamp))
       log_->LogDebugData(debug_data);
   }
 
