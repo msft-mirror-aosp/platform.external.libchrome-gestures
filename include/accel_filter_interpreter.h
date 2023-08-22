@@ -30,6 +30,10 @@ class AccelFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(AccelFilterInterpreterTest, NotSmoothingTest);
   FRIEND_TEST(AccelFilterInterpreterTest, SmoothingTest);
   FRIEND_TEST(AccelFilterInterpreterTest, TinyMoveTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, BadGestureTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, BadDeltaTTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, BadSpeedFlingTest);
+  FRIEND_TEST(AccelFilterInterpreterTest, BadSpeedMoveTest);
   FRIEND_TEST(AccelFilterInterpreterTest, UnacceleratedMouseTest);
   FRIEND_TEST(AccelFilterInterpreterTest, UnacceleratedTouchpadTest);
   FRIEND_TEST(AccelFilterInterpreterTest, TouchpadPointAccelCurveTest);

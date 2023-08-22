@@ -177,6 +177,107 @@ TEST_F(AccelFilterInterpreterTest, TinyMoveTest) {
                   out->details.scroll.dx);
 }
 
+TEST_F(AccelFilterInterpreterTest, BadGestureTest) {
+  AccelFilterInterpreterTestInterpreter* base_interpreter =
+      new AccelFilterInterpreterTestInterpreter;
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
+  TestInterpreterWrapper interpreter(&accel_interpreter);
+
+  // AccelFilterInterpreter should not add gain to a ButtonsChange gesture.
+  base_interpreter->return_values_.push_back(Gesture(kGestureButtonsChange,
+                                                     1,  // start time
+                                                     2,  // end time
+                                                     0, // down
+                                                     0, // up
+                                                     false)); // is_tap
+
+  // Send the ButtonsChange into AccelFilterInterpreter. The filter
+  // should send it right back out.
+  Gesture* out = interpreter.SyncInterpret(empty_hwstate_, nullptr);
+  ASSERT_NE(nullptr, out);
+  EXPECT_EQ(kGestureTypeButtonsChange, out->type);
+}
+
+TEST_F(AccelFilterInterpreterTest, BadDeltaTTest) {
+  AccelFilterInterpreterTestInterpreter* base_interpreter =
+      new AccelFilterInterpreterTestInterpreter;
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
+  TestInterpreterWrapper interpreter(&accel_interpreter);
+
+  // Change the bounds for reasonable minimum Dt.  This will allow the filter
+  // to keep a very small Dt without adjusting it.
+  accel_interpreter.min_reasonable_dt_.val_ = 0;
+
+  // Send the filter a very small Dt and have the logic catch that it
+  // is too small.  This will not allow a fictitious Dt to be used but
+  // will just not apply gain to this specific gesture.
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     1,  // start time
+                                                     1.000001, // end time
+                                                     4,  // dx
+                                                     0));  // dy
+
+  // Send the Move into AccelFilterInterpreter. No gain should be applied
+  // to Dx, even though this small of a Dt would normally have added a lot
+  // of gain.
+  Gesture* out = interpreter.SyncInterpret(empty_hwstate_, nullptr);
+  ASSERT_NE(nullptr, out);
+  EXPECT_EQ(kGestureTypeMove, out->type);
+  EXPECT_EQ(fabsf(out->details.move.dx), 4);
+}
+
+TEST_F(AccelFilterInterpreterTest, BadSpeedFlingTest) {
+  AccelFilterInterpreterTestInterpreter* base_interpreter =
+      new AccelFilterInterpreterTestInterpreter;
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
+  TestInterpreterWrapper interpreter(&accel_interpreter);
+
+  // Change the bounds for reasonable maximum Dt.  This will allow the filter
+  // to keep a large Dt without adjusting it.
+  accel_interpreter.max_reasonable_dt_.val_ = 1000;
+
+  // Send the filter a Fling with a large Dt and have the logic catch that it
+  // is too big.  This will not allow a fictitious Dt to be used but will
+  // just not apply gain to this specific gesture.
+  base_interpreter->return_values_.push_back(Gesture(kGestureFling,
+                                                     1,  // start time
+                                                     2,  // end time
+                                                     0.000001,  // vx
+                                                     0,   // vy
+                                                     0)); // state
+
+  // Send the Fling into AccelFilterInterpreter. No gain should be applied
+  // to Vx.
+  Gesture* out = interpreter.SyncInterpret(empty_hwstate_, nullptr);
+  ASSERT_NE(nullptr, out);
+  EXPECT_EQ(kGestureTypeFling, out->type);
+  EXPECT_NEAR(fabsf(out->details.fling.vx), 0.000001, 0.0000001);
+}
+
+TEST_F(AccelFilterInterpreterTest, BadSpeedMoveTest) {
+  AccelFilterInterpreterTestInterpreter* base_interpreter =
+      new AccelFilterInterpreterTestInterpreter;
+  AccelFilterInterpreter accel_interpreter(nullptr, base_interpreter, nullptr);
+  TestInterpreterWrapper interpreter(&accel_interpreter);
+
+  // Change the bounds for reasonable maximum Dt.  This will allow the filter
+  // to keep a large Dt without adjusting it.
+  accel_interpreter.max_reasonable_dt_.val_ = 1000;
+
+  // Send the filter a Move with a large Dt and have the logic catch that it
+  // is too big.  This will not allow a fictitious Dt to be used but will
+  // just not apply gain to this specific gesture.
+  base_interpreter->return_values_.push_back(Gesture(kGestureMove,
+                                                     1,  // start time
+                                                     1000, // end time
+                                                     0.0001,  // dx
+                                                     0));  // dy
+
+  // Send the Move into AccelFilterInterpreter. The gesture should be dropped.
+  Gesture* out = interpreter.SyncInterpret(empty_hwstate_, nullptr);
+  ASSERT_EQ(nullptr, out);
+}
+
 TEST_F(AccelFilterInterpreterTest, TimingTest) {
   AccelFilterInterpreterTestInterpreter* base_interpreter =
       new AccelFilterInterpreterTestInterpreter;
