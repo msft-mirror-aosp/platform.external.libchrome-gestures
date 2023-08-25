@@ -200,9 +200,7 @@ void MouseInterpreter::InterpretScrollWheelEvent(const HardwareState& hwstate,
 
     // When scroll acceleration is off, the scroll factor does not relate to
     // scroll velocity. It's simply a constant multiplier to the wheel value.
-    // TODO(zhangwenyu): This is gated behind a flag in settings and final
-    // values will be updated after some experimentations.
-    const double unaccel_scroll_factors[] = { 8.0, 20.0, 36.0, 64.0, 108.0 };
+    const double unaccel_scroll_factors[] = { 20.0, 36.0, 72.0, 112.0, 164.0 };
 
     float velocity = current_wheel_value / dt;
     float offset = current_wheel_value * (
