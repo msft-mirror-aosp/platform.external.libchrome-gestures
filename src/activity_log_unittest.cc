@@ -380,13 +380,13 @@ TEST(ActivityLogTest, GestureConsumeTest) {
             Json::Value("ActivityLogTest_GestureTest"));
   EXPECT_EQ(result[ActivityLog::kKeyGestureType],
             Json::Value(ActivityLog::kValueGestureTypeMove));
-  EXPECT_EQ(result[ActivityLog::kKeyGestureMoveDX],
+  EXPECT_EQ(result[ActivityLog::kKeyGestureDX],
             Json::Value(move.details.move.dx));
-  EXPECT_EQ(result[ActivityLog::kKeyGestureMoveDY],
+  EXPECT_EQ(result[ActivityLog::kKeyGestureDY],
             Json::Value(move.details.move.dy));
-  EXPECT_EQ(result[ActivityLog::kKeyGestureMoveOrdinalDX],
+  EXPECT_EQ(result[ActivityLog::kKeyGestureOrdinalDX],
             Json::Value(move.details.move.ordinal_dx));
-  EXPECT_EQ(result[ActivityLog::kKeyGestureMoveOrdinalDY],
+  EXPECT_EQ(result[ActivityLog::kKeyGestureOrdinalDY],
             Json::Value(move.details.move.ordinal_dy));
   log.Clear();
 }
@@ -418,13 +418,13 @@ TEST(ActivityLogTest, GestureProduceTest) {
             Json::Value("ActivityLogTest_GestureTest"));
   EXPECT_EQ(result[ActivityLog::kKeyGestureType],
             Json::Value(ActivityLog::kValueGestureTypeScroll));
-  EXPECT_EQ(result[ActivityLog::kKeyGestureScrollDX],
+  EXPECT_EQ(result[ActivityLog::kKeyGestureDX],
             Json::Value(scroll.details.scroll.dx));
-  EXPECT_EQ(result[ActivityLog::kKeyGestureScrollDY],
+  EXPECT_EQ(result[ActivityLog::kKeyGestureDY],
             Json::Value(scroll.details.scroll.dy));
-  EXPECT_EQ(result[ActivityLog::kKeyGestureScrollOrdinalDX],
+  EXPECT_EQ(result[ActivityLog::kKeyGestureOrdinalDX],
             Json::Value(scroll.details.scroll.ordinal_dx));
-  EXPECT_EQ(result[ActivityLog::kKeyGestureScrollOrdinalDY],
+  EXPECT_EQ(result[ActivityLog::kKeyGestureOrdinalDY],
             Json::Value(scroll.details.scroll.ordinal_dy));
   log.Clear();
 }
@@ -454,7 +454,7 @@ TEST(ActivityLogTest, HandleTimerPreTest) {
             Json::Value(ActivityLog::kKeyHandleTimerPre));
   EXPECT_EQ(result[ActivityLog::kKeyMethodName],
             Json::Value("ActivityLogTest_HandleTimerTest"));
-  EXPECT_EQ(result[ActivityLog::kKeyHandleTimerNow],
+  EXPECT_EQ(result[ActivityLog::kKeyTimerNow],
             Json::Value(static_cast<stime_t>(0)));
   EXPECT_EQ(result[ActivityLog::kKeyHandleTimerTimeout], Json::Value(timeout));
   log.Clear();
@@ -485,7 +485,7 @@ TEST(ActivityLogTest, HandleTimerPostTest) {
             Json::Value(ActivityLog::kKeyHandleTimerPost));
   EXPECT_EQ(result[ActivityLog::kKeyMethodName],
             Json::Value("ActivityLogTest_HandleTimerTest"));
-  EXPECT_EQ(result[ActivityLog::kKeyHandleTimerNow],
+  EXPECT_EQ(result[ActivityLog::kKeyTimerNow],
             Json::Value(static_cast<stime_t>(0)));
   EXPECT_EQ(result[ActivityLog::kKeyHandleTimerTimeout], Json::Value(timeout));
   log.Clear();

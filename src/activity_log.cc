@@ -248,7 +248,7 @@ Json::Value ActivityLog::EncodeHandleTimer(const HandleTimerPre& handle) {
   Json::Value ret(Json::objectValue);
   ret[kKeyType] = Json::Value(kKeyHandleTimerPre);
   ret[kKeyMethodName] = Json::Value(handle.name);
-  ret[kKeyHandleTimerNow] = Json::Value(handle.now);
+  ret[kKeyTimerNow] = Json::Value(handle.now);
   if (handle.timeout_is_present)
     ret[kKeyHandleTimerTimeout] = Json::Value(handle.timeout);
   return ret;
@@ -258,7 +258,7 @@ Json::Value ActivityLog::EncodeHandleTimer(const HandleTimerPost& handle) {
   Json::Value ret(Json::objectValue);
   ret[kKeyType] = Json::Value(kKeyHandleTimerPost);
   ret[kKeyMethodName] = Json::Value(handle.name);
-  ret[kKeyHandleTimerNow] = Json::Value(handle.now);
+  ret[kKeyTimerNow] = Json::Value(handle.now);
   if (handle.timeout_is_present)
     ret[kKeyHandleTimerTimeout] = Json::Value(handle.timeout);
   return ret;
@@ -267,7 +267,7 @@ Json::Value ActivityLog::EncodeHandleTimer(const HandleTimerPost& handle) {
 Json::Value ActivityLog::EncodeTimerCallback(stime_t timestamp) {
   Json::Value ret(Json::objectValue);
   ret[kKeyType] = Json::Value(kKeyTimerCallback);
-  ret[kKeyTimerCallbackNow] = Json::Value(timestamp);
+  ret[kKeyTimerNow] = Json::Value(timestamp);
   return ret;
 }
 
@@ -292,26 +292,24 @@ Json::Value ActivityLog::EncodeGestureCommon(const Gesture& gesture) {
       break;
     case kGestureTypeMove:
       ret[kKeyGestureType] = Json::Value(kValueGestureTypeMove);
-      ret[kKeyGestureMoveDX] = Json::Value(gesture.details.move.dx);
-      ret[kKeyGestureMoveDY] = Json::Value(gesture.details.move.dy);
-      ret[kKeyGestureMoveOrdinalDX] =
-          Json::Value(gesture.details.move.ordinal_dx);
-      ret[kKeyGestureMoveOrdinalDY] =
-          Json::Value(gesture.details.move.ordinal_dy);
+      ret[kKeyGestureDX] = Json::Value(gesture.details.move.dx);
+      ret[kKeyGestureDY] = Json::Value(gesture.details.move.dy);
+      ret[kKeyGestureOrdinalDX] = Json::Value(gesture.details.move.ordinal_dx);
+      ret[kKeyGestureOrdinalDY] = Json::Value(gesture.details.move.ordinal_dy);
       break;
     case kGestureTypeScroll:
       ret[kKeyGestureType] = Json::Value(kValueGestureTypeScroll);
-      ret[kKeyGestureScrollDX] = Json::Value(gesture.details.scroll.dx);
-      ret[kKeyGestureScrollDY] = Json::Value(gesture.details.scroll.dy);
-      ret[kKeyGestureScrollOrdinalDX] =
+      ret[kKeyGestureDX] = Json::Value(gesture.details.scroll.dx);
+      ret[kKeyGestureDY] = Json::Value(gesture.details.scroll.dy);
+      ret[kKeyGestureOrdinalDX] =
           Json::Value(gesture.details.scroll.ordinal_dx);
-      ret[kKeyGestureScrollOrdinalDY] =
+      ret[kKeyGestureOrdinalDY] =
           Json::Value(gesture.details.scroll.ordinal_dy);
       break;
     case kGestureTypeMouseWheel:
       ret[kKeyGestureType] = Json::Value(kValueGestureTypeMouseWheel);
-      ret[kKeyGestureMouseWheelDX] = Json::Value(gesture.details.wheel.dx);
-      ret[kKeyGestureMouseWheelDY] = Json::Value(gesture.details.wheel.dy);
+      ret[kKeyGestureDX] = Json::Value(gesture.details.wheel.dx);
+      ret[kKeyGestureDY] = Json::Value(gesture.details.wheel.dy);
       ret[kKeyGestureMouseWheelTicksDX] =
           Json::Value(gesture.details.wheel.tick_120ths_dx);
       ret[kKeyGestureMouseWheelTicksDY] =
@@ -345,11 +343,11 @@ Json::Value ActivityLog::EncodeGestureCommon(const Gesture& gesture) {
       break;
     case kGestureTypeSwipe:
       ret[kKeyGestureType] = Json::Value(kValueGestureTypeSwipe);
-      ret[kKeyGestureSwipeDX] = Json::Value(gesture.details.swipe.dx);
-      ret[kKeyGestureSwipeDY] = Json::Value(gesture.details.swipe.dy);
-      ret[kKeyGestureSwipeOrdinalDX] =
+      ret[kKeyGestureDX] = Json::Value(gesture.details.swipe.dx);
+      ret[kKeyGestureDY] = Json::Value(gesture.details.swipe.dy);
+      ret[kKeyGestureOrdinalDX] =
           Json::Value(gesture.details.swipe.ordinal_dx);
-      ret[kKeyGestureSwipeOrdinalDY] =
+      ret[kKeyGestureOrdinalDY] =
           Json::Value(gesture.details.swipe.ordinal_dy);
       break;
     case kGestureTypeSwipeLift:
@@ -357,13 +355,13 @@ Json::Value ActivityLog::EncodeGestureCommon(const Gesture& gesture) {
       break;
     case kGestureTypeFourFingerSwipe:
       ret[kKeyGestureType] = Json::Value(kValueGestureTypeFourFingerSwipe);
-      ret[kKeyGestureFourFingerSwipeDX] =
+      ret[kKeyGestureDX] =
           Json::Value(gesture.details.four_finger_swipe.dx);
-      ret[kKeyGestureFourFingerSwipeDY] =
+      ret[kKeyGestureDY] =
           Json::Value(gesture.details.four_finger_swipe.dy);
-      ret[kKeyGestureFourFingerSwipeOrdinalDX] =
+      ret[kKeyGestureOrdinalDX] =
           Json::Value(gesture.details.four_finger_swipe.ordinal_dx);
-      ret[kKeyGestureFourFingerSwipeOrdinalDY] =
+      ret[kKeyGestureOrdinalDY] =
           Json::Value(gesture.details.four_finger_swipe.ordinal_dy);
       break;
     case kGestureTypeFourFingerSwipeLift:
@@ -605,7 +603,7 @@ const char ActivityLog::kKeyGestureConsume[] = "debugGestureConsume";
 const char ActivityLog::kKeyGestureProduce[] = "debugGestureProduce";
 const char ActivityLog::kKeyHandleTimerPre[] = "debugHandleTimerPre";
 const char ActivityLog::kKeyHandleTimerPost[] = "debugHandleTimerPost";
-const char ActivityLog::kKeyHandleTimerNow[] = "now";
+const char ActivityLog::kKeyTimerNow[] = "now";
 const char ActivityLog::kKeyHandleTimerTimeout[] = "timeout";
 const char ActivityLog::kKeyPropChange[] = "propertyChange";
 const char ActivityLog::kKeyHardwareStateTimestamp[] = "timestamp";
@@ -626,7 +624,6 @@ const char ActivityLog::kKeyFingerStatePositionX[] = "positionX";
 const char ActivityLog::kKeyFingerStatePositionY[] = "positionY";
 const char ActivityLog::kKeyFingerStateTrackingId[] = "trackingId";
 const char ActivityLog::kKeyFingerStateFlags[] = "flags";
-const char ActivityLog::kKeyTimerCallbackNow[] = "now";
 const char ActivityLog::kKeyCallbackRequestWhen[] = "when";
 const char ActivityLog::kKeyGestureType[] = "gestureType";
 const char ActivityLog::kValueGestureTypeContactInitiated[] =
@@ -645,16 +642,10 @@ const char ActivityLog::kValueGestureTypeFourFingerSwipeLift[] =
 const char ActivityLog::kValueGestureTypeMetrics[] = "metrics";
 const char ActivityLog::kKeyGestureStartTime[] = "startTime";
 const char ActivityLog::kKeyGestureEndTime[] = "endTime";
-const char ActivityLog::kKeyGestureMoveDX[] = "dx";
-const char ActivityLog::kKeyGestureMoveDY[] = "dy";
-const char ActivityLog::kKeyGestureMoveOrdinalDX[] = "ordinalDx";
-const char ActivityLog::kKeyGestureMoveOrdinalDY[] = "ordinalDy";
-const char ActivityLog::kKeyGestureScrollDX[] = "dx";
-const char ActivityLog::kKeyGestureScrollDY[] = "dy";
-const char ActivityLog::kKeyGestureScrollOrdinalDX[] = "ordinalDx";
-const char ActivityLog::kKeyGestureScrollOrdinalDY[] = "ordinalDy";
-const char ActivityLog::kKeyGestureMouseWheelDX[] = "dx";
-const char ActivityLog::kKeyGestureMouseWheelDY[] = "dy";
+const char ActivityLog::kKeyGestureDX[] = "dx";
+const char ActivityLog::kKeyGestureDY[] = "dy";
+const char ActivityLog::kKeyGestureOrdinalDX[] = "ordinalDx";
+const char ActivityLog::kKeyGestureOrdinalDY[] = "ordinalDy";
 const char ActivityLog::kKeyGestureMouseWheelTicksDX[] = "ticksDx";
 const char ActivityLog::kKeyGestureMouseWheelTicksDY[] = "ticksDy";
 const char ActivityLog::kKeyGesturePinchDZ[] = "dz";
@@ -667,14 +658,6 @@ const char ActivityLog::kKeyGestureFlingVY[] = "vy";
 const char ActivityLog::kKeyGestureFlingOrdinalVX[] = "ordinalVx";
 const char ActivityLog::kKeyGestureFlingOrdinalVY[] = "ordinalVy";
 const char ActivityLog::kKeyGestureFlingState[] = "flingState";
-const char ActivityLog::kKeyGestureSwipeDX[] = "dx";
-const char ActivityLog::kKeyGestureSwipeDY[] = "dy";
-const char ActivityLog::kKeyGestureSwipeOrdinalDX[] = "ordinalDx";
-const char ActivityLog::kKeyGestureSwipeOrdinalDY[] = "ordinalDy";
-const char ActivityLog::kKeyGestureFourFingerSwipeDX[] = "dx";
-const char ActivityLog::kKeyGestureFourFingerSwipeDY[] = "dy";
-const char ActivityLog::kKeyGestureFourFingerSwipeOrdinalDX[] = "ordinalDx";
-const char ActivityLog::kKeyGestureFourFingerSwipeOrdinalDY[] = "ordinalDy";
 const char ActivityLog::kKeyGestureMetricsType[] = "metricsType";
 const char ActivityLog::kKeyGestureMetricsData1[] = "data1";
 const char ActivityLog::kKeyGestureMetricsData2[] = "data2";
