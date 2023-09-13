@@ -19,11 +19,6 @@
 #include "include/prop_registry.h"
 #include "include/string_util.h"
 
-// This should be set by build system:
-#ifndef VCSID
-#define VCSID "Unknown"
-#endif  // VCSID
-
 #define QUINTTAP_COUNT 5  /* BTN_TOOL_QUINTTAP - Five fingers on trackpad */
 
 using std::set;

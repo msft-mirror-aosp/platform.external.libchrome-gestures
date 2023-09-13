@@ -13,6 +13,11 @@
 #include <gtest/gtest.h>  // For FRIEND_TEST
 #include <json/value.h>
 
+// This should be set by build system:
+#ifndef VCSID
+#define VCSID "Unknown"
+#endif  // VCSID
+
 // This is a class that circularly buffers all incoming and outgoing activity
 // so that end users can report issues and engineers can reproduce them.
 
