@@ -48,9 +48,9 @@ stime_t StimeFromTimespec(const struct timespec*);
 struct HardwareProperties {
   // Touch properties
   // The minimum X coordinate that the device can report.
-  float left;
+  float left = 0;
   // The minimum Y coordinate that the device can report.
-  float top;
+  float top = 0;
   // The maximum X coordinate that the device can report.
   float right;
   // The maximum Y coordinate that the device can report.

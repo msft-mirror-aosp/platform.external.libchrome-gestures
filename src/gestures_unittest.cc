@@ -432,16 +432,17 @@ TEST(GesturesTest, HardwareStateGetFingerStateTest) {
 
 TEST(GesturesTest, HardwarePropertiesToStringTest) {
   HardwareProperties hp = {
-    1009.5, 1002.4, 1003.9, 1004.5,  // left, top, right, bottom
-    1005.4, 1006.9,  // res_x, res_y
-    1007.4, 1008.5, // x, y screen dpi
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    12,  // max fingers
-    11,  // max touches
-    0, 1, 1,  // t5r2, semi-mt, is_button_pad
-    0, 0,  // has wheel, vertical wheel is high resolution
-    0,  // is_haptic_pad
+    .left = 1009.5, .top = 1002.4, .right = 1003.9, .bottom = 1004.5,
+    .res_x = 1005.4, .res_y = 1006.9,
+    .screen_x_dpi = 1007.4,
+    .screen_y_dpi = 1008.5,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 12,
+    .max_touch_cnt = 11,
+    .supports_t5r2 = 0, .support_semi_mt = 1, .is_button_pad = 1,
+    .has_wheel = 0, .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   string str = hp.String();
   fprintf(stderr, "str: %s\n", str.c_str());

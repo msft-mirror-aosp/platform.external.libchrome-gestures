@@ -14,10 +14,20 @@ namespace gestures {
 HardwareProperties make_hwprops_for_mouse(
     unsigned has_wheel, unsigned wheel_is_hi_res) {
   return {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // touch-specific properties
-    has_wheel,
-    wheel_is_hi_res,
-    0,  // is_haptic_pad
+    .right = 0,
+    .bottom = 0,
+    .res_x = 0,
+    .res_y = 0,
+    .orientation_minimum = 0,
+    .orientation_maximum = 0,
+    .max_finger_cnt = 0,
+    .max_touch_cnt = 0,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 0,
+    .has_wheel = has_wheel,
+    .wheel_is_hi_res = wheel_is_hi_res,
+    .is_haptic_pad = 0,
   };
 }
 

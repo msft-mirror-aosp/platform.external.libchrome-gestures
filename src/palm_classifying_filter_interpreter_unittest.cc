@@ -46,24 +46,20 @@ class PalmClassifyingFilterInterpreterTestInterpreter : public Interpreter {
 TEST(PalmClassifyingFilterInterpreterTest, PalmTest) {
   PalmClassifyingFilterInterpreter pci(nullptr, nullptr, nullptr);
   HardwareProperties hwprops = {
-    0,  // left edge
-    0,  // top edge
-    1000,  // right edge
-    1000,  // bottom edge
-    500,  // x pixels/TP width
-    500,  // y pixels/TP height
-    96,  // x screen DPI
-    96,  // y screen DPI
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    2,  // max fingers
-    5,  // max touch
-    0,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    0,  // is haptic pad
+    .right = 1000,
+    .bottom = 1000,
+    .res_x = 500,
+    .res_y = 500,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 2,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -126,24 +122,20 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmTest) {
 TEST(PalmClassifyingFilterInterpreterTest, StationaryPalmTest) {
   PalmClassifyingFilterInterpreter pci(nullptr, nullptr, nullptr);
   HardwareProperties hwprops = {
-    0,  // left edge
-    0,  // top edge
-    100,  // right edge
-    100,  // bottom edge
-    1,  // x pixels/TP width
-    1,  // y pixels/TP height
-    1,  // x screen DPI
-    1,  // y screen DPI
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    5,  // max fingers
-    5,  // max touch
-    0,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    0,  // is haptic pad
+    .right = 100,
+    .bottom = 100,
+    .res_x = 1,
+    .res_y = 1,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 5,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -187,24 +179,20 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmAtEdgeTest) {
   std::unique_ptr<PalmClassifyingFilterInterpreter> pci(
       new PalmClassifyingFilterInterpreter(nullptr, nullptr, nullptr));
   HardwareProperties hwprops = {
-    0,  // left edge
-    0,  // top edge
-    100,  // right edge
-    100,  // bottom edge
-    1,  // x pixels/mm
-    1,  // y pixels/mm
-    1,  // x screen px/mm
-    1,  // y screen px/mm
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    5,  // max fingers
-    5,  // max touch
-    0,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    0,  // is haptic pad
+    .right = 100,
+    .bottom = 100,
+    .res_x = 1,
+    .res_y = 1,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 5,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(pci.get(), &hwprops);
 
@@ -316,24 +304,20 @@ struct PalmReevaluateTestInputs {
 TEST(PalmClassifyingFilterInterpreterTest, PalmReevaluateTest) {
   PalmClassifyingFilterInterpreter pci(nullptr, nullptr, nullptr);
   HardwareProperties hwprops = {
-    0,  // left edge
-    0,  // top edge
-    106.666672,  // right edge
-    68.000000,  // bottom edge
-    1,  // pixels/TP width
-    1,  // pixels/TP height
-    25.4,  // screen DPI x
-    25.4,  // screen DPI y
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    15,  // max fingers
-    5,  // max touch
-    0,  // t5r2
-    0,  // semi-mt
-    true,  // is button pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    false,  // is haptic pad
+    .right = 106.666672,
+    .bottom = 68.000000,
+    .res_x = 1,
+    .res_y = 1,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 15,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = true,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = false,
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 
@@ -407,24 +391,20 @@ TEST(PalmClassifyingFilterInterpreterTest, LargeTouchMajorTest) {
       new PalmClassifyingFilterInterpreterTestInterpreter;
   PalmClassifyingFilterInterpreter pci(nullptr, base_interpreter, nullptr);
   HardwareProperties hwprops = {
-    0,  // left edge
-    0,  // top edge
-    100,  // right edge
-    100,  // bottom edge
-    1,  // x pixels/mm
-    1,  // y pixels/mm
-    1,  // x screen px/mm
-    1,  // y screen px/mm
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    5,  // max fingers
-    5,  // max touch
-    0,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    0,  // is haptic pad
+    .right = 100,
+    .bottom = 100,
+    .res_x = 1,
+    .res_y = 1,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 5,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(&pci, &hwprops);
 

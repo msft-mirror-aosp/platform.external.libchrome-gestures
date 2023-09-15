@@ -33,24 +33,24 @@ TEST(ActivityLogTest, SimpleTest) {
   EXPECT_TRUE(strstr(log.Encode().c_str(), "foobarstr"));
 
   HardwareProperties hwprops = {
-    6011,  // left edge
-    6012,  // top edge
-    6013,  // right edge
-    6014,  // bottom edge
-    6015,  // x pixels/TP width
-    6016,  // y pixels/TP height
-    6017,  // x screen DPI
-    6018,  // y screen DPI
-    6019,  // orientation minimum
-    6020,  // orientation maximum
-    6021,  // max fingers
-    6022,  // max touch
-    1,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad,
-    0,  // has wheel
-    0,  // vertical wheel is high resolution
-    0,  // is haptic pad
+    .left = 6011,
+    .top = 6012,
+    .right = 6013,
+    .bottom = 6014,
+    .res_x = 6015,
+    .res_y = 6016,
+    .screen_x_dpi = 6017,
+    .screen_y_dpi = 6018,
+    .orientation_minimum = 6019,
+    .orientation_maximum = 6020,
+    .max_finger_cnt = 6021,
+    .max_touch_cnt = 6022,
+    .supports_t5r2 = 1,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
 
   log.SetHardwareProperties(hwprops);
@@ -227,24 +227,24 @@ TEST(ActivityLogTest, HardwareStatePreTest) {
   ActivityLog log(&prop_reg);
 
   HardwareProperties hwprops = {
-    6011,  // left edge
-    6012,  // top edge
-    6013,  // right edge
-    6014,  // bottom edge
-    6015,  // x pixels/TP width
-    6016,  // y pixels/TP height
-    6017,  // x screen DPI
-    6018,  // y screen DPI
-    6019,  // orientation minimum
-    6020,  // orientation maximum
-    6021,  // max fingers
-    6022,  // max touch
-    1,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad,
-    0,  // has wheel
-    0,  // vertical wheel is high resolution
-    0,  // is haptic pad
+    .left = 6011,
+    .top = 6012,
+    .right = 6013,
+    .bottom = 6014,
+    .res_x = 6015,
+    .res_y = 6016,
+    .screen_x_dpi = 6017,
+    .screen_y_dpi = 6018,
+    .orientation_minimum = 6019,
+    .orientation_maximum = 6020,
+    .max_finger_cnt = 6021,
+    .max_touch_cnt = 6022,
+    .supports_t5r2 = 1,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   log.SetHardwareProperties(hwprops);
 
@@ -292,24 +292,24 @@ TEST(ActivityLogTest, HardwareStatePostTest) {
   ActivityLog log(&prop_reg);
 
   HardwareProperties hwprops = {
-    6011,  // left edge
-    6012,  // top edge
-    6013,  // right edge
-    6014,  // bottom edge
-    6015,  // x pixels/TP width
-    6016,  // y pixels/TP height
-    6017,  // x screen DPI
-    6018,  // y screen DPI
-    6019,  // orientation minimum
-    6020,  // orientation maximum
-    6021,  // max fingers
-    6022,  // max touch
-    1,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad,
-    0,  // has wheel
-    0,  // vertical wheel is high resolution
-    0,  // is haptic pad
+    .left = 6011,
+    .top = 6012,
+    .right = 6013,
+    .bottom = 6014,
+    .res_x = 6015,
+    .res_y = 6016,
+    .screen_x_dpi = 6017,
+    .screen_y_dpi = 6018,
+    .orientation_minimum = 6019,
+    .orientation_maximum = 6020,
+    .max_finger_cnt = 6021,
+    .max_touch_cnt = 6022,
+    .supports_t5r2 = 1,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   log.SetHardwareProperties(hwprops);
 
