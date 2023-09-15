@@ -1763,7 +1763,7 @@ protected:
       }
 
       if (!hwstate || hwstate->timestamp != 0.0) {
-        same_fingers = ii_->state_buffer_.Get(1)->SameFingersAs(states[i].hws);
+        same_fingers = ii_->state_buffer_.Get(1).SameFingersAs(states[i].hws);
       }
 
       if (hwstate)
@@ -2964,7 +2964,7 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
         EXPECT_EQ(kIdl, ii->tap_to_click_state_);
         EXPECT_TRUE(ii->tap_enable_.val_);
       } else {
-        same_fingers = ii->state_buffer_.Get(1)->SameFingersAs(hwsgs.hws);
+        same_fingers = ii->state_buffer_.Get(1).SameFingersAs(hwsgs.hws);
       }
 
       // Disable tap in the middle of the gesture

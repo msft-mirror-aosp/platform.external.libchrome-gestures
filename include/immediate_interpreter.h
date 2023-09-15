@@ -127,12 +127,12 @@ class HardwareStateBuffer {
   // Pops most recently pushed state
   void PopState();
 
-  const HardwareState* Get(size_t idx) const {
-    return &states_[(idx + newest_index_) % size_];
+  const HardwareState& Get(size_t idx) const {
+    return states_[(idx + newest_index_) % size_];
   }
 
-  HardwareState* Get(size_t idx) {
-    return const_cast<HardwareState*>(
+  HardwareState& Get(size_t idx) {
+    return const_cast<HardwareState&>(
         const_cast<const HardwareStateBuffer*>(this)->Get(idx));
   }
 
