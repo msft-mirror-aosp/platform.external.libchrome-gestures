@@ -13,6 +13,7 @@
 
 #include "include/gestures.h"
 #include "include/lookahead_filter_interpreter.h"
+#include "include/string_util.h"
 #include "include/unittest_util.h"
 #include "include/util.h"
 
@@ -22,6 +23,9 @@ using std::pair;
 namespace gestures {
 
 class LookaheadFilterInterpreterTest : public ::testing::Test {};
+class LookaheadFilterInterpreterParmTest :
+          public LookaheadFilterInterpreterTest,
+          public testing::WithParamInterface<int> {};
 
 class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
  public:
@@ -88,7 +92,7 @@ class LookaheadFilterInterpreterTestInterpreter : public Interpreter {
   std::set<short> all_ids_;
 };
 
-TEST(LookaheadFilterInterpreterTest, SimpleTest) {
+TEST_P(LookaheadFilterInterpreterParmTest, SimpleTest) {
   LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
   std::unique_ptr<LookaheadFilterInterpreter> interpreter;
 
@@ -137,6 +141,8 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
 
   stime_t expected_timeout = 0.0;
   Gesture expected_movement;
+  int suppress = GetParam();
+
   for (size_t i = 3; i < arraysize(hs); ++i) {
     if (i % 3 == 0) {
       base_interpreter = new LookaheadFilterInterpreterTestInterpreter;
@@ -159,6 +165,7 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
       wrapper.Reset(interpreter.get());
       interpreter->min_delay_.val_ = 0.05;
       expected_timeout = interpreter->min_delay_.val_;
+      interpreter->suppress_immediate_tapdown_.val_ = suppress;
     }
     stime_t timeout = NO_DEADLINE;
     Gesture* out = wrapper.SyncInterpret(hs[i], &timeout);
@@ -204,6 +211,9 @@ TEST(LookaheadFilterInterpreterTest, SimpleTest) {
     }
   }
 }
+INSTANTIATE_TEST_SUITE_P(LookaheadFilterInterpreter,
+                         LookaheadFilterInterpreterParmTest,
+                         testing::Values(0, 1));
 
 class LookaheadFilterInterpreterVariableDelayTestInterpreter
     : public Interpreter {
@@ -1273,6 +1283,122 @@ TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest) {
     EXPECT_EQ(queue.back().fs_[0].tracking_id, 20);  // the same input id
     EXPECT_EQ(queue.back().fs_[1].tracking_id, 21);
   }
+}
+
+TEST(LookaheadFilterInterpreterTest, AddFingerFlingTest) {
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
+
+  HardwareProperties hwprops = {
+    0, 0, 100, 100,  // left, top, right, bottom
+    1,  // x res (pixels/mm)
+    1,  // y res (pixels/mm)
+    25, 25,  // scrn DPI X, Y
+    -1,  // orientation minimum
+    2,   // orientation maximum
+    2, 5,  // max fingers, max_touch
+    1, 1, 0,  // t5r2, semi, button pad
+    0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
+  };
+  TestInterpreterWrapper wrapper(interpreter.get(), &hwprops);
+
+  base_interpreter = new LookaheadFilterInterpreterTestInterpreter;
+  interpreter.reset(new LookaheadFilterInterpreter(
+      nullptr, base_interpreter, nullptr));
+  wrapper.Reset(interpreter.get());
+
+  // Gesture Consumer that verifies and counts each Fling type gesture
+  class FlingConsumer : public GestureConsumer {
+    public:
+      void ConsumeGesture(const Gesture& gesture) {
+        EXPECT_EQ(gesture.type, kGestureTypeFling);
+        ++gestures_consumed_;
+      }
+      int gestures_consumed_ = 0;
+  } fling_consumer{};
+  interpreter->consumer_ = &fling_consumer;
+
+  FingerState fs[] = {
+    // TM, Tm, WM, Wm, pr, orient, x, y, id
+    { 0, 0, 0, 0, 5, 0, 76, 45, 20, 0},  // 0 - One Finger
+
+    { 0, 0, 0, 0, 62, 0, 56, 43, 20, 0}, // 1 - Two Fingers
+    { 0, 0, 0, 0, 62, 0, 76, 41, 21, 0},
+  };
+  HardwareState hs[] = {
+    make_hwstate(328.989039, 0, 1, 1, &fs[0]),
+    make_hwstate(329.013853, 0, 2, 2, &fs[1]),
+  };
+
+  // Disable Suppress Immediate Tapdown
+  interpreter->suppress_immediate_tapdown_.val_ = 0;
+
+  // Run through the two hardware states and verify a fling is detected
+  stime_t timeout = NO_DEADLINE;
+  EXPECT_EQ(fling_consumer.gestures_consumed_, 0);
+  wrapper.SyncInterpret(hs[0], &timeout);
+  EXPECT_EQ(fling_consumer.gestures_consumed_, 0);
+  wrapper.SyncInterpret(hs[1], &timeout);
+  EXPECT_EQ(fling_consumer.gestures_consumed_, 1);
+}
+
+TEST(LookaheadFilterInterpreterTest, ConsumeGestureTest) {
+  LookaheadFilterInterpreterTestInterpreter* base_interpreter = nullptr;
+  std::unique_ptr<LookaheadFilterInterpreter> interpreter;
+
+  HardwareProperties hwprops = {
+    0, 0, 100, 100,  // left, top, right, bottom
+    1,  // x res (pixels/mm)
+    1,  // y res (pixels/mm)
+    25, 25,  // scrn DPI X, Y
+    -1,  // orientation minimum
+    2,   // orientation maximum
+    2, 5,  // max fingers, max_touch
+    1, 1, 0,  // t5r2, semi, button pad
+    0, 0,  // has wheel, vertical wheel is high resolution
+    0,  // haptic pad
+  };
+  TestInterpreterWrapper wrapper(interpreter.get(), &hwprops);
+
+  base_interpreter = new LookaheadFilterInterpreterTestInterpreter;
+  interpreter.reset(new LookaheadFilterInterpreter(
+      nullptr, base_interpreter, nullptr));
+  wrapper.Reset(interpreter.get());
+
+  // Gesture Consumer that counts each Metrics and Scroll type gesture
+  class TestGestureConsumer : public GestureConsumer {
+    public:
+      void ConsumeGesture(const Gesture& gesture) {
+        if (gesture.type == kGestureTypeMetrics)
+          ++metric_gestures_consumed_;
+        else if (gesture.type == kGestureTypeScroll)
+          ++scroll_gestures_consumed_;
+      }
+      int metric_gestures_consumed_ = 0;
+      int scroll_gestures_consumed_ = 0;
+  } test_consumer{};
+  interpreter->consumer_ = &test_consumer;
+
+  // Both gestures counters should start with zero
+  EXPECT_EQ(test_consumer.metric_gestures_consumed_, 0);
+  EXPECT_EQ(test_consumer.scroll_gestures_consumed_, 0);
+
+  // Push a Metrics gesture into the interpreter
+  interpreter->ConsumeGesture(Gesture(kGestureMetrics, 0, 0,
+                              kGestureMetricsTypeMouseMovement,
+                              0, 0));
+
+  // Verify it was detected
+  EXPECT_EQ(test_consumer.metric_gestures_consumed_, 1);
+  EXPECT_EQ(test_consumer.scroll_gestures_consumed_, 0);
+
+  // Push a Scroll gesture into the interpreter
+  interpreter->ConsumeGesture(Gesture(kGestureScroll, 0, 0, 0, 0));
+
+  // Verify it was detected
+  EXPECT_EQ(test_consumer.metric_gestures_consumed_, 1);
+  EXPECT_EQ(test_consumer.scroll_gestures_consumed_, 1);
 }
 
 }  // namespace gestures
