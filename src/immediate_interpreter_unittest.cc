@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <stdio.h>
+#include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -2769,8 +2770,29 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
   }
 }
 
-TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
-  std::unique_ptr<ImmediateInterpreter> ii;
+enum class TtcEnableTestMode {
+  TapEnabled = 0,
+  TapDisabledDuringGesture,
+  TapDisabledBeforeGestureWhileIdle,
+  TapPausedDuringGesture,
+  TapPausedBeforeGestureWhileIdle,
+};
+
+class ImmediateInterpreterTtcEnableTest :
+          public testing::TestWithParam<TtcEnableTestMode> {};
+
+TEST_P(ImmediateInterpreterTtcEnableTest, TapToClickEnableTest) {
+  ImmediateInterpreter ii(nullptr, nullptr);
+  ii.drag_lock_enable_.val_ = 1;
+  ii.motion_tap_prevent_timeout_.val_ = 0;
+  ii.tap_drag_timeout_.val_ = 0.05;
+  ii.tap_enable_.val_ = 1;
+  ii.tap_drag_enable_.val_ = 1;
+  ii.tap_paused_.val_ = 0;
+  ii.tap_move_dist_.val_ = 1.0;
+  ii.tap_timeout_.val_ = 0.05;
+  EXPECT_EQ(kIdl, ii.tap_to_click_state_);
+  EXPECT_TRUE(ii.tap_enable_.val_);
 
   HardwareProperties hwprops = {
     .right = 200,
@@ -2788,7 +2810,7 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
     .wheel_is_hi_res = 0,
     .is_haptic_pad = 0,
   };
-  TestInterpreterWrapper wrapper(ii.get(), &hwprops);
+  TestInterpreterWrapper wrapper(&ii, &hwprops);
 
   FingerState fs[] = {
     // TM, Tm, WM, Wm, Press, Orientation, X, Y, TrID
@@ -2816,109 +2838,103 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
     {make_hwstate(0.99,0,0,0,nullptr),.99,MkSet(),0,kBL,kIdl,false}
   };
 
-  for (int iter = 0; iter < 5; ++iter) {
-    for (size_t i = 0; i < arraysize(hwsgs_list); ++i) {
-      string desc;
-      stime_t disable_time = 0.0;
-      stime_t pause_time = 0.0;
-      switch (iter) {
-        case 0:  // test with tap enabled
-          desc = StringPrintf("State %zu (tap enabled)", i);
-          disable_time = -1;  // unreachable time
-          pause_time = -1;
-          break;
-        case 1:  // test with tap disabled during gesture
-          desc = StringPrintf("State %zu (tap disabled during gesture)", i);
-          disable_time = 0.02;
-          pause_time = -1;
-          break;
-        case 2:  // test with tap disabled before gesture (while Idle)
-          desc = StringPrintf("State %zu (tap disabled while Idle)", i);
-          disable_time = 0.00;
-          pause_time = -1;
-          break;
-        case 3:  // test with tap paused during gesture
-          desc = StringPrintf("State %zu (tap paused during gesture)", i);
-          disable_time = -1;
-          pause_time = 0.02;
-          break;
-        case 4:  // test with tap paused before gesture (while Idle)
-          desc = StringPrintf("State %zu (tap paused while Idle)", i);
-          disable_time = 0.00;
-          pause_time = -1;
-          break;
-      }
+  for (size_t i = 0; i < arraysize(hwsgs_list); ++i) {
+    string desc;
+    stime_t disable_time = 0.0;
+    stime_t pause_time = 0.0;
+    switch (GetParam()) {
+      case TtcEnableTestMode::TapEnabled:
+        desc = "tap enabled";
+        disable_time = -1;  // unreachable time
+        pause_time = -1;
+        break;
+      case TtcEnableTestMode::TapDisabledDuringGesture:
+        desc = "tap disabled during gesture";
+        disable_time = 0.02;
+        pause_time = -1;
+        break;
+      case TtcEnableTestMode::TapDisabledBeforeGestureWhileIdle:
+        desc = "tap disabled while Idle";
+        disable_time = 0.00;
+        pause_time = -1;
+        break;
+      case TtcEnableTestMode::TapPausedDuringGesture:
+        desc = "tap paused during gesture";
+        disable_time = -1;
+        pause_time = 0.02;
+        break;
+      case TtcEnableTestMode::TapPausedBeforeGestureWhileIdle:
+        desc = "tap paused while Idle";
+        disable_time = 0.00;
+        pause_time = -1;
+        break;
+    }
+    SCOPED_TRACE(StringPrintf("State %zu (%s)", i, desc.c_str()));
 
-      HWStateGs &hwsgs = hwsgs_list[i];
-      HardwareState* hwstate = &hwsgs.hws;
-      stime_t now = hwsgs.callback_now;
-      if (hwsgs.callback_now >= 0.0)
-        hwstate = nullptr;
-      else
-        now = hwsgs.hws.timestamp;
+    HWStateGs &hwsgs = hwsgs_list[i];
+    HardwareState* hwstate = &hwsgs.hws;
+    stime_t now = hwsgs.callback_now;
+    if (hwsgs.callback_now >= 0.0)
+      hwstate = nullptr;
+    else
+      now = hwsgs.hws.timestamp;
 
-      bool same_fingers = false;
-      if (hwstate && hwstate->timestamp == 0.0) {
-        // Reset imm interpreter
-        fprintf(stderr, "Resetting imm interpreter, i = %zd\n", i);
-        ii.reset(new ImmediateInterpreter(nullptr, nullptr));
-        wrapper.Reset(ii.get());
-        ii->drag_lock_enable_.val_ = 1;
-        ii->motion_tap_prevent_timeout_.val_ = 0;
-        ii->tap_drag_timeout_.val_ = 0.05;
-        ii->tap_enable_.val_ = 1;
-        ii->tap_drag_enable_.val_ = 1;
-        ii->tap_paused_.val_ = 0;
-        ii->tap_move_dist_.val_ = 1.0;
-        ii->tap_timeout_.val_ = 0.05;
-        EXPECT_EQ(kIdl, ii->tap_to_click_state_);
-        EXPECT_TRUE(ii->tap_enable_.val_);
-      } else {
-        same_fingers = ii->state_buffer_.Get(1).SameFingersAs(hwsgs.hws);
-      }
+    bool same_fingers = false;
+    if (!hwstate || hwstate->timestamp != 0.0) {
+      same_fingers = ii.state_buffer_.Get(1).SameFingersAs(hwsgs.hws);
+    }
 
-      // Disable tap in the middle of the gesture
-      if (hwstate && hwstate->timestamp == disable_time)
-        ii->tap_enable_.val_ = 0;
+    // Disable tap in the middle of the gesture
+    if (hwstate && hwstate->timestamp == disable_time)
+      ii.tap_enable_.val_ = 0;
 
-      if (hwstate && hwstate->timestamp == pause_time)
-        ii->tap_paused_.val_ = true;
+    if (hwstate && hwstate->timestamp == pause_time)
+      ii.tap_paused_.val_ = true;
 
-      if (hwstate)
-        ii->state_buffer_.PushState(*hwstate);
-      unsigned bdown = 0;
-      unsigned bup = 0;
-      stime_t tm = NO_DEADLINE;
-      for (auto finger: hwsgs.gesturing_fingers)
-        ii->origin_timestamps_.emplace(finger, 0);
-      ii->UpdateTapState(
-          hwstate, hwsgs.gesturing_fingers, same_fingers, now, &bdown, &bup,
-          &tm);
-      ii->prev_gs_fingers_ = hwsgs.gesturing_fingers;
+    if (hwstate)
+      ii.state_buffer_.PushState(*hwstate);
+    unsigned buttons_down = 0;
+    unsigned buttons_up = 0;
+    stime_t timeout = NO_DEADLINE;
+    for (auto finger: hwsgs.gesturing_fingers)
+      ii.origin_timestamps_.emplace(finger, 0);
+    ii.UpdateTapState(
+        hwstate, hwsgs.gesturing_fingers, same_fingers, now, &buttons_down,
+        &buttons_up, &timeout);
+    ii.prev_gs_fingers_ = hwsgs.gesturing_fingers;
 
-      switch (iter) {
-        case 0:  // tap should be enabled
-        case 1:
-        case 3:
-          EXPECT_EQ(hwsgs.expected_down, bdown) << desc;
-          EXPECT_EQ(hwsgs.expected_up, bup) << desc;
-          if (hwsgs.timeout)
-            EXPECT_GT(tm, 0.0) << desc;
-          else
-            EXPECT_DOUBLE_EQ(NO_DEADLINE, tm) << desc;
-          EXPECT_EQ(hwsgs.expected_state, ii->tap_to_click_state_) << desc;
-          break;
-        case 2:  // tap should be disabled
-        case 4:
-          EXPECT_EQ(0, bdown) << desc;
-          EXPECT_EQ(0, bup) << desc;
-          EXPECT_DOUBLE_EQ(NO_DEADLINE, tm) << desc;
-          EXPECT_EQ(kIdl, ii->tap_to_click_state_) << desc;
-          break;
-      }
+    switch (GetParam()) {
+      case TtcEnableTestMode::TapEnabled:
+      case TtcEnableTestMode::TapDisabledDuringGesture:
+      case TtcEnableTestMode::TapPausedDuringGesture:
+        // tap should be enabled
+        EXPECT_EQ(hwsgs.expected_down, buttons_down);
+        EXPECT_EQ(hwsgs.expected_up, buttons_up);
+        if (hwsgs.timeout)
+          EXPECT_GT(timeout, 0.0);
+        else
+          EXPECT_DOUBLE_EQ(NO_DEADLINE, timeout);
+        EXPECT_EQ(hwsgs.expected_state, ii.tap_to_click_state_);
+        break;
+      case TtcEnableTestMode::TapDisabledBeforeGestureWhileIdle:
+      case TtcEnableTestMode::TapPausedBeforeGestureWhileIdle:
+        // tap should be disabled
+        EXPECT_EQ(0, buttons_down);
+        EXPECT_EQ(0, buttons_up);
+        EXPECT_DOUBLE_EQ(NO_DEADLINE, timeout);
+        EXPECT_EQ(kIdl, ii.tap_to_click_state_);
+        break;
     }
   }
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    ImmediateInterpreterTtc, ImmediateInterpreterTtcEnableTest,
+    testing::Values(TtcEnableTestMode::TapEnabled,
+                    TtcEnableTestMode::TapDisabledDuringGesture,
+                    TtcEnableTestMode::TapDisabledBeforeGestureWhileIdle,
+                    TtcEnableTestMode::TapPausedDuringGesture,
+                    TtcEnableTestMode::TapPausedBeforeGestureWhileIdle));
 
 struct ClickTestHardwareStateAndExpectations {
   HardwareState hs;

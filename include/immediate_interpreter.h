@@ -355,13 +355,13 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(ImmediateInterpreterTest, StationaryPalmTest);
   FRIEND_TEST(ImmediateInterpreterTest, SwipeTest);
   FRIEND_TEST(ImmediateInterpreterTest, TapRecordTest);
-  FRIEND_TEST(ImmediateInterpreterTest, TapToClickEnableTest);
   FRIEND_TEST(ImmediateInterpreterTest, TapToClickKeyboardTest);
   FRIEND_TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest);
   FRIEND_TEST(ImmediateInterpreterTest, ThumbRetainReevaluateTest);
   FRIEND_TEST(ImmediateInterpreterTest, ThumbRetainTest);
   FRIEND_TEST(ImmediateInterpreterTest, WarpedFingersTappingTest);
   FRIEND_TEST(ImmediateInterpreterTest, ZeroClickInitializationTest);
+  FRIEND_TEST(ImmediateInterpreterTtcEnableTest, TapToClickEnableTest);
   friend class TapRecord;
   friend class TapToClickStateMachineTest;
   friend class FingerButtonClick;
