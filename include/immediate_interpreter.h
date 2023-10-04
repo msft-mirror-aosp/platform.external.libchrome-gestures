@@ -358,12 +358,12 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(ImmediateInterpreterTest, TapToClickEnableTest);
   FRIEND_TEST(ImmediateInterpreterTest, TapToClickKeyboardTest);
   FRIEND_TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest);
-  FRIEND_TEST(ImmediateInterpreterTest, TapToClickStateMachineTest);
   FRIEND_TEST(ImmediateInterpreterTest, ThumbRetainReevaluateTest);
   FRIEND_TEST(ImmediateInterpreterTest, ThumbRetainTest);
   FRIEND_TEST(ImmediateInterpreterTest, WarpedFingersTappingTest);
   FRIEND_TEST(ImmediateInterpreterTest, ZeroClickInitializationTest);
   friend class TapRecord;
+  friend class TapToClickStateMachineTest;
   friend class FingerButtonClick;
 
  public:
@@ -381,7 +381,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   virtual ~ImmediateInterpreter() {}
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout);
 
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
 
@@ -395,6 +395,8 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   float tap_min_pressure() const { return tap_min_pressure_.val_; }
 
   stime_t tap_max_finger_age() const { return tap_max_finger_age_.val_; }
+
+  bool device_reports_pressure() const { return hwprops_->reports_pressure; }
 
   stime_t finger_origin_timestamp(short finger_id) const {
     return origin_timestamps_.at(finger_id);
@@ -641,7 +643,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   bool sent_button_down_;
 
   // If we haven't sent a button down by this time, send one
-  stime_t button_down_timeout_;
+  stime_t button_down_deadline_;
 
   // When fingers change, we record the time
   stime_t changed_time_;

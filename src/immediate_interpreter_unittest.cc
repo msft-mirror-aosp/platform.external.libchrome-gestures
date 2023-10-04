@@ -58,7 +58,7 @@ TEST(ImmediateInterpreterTest, ScrollManagerTest) {
 }
 
 TEST(ImmediateInterpreterTest, MoveDownTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
 
   HardwareProperties hwprops = {
     0,  // left edge
@@ -93,36 +93,36 @@ TEST(ImmediateInterpreterTest, MoveDownTest) {
     make_hwstate(200000, 0, 1, 1, &finger_states[0]),
     make_hwstate(210000, 0, 1, 1, &finger_states[1]),
     make_hwstate(220000, 0, 1, 1, &finger_states[2]),
-    make_hwstate(230000, 0, 0, 0, NULL),
-    make_hwstate(240000, 0, 0, 0, NULL),
+    make_hwstate(230000, 0, 0, 0, nullptr),
+    make_hwstate(240000, 0, 0, 0, nullptr),
   };
 
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[0], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[0], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[1], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[1], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(0, gs->details.move.dx);
   EXPECT_EQ(10, gs->details.move.dy);
   EXPECT_EQ(200000, gs->start_time);
   EXPECT_EQ(210000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hardware_states[2], NULL);
-  EXPECT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[2], nullptr);
+  EXPECT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(10, gs->details.move.dx);
   EXPECT_EQ(0, gs->details.move.dy);
   EXPECT_EQ(210000, gs->start_time);
   EXPECT_EQ(220000, gs->end_time);
 
-  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL),
-            wrapper.SyncInterpret(&hardware_states[3], NULL));
-  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL),
-            wrapper.SyncInterpret(&hardware_states[4], NULL));
+  EXPECT_EQ(nullptr,
+            wrapper.SyncInterpret(hardware_states[3], nullptr));
+  EXPECT_EQ(nullptr,
+            wrapper.SyncInterpret(hardware_states[4], nullptr));
 }
 
 TEST(ImmediateInterpreterTest, MoveUpWithRestingThumbTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
 
   HardwareProperties hwprops = {
     0,  // left edge
@@ -160,36 +160,36 @@ TEST(ImmediateInterpreterTest, MoveUpWithRestingThumbTest) {
     make_hwstate(200000, 0, 2, 2, &finger_states[0]),
     make_hwstate(210000, 0, 2, 2, &finger_states[2]),
     make_hwstate(220000, 0, 2, 2, &finger_states[4]),
-    make_hwstate(230000, 0, 0, 0, NULL),
-    make_hwstate(240000, 0, 0, 0, NULL),
+    make_hwstate(230000, 0, 0, 0, nullptr),
+    make_hwstate(240000, 0, 0, 0, nullptr),
   };
 
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[0], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[0], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[1], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[1], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(0, gs->details.move.dx);
   EXPECT_EQ(-10, gs->details.move.dy);
   EXPECT_EQ(200000, gs->start_time);
   EXPECT_EQ(210000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hardware_states[2], NULL);
-  EXPECT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[2], nullptr);
+  EXPECT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(0, gs->details.move.dx);
   EXPECT_EQ(-10, gs->details.move.dy);
   EXPECT_EQ(210000, gs->start_time);
   EXPECT_EQ(220000, gs->end_time);
 
-  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL),
-            wrapper.SyncInterpret(&hardware_states[3], NULL));
-  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL),
-            wrapper.SyncInterpret(&hardware_states[4], NULL));
+  EXPECT_EQ(nullptr,
+            wrapper.SyncInterpret(hardware_states[3], nullptr));
+  EXPECT_EQ(nullptr,
+            wrapper.SyncInterpret(hardware_states[4], nullptr));
 }
 
 TEST(ImmediateInterpreterTest, SemiMtScrollUpWithRestingThumbTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -230,18 +230,18 @@ TEST(ImmediateInterpreterTest, SemiMtScrollUpWithRestingThumbTest) {
     make_hwstate(0.300000, 0, 2, 3, &finger_states[4]),
   };
 
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[0], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[0], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[1], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[1], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
   EXPECT_FLOAT_EQ(0, gs->details.move.dx);
   EXPECT_FLOAT_EQ(-100, gs->details.move.dy);
   EXPECT_DOUBLE_EQ(0.200000, gs->start_time);
   EXPECT_DOUBLE_EQ(0.250000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hardware_states[2], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[2], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
   EXPECT_FLOAT_EQ(0, gs->details.move.dx);
   EXPECT_FLOAT_EQ(-100, gs->details.move.dy);
@@ -250,7 +250,7 @@ TEST(ImmediateInterpreterTest, SemiMtScrollUpWithRestingThumbTest) {
 }
 
 void ScrollUpTest(float pressure_a, float pressure_b) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -294,18 +294,18 @@ void ScrollUpTest(float pressure_a, float pressure_b) {
     make_hwstate(0.300000, 0, 2, 2, &finger_states[4]),
   };
 
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[0], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[0], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[1], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[1], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
   EXPECT_FLOAT_EQ(0, gs->details.move.dx);
   EXPECT_FLOAT_EQ(-100, gs->details.move.dy);
   EXPECT_DOUBLE_EQ(0.200000, gs->start_time);
   EXPECT_DOUBLE_EQ(0.250000, gs->end_time);
 
-  gs = wrapper.SyncInterpret(&hardware_states[2], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[2], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
   EXPECT_FLOAT_EQ(0, gs->details.move.dx);
   EXPECT_FLOAT_EQ(-100, gs->details.move.dy);
@@ -324,7 +324,7 @@ TEST(ImmediateInterpreterTest, FatFingerScrollUpTest) {
 // Tests that a tap immediately after a scroll doesn't generate a click.
 // Such a tap would be unrealistic to come from a human.
 TEST(ImmediateInterpreterTest, ScrollThenFalseTapTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -365,28 +365,28 @@ TEST(ImmediateInterpreterTest, ScrollThenFalseTapTest) {
     make_hwstate(0.200000, 0, 2, 2, &finger_states[0]),
     make_hwstate(0.250000, 0, 2, 2, &finger_states[2]),
     make_hwstate(0.300000, 0, 2, 2, &finger_states[4]),
-    make_hwstate(0.310000, 0, 0, 0, NULL),
+    make_hwstate(0.310000, 0, 0, 0, nullptr),
     make_hwstate(0.320000, 0, 1, 1, &finger_states[6]),
-    make_hwstate(0.330000, 0, 0, 0, NULL),
+    make_hwstate(0.330000, 0, 0, 0, nullptr),
   };
 
   ii.tap_enable_.val_ = 1;
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[0], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[0], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[1], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[1], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[2], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[2], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[3], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[3], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeFling, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[4], NULL);
-  ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[4], nullptr);
+  ASSERT_EQ(nullptr, gs);
   stime_t timeout = NO_DEADLINE;
-  gs = wrapper.SyncInterpret(&hardware_states[5], &timeout);
-  ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[5], &timeout);
+  ASSERT_EQ(nullptr, gs);
   // If it were a tap, timeout would be > 0, but this shouldn't be a tap,
   // so timeout should be negative still.
   EXPECT_LT(timeout, 0.0);
@@ -395,7 +395,7 @@ TEST(ImmediateInterpreterTest, ScrollThenFalseTapTest) {
 // Tests that a consistent scroll has predictable fling, and that increasing
 // scrolls have a fling as least as fast the second to last scroll.
 TEST(ImmediateInterpreterTest, FlingTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -453,54 +453,54 @@ TEST(ImmediateInterpreterTest, FlingTest) {
     make_hwstate(1.01, 0, 2, 2, &finger_states[2]),
     make_hwstate(1.02, 0, 2, 2, &finger_states[4]),
     make_hwstate(1.03, 0, 2, 2, &finger_states[6]),
-    make_hwstate(1.04, 0, 0, 0, NULL),
+    make_hwstate(1.04, 0, 0, 0, nullptr),
 
     make_hwstate(3.00, 0, 2, 2, &finger_states[8]),
     make_hwstate(4.00, 0, 2, 2, &finger_states[8]),
     make_hwstate(4.01, 0, 2, 2, &finger_states[10]),
     make_hwstate(4.02, 0, 2, 2, &finger_states[12]),
     make_hwstate(4.03, 0, 2, 2, &finger_states[14]),
-    make_hwstate(4.04, 0, 0, 0, NULL),
+    make_hwstate(4.04, 0, 0, 0, nullptr),
   };
 
   size_t idx = 0;
 
   // Consistent movement
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[idx++], NULL));
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[idx++], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[idx++], nullptr));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[idx++], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeFling, gs->type);
   EXPECT_FLOAT_EQ(0, gs->details.fling.vx);
   EXPECT_FLOAT_EQ(10 / 0.01, gs->details.fling.vy);
 
   // Increasing speed movement
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), gs) << gs->String();
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), gs) << gs->String();
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  EXPECT_EQ(nullptr, gs) << gs->String();
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  EXPECT_EQ(nullptr, gs) << gs->String();
 
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeFling, gs->type);
   EXPECT_FLOAT_EQ(0, gs->details.fling.vx);
   EXPECT_FLOAT_EQ(1250, gs->details.fling.vy);
@@ -509,7 +509,7 @@ TEST(ImmediateInterpreterTest, FlingTest) {
 // Tests that fingers that have been present a while, but are stationary,
 // can be evaluated multiple times when they start moving.
 TEST(ImmediateInterpreterTest, DelayedStartScrollTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -550,27 +550,27 @@ TEST(ImmediateInterpreterTest, DelayedStartScrollTest) {
     make_hwstate(2.00, 0, 2, 2, &finger_states[0]),
     make_hwstate(2.01, 0, 2, 2, &finger_states[2]),
     make_hwstate(2.02, 0, 2, 2, &finger_states[4]),
-    make_hwstate(2.03, 0, 0, 0, NULL),
+    make_hwstate(2.03, 0, 0, 0, nullptr),
   };
 
   size_t idx = 0;
 
   // Consistent movement
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[idx++], NULL));
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[idx++], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[idx++], nullptr));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[idx++], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
 
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
 }
 
 // Tests that after a scroll is happening, if a finger lets go, scrolling stops.
 TEST(ImmediateInterpreterTest, ScrollReevaluateTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -622,18 +622,18 @@ TEST(ImmediateInterpreterTest, ScrollReevaluateTest) {
   size_t idx = 0;
 
   // Consistent movement
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[idx++], NULL));
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[idx++], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[idx++], nullptr));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[idx++], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
 
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
 
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
   if (gs) {
     fprintf(stderr, "gs:%si=%zd\n", gs->String().c_str(), idx);
     EXPECT_NE(kGestureTypeScroll, gs->type);
@@ -645,7 +645,7 @@ TEST(ImmediateInterpreterTest, ScrollReevaluateTest) {
 // it into move mode, then put a second finger down a bit later, but it was
 // stuck in move mode. This tests that it does switch to scroll mode.
 TEST(ImmediateInterpreterTest, OneFingerThenTwoDelayedStartScrollTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -685,7 +685,7 @@ TEST(ImmediateInterpreterTest, OneFingerThenTwoDelayedStartScrollTest) {
     make_hwstate(1.20, 0, 2, 2, &finger_states[1]),
     make_hwstate(2.00, 0, 2, 2, &finger_states[1]),
     make_hwstate(2.01, 0, 2, 2, &finger_states[3]),
-    make_hwstate(2.03, 0, 0, 0, NULL),
+    make_hwstate(2.03, 0, 0, 0, nullptr),
   };
 
   TestInterpreterWrapper wrapper(&ii, &hwprops);
@@ -693,14 +693,14 @@ TEST(ImmediateInterpreterTest, OneFingerThenTwoDelayedStartScrollTest) {
   size_t idx = 0;
 
   // Consistent movement
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[idx++], NULL));
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[idx++], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[idx++], nullptr));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[idx++], nullptr));
 
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  EXPECT_EQ(nullptr, gs);
 
-  gs = wrapper.SyncInterpret(&hardware_states[idx++], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[idx++], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeScroll, gs->type);
 }
 
@@ -860,7 +860,7 @@ TEST(ImmediateInterpreterTest, OneFatFingerScrollTest) {
   };
   for (size_t i = 0; i < arraysize(inputs); i++) {
     if (inputs[i].start == kS) {
-      ii.reset(new ImmediateInterpreter(NULL, NULL));
+      ii.reset(new ImmediateInterpreter(nullptr, nullptr));
       wrapper.Reset(ii.get());
     }
 
@@ -873,13 +873,13 @@ TEST(ImmediateInterpreterTest, OneFatFingerScrollTest) {
         make_hwstate(inputs[i].now, 0, finger_cnt, finger_cnt, fs);
 
     stime_t timeout = NO_DEADLINE;
-    Gesture* gs = wrapper.SyncInterpret(&hs, &timeout);
+    Gesture* gs = wrapper.SyncInterpret(hs, &timeout);
     switch (inputs[i].expectation) {
       case kAnything:
         // Anything goes
         break;
       case kScroll:
-        EXPECT_NE(static_cast<Gesture*>(NULL), gs) << "i=" << i;
+        EXPECT_NE(nullptr, gs) << "i=" << i;
         if (!gs)
           break;
         EXPECT_EQ(kGestureTypeScroll, gs->type);
@@ -1010,7 +1010,7 @@ TEST(ImmediateInterpreterTest, NoLiftoffScrollTest) {
   };
   for (size_t i = 0; i < arraysize(inputs); i++) {
     if (inputs[i].reset) {
-      ii.reset(new ImmediateInterpreter(NULL, NULL));
+      ii.reset(new ImmediateInterpreter(nullptr, nullptr));
       wrapper.Reset(ii.get());
     }
     FingerState fs[] = {
@@ -1020,7 +1020,7 @@ TEST(ImmediateInterpreterTest, NoLiftoffScrollTest) {
     HardwareState hs = make_hwstate(inputs[i].now, 0, 2, 2, fs);
 
     stime_t timeout = NO_DEADLINE;
-    Gesture* gs = wrapper.SyncInterpret(&hs, &timeout);
+    Gesture* gs = wrapper.SyncInterpret(hs, &timeout);
     if (gs) {
       EXPECT_EQ(kGestureTypeScroll, gs->type);
       EXPECT_LE(gs->details.scroll.dy, 0.0);
@@ -1133,15 +1133,15 @@ TEST(ImmediateInterpreterTest, DiagonalSnapTest) {
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
     HardwareStateAnScrollExpectations& hse = hardware_states[i];
     if (hse.hs.timestamp == 0.0) {
-      ii.reset(new ImmediateInterpreter(NULL, NULL));
+      ii.reset(new ImmediateInterpreter(nullptr, nullptr));
       wrapper.Reset(ii.get());
     }
-    Gesture* gs = wrapper.SyncInterpret(&hse.hs, NULL);
+    Gesture* gs = wrapper.SyncInterpret(hse.hs, nullptr);
     if (hse.dx == 0.0 && hse.dy == 0.0) {
-      EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), gs);
+      EXPECT_EQ(nullptr, gs);
       continue;
     }
-    ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+    ASSERT_NE(nullptr, gs);
     EXPECT_EQ(kGestureTypeScroll, gs->type);
     EXPECT_FLOAT_EQ(hse.dx, gs->details.scroll.dx);
     EXPECT_FLOAT_EQ(hse.dy, gs->details.scroll.dy);
@@ -1192,23 +1192,23 @@ TEST(ImmediateInterpreterTest, RestingFingerTest) {
   for (size_t direction = 0; direction < 2; direction++) {
     if (direction == 1)
       dx *= -1.0;
-    ii.reset(new ImmediateInterpreter(NULL, NULL));
+    ii.reset(new ImmediateInterpreter(nullptr, nullptr));
     wrapper.Reset(ii.get());
     for (size_t i = 0; i < 4; i++) {
       HardwareState hs = make_hwstate(kTO + 0.01 * i, 0, 2, 2, finger_states);
       if (i == 0) {
         hs.timestamp -= kTO;
-        Gesture* gs = wrapper.SyncInterpret(&hs, NULL);
-        EXPECT_EQ(static_cast<Gesture*>(NULL), gs);
+        Gesture* gs = wrapper.SyncInterpret(hs, nullptr);
+        EXPECT_EQ(nullptr, gs);
         hs.timestamp += kTO;
-        gs = wrapper.SyncInterpret(&hs, NULL);
+        gs = wrapper.SyncInterpret(hs, nullptr);
         if (gs && gs->type == kGestureTypeMove) {
           EXPECT_FLOAT_EQ(0.0, gs->details.move.dx);
           EXPECT_FLOAT_EQ(0.0, gs->details.move.dy);
         }
       } else {
-        Gesture* gs = wrapper.SyncInterpret(&hs, NULL);
-        ASSERT_NE(static_cast<Gesture*>(NULL), gs);
+        Gesture* gs = wrapper.SyncInterpret(hs, nullptr);
+        ASSERT_NE(nullptr, gs);
         EXPECT_EQ(kGestureTypeMove, gs->type);
         EXPECT_FLOAT_EQ(dx, gs->details.move.dx);
         EXPECT_FLOAT_EQ(0.0, gs->details.move.dy);
@@ -1219,7 +1219,7 @@ TEST(ImmediateInterpreterTest, RestingFingerTest) {
 }
 
 TEST(ImmediateInterpreterTest, ThumbRetainTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -1263,7 +1263,7 @@ TEST(ImmediateInterpreterTest, ThumbRetainTest) {
   ii.tap_enable_.val_ = 0;
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    Gesture* gs = wrapper.SyncInterpret(&hardware_states[i], NULL);
+    Gesture* gs = wrapper.SyncInterpret(hardware_states[i], nullptr);
     if (!gs)
       continue;
     EXPECT_EQ(kGestureTypeMove, gs->type) << "i=" << i;
@@ -1273,7 +1273,7 @@ TEST(ImmediateInterpreterTest, ThumbRetainTest) {
 }
 
 TEST(ImmediateInterpreterTest, ThumbRetainReevaluateTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -1318,13 +1318,13 @@ TEST(ImmediateInterpreterTest, ThumbRetainReevaluateTest) {
   ii.tap_enable_.val_ = 0;
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    Gesture* gs = wrapper.SyncInterpret(&hardware_states[i], NULL);
+    Gesture* gs = wrapper.SyncInterpret(hardware_states[i], nullptr);
     EXPECT_TRUE(!gs || gs->type == kGestureTypeScroll);
   }
 }
 
 TEST(ImmediateInterpreterTest, SetHardwarePropertiesTwiceTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -1361,12 +1361,12 @@ TEST(ImmediateInterpreterTest, SetHardwarePropertiesTwiceTest) {
     200000, 0, 5, 5, &finger_states[0], 0, 0, 0, 0, 0, 0.0
   };
   // This used to cause a crash:
-  Gesture* gs = wrapper.SyncInterpret(&hardware_state, NULL);
-  EXPECT_EQ(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_state, nullptr);
+  EXPECT_EQ(nullptr, gs);
 }
 
 TEST(ImmediateInterpreterTest, AmbiguousPalmCoScrollTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -1439,11 +1439,11 @@ TEST(ImmediateInterpreterTest, AmbiguousPalmCoScrollTest) {
   ASSERT_EQ(arraysize(expected_gs), arraysize(hardware_state));
 
   for (size_t i = 0; i < arraysize(hardware_state); ++i) {
-    Gesture* gs = wrapper.SyncInterpret(&hardware_state[i], NULL);
+    Gesture* gs = wrapper.SyncInterpret(hardware_state[i], nullptr);
     if (expected_gs[i] == kGestureTypeNull) {
-      EXPECT_EQ(static_cast<Gesture*>(NULL), gs) << "gs:" << gs->String();
+      EXPECT_EQ(nullptr, gs) << "gs:" << gs->String();
     } else {
-      ASSERT_NE(static_cast<Gesture*>(NULL), gs);
+      ASSERT_NE(nullptr, gs);
       EXPECT_EQ(expected_gs[i], gs->type) << "i=" << i
                                           << " gs: " << gs->String();
     }
@@ -1451,7 +1451,7 @@ TEST(ImmediateInterpreterTest, AmbiguousPalmCoScrollTest) {
 }
 
 TEST(ImmediateInterpreterTest, PressureChangeMoveTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -1493,7 +1493,7 @@ TEST(ImmediateInterpreterTest, PressureChangeMoveTest) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_state); ++i) {
-    Gesture* result = wrapper.SyncInterpret(&hardware_state[i], NULL);
+    Gesture* result = wrapper.SyncInterpret(hardware_state[i], nullptr);
     switch (i) {
       case 0:
         EXPECT_FALSE(result);
@@ -1514,7 +1514,7 @@ TEST(ImmediateInterpreterTest, PressureChangeMoveTest) {
 }
 
 TEST(ImmediateInterpreterTest, GetGesturingFingersTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -1546,7 +1546,7 @@ TEST(ImmediateInterpreterTest, GetGesturingFingersTest) {
   };
   HardwareState hardware_state[] = {
     // time, buttons, finger count, finger states pointer
-    make_hwstate(200000, 0, 0, 0, NULL),
+    make_hwstate(200000, 0, 0, 0, nullptr),
     make_hwstate(200001, 0, 1, 1, &finger_states[0]),
     make_hwstate(200002, 0, 2, 2, &finger_states[0]),
     make_hwstate(200002, 0, 3, 3, &finger_states[0]),
@@ -1624,7 +1624,7 @@ std::set<short> MkSet(short id1, short id2, short id3) {
 }  // namespace{}
 
 TEST(ImmediateInterpreterTest, TapRecordTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   TapRecord tr(&ii);
   EXPECT_FALSE(tr.TapComplete());
   // two finger IDs:
@@ -1639,7 +1639,7 @@ TEST(ImmediateInterpreterTest, TapRecordTest) {
     {0, 0, 0, 0, 75, 0, 4, 9, kF2, 0},
     {0, 0, 0, 0, 50, 0, 7, 4, kF1, 0}
   };
-  HardwareState nullstate = make_hwstate(0.0, 0, 0, 0, NULL);
+  HardwareState nullstate = make_hwstate(0.0, 0, 0, 0, nullptr);
   HardwareState hw[] = {
     // time, buttons, finger count, touch count, finger states pointer
     make_hwstate(0.0, 0, 1, 1, &fs[0]),
@@ -1693,502 +1693,983 @@ TEST(ImmediateInterpreterTest, TapRecordTest) {
 
 namespace {
 
-const long HWStateFlagStart          = 0x01000000;  // Start
-const long HWStateFlagContinue       = 0x02000000;  // Continue
-// Start; also start of slow double tap test:
-const long HWStateFlagStartDoubleTap = 0x04000000;
-// Start; also start of T5R2 tests:
-const long HWStateFlagStartT5R2      = 0x08000000;
-// Start; also tap dragging is disabled this time
-const long HWStateFlagStartNoDrag    = 0x10000000;
-const long HWStateFlagMask           = 0xff000000;
-
-#define S (__LINE__ + HWStateFlagStart)
-#define C (__LINE__ + HWStateFlagContinue)
-#define D (__LINE__ + HWStateFlagStartDoubleTap)
-#define T (__LINE__ + HWStateFlagStartT5R2)
-#define N (__LINE__ + HWStateFlagStartNoDrag)
-
+// Contains inputs to be made to the tap-to-click state machine, and the
+// expected state and output of the machine after those inputs.
 struct HWStateGs {
-  long line_number_and_flags;
   HardwareState hws;
+  // If >= 0, no HardwareState is passed into the state machine, simulating a
+  // callback.
   stime_t callback_now;
-  std::set<short> gs;
+  // Tracking IDs of fingers that are considered to be gesturing.
+  std::set<short> gesturing_fingers;
+
   unsigned expected_down;
   unsigned expected_up;
   ImmediateInterpreter::TapToClickState expected_state;
+  // Whether the state machine is expected to set a timeout after receiving
+  // these inputs.
   bool timeout;
-
-  bool IsStart() {
-    return line_number_and_flags & (HWStateFlagStart |
-                                    HWStateFlagStartDoubleTap |
-                                    HWStateFlagStartT5R2 |
-                                    HWStateFlagStartNoDrag);
-  }
-  long LineNumber() {
-    return line_number_and_flags & ~HWStateFlagMask;
-  }
 };
 
-size_t NonT5R2States(const HWStateGs* states, size_t length) {
-  for (size_t i = 0; i < length; i++)
-    if (states[i].line_number_and_flags & HWStateFlagStartT5R2)
-      return i;
-  return length;
-}
+// Shorter names so that HWStateGs definitions take only 1 line each.
+typedef ImmediateInterpreter::TapToClickState TapState;
+constexpr TapState kIdl = ImmediateInterpreter::kTtcIdle;
+constexpr TapState kFTB = ImmediateInterpreter::kTtcFirstTapBegan;
+constexpr TapState kTpC = ImmediateInterpreter::kTtcTapComplete;
+constexpr TapState kSTB = ImmediateInterpreter::kTtcSubsequentTapBegan;
+constexpr TapState kDrg = ImmediateInterpreter::kTtcDrag;
+constexpr TapState kDRl = ImmediateInterpreter::kTtcDragRelease;
+constexpr TapState kDRt = ImmediateInterpreter::kTtcDragRetouch;
+constexpr unsigned kBL = GESTURES_BUTTON_LEFT;
+constexpr unsigned kBM = GESTURES_BUTTON_MIDDLE;
+constexpr unsigned kBR = GESTURES_BUTTON_RIGHT;
 
 }  // namespace {}
 
-// Shorter names so that HWStateGs defs take only 1 line each
-typedef ImmediateInterpreter::TapToClickState TapState;
-const TapState kIdl = ImmediateInterpreter::kTtcIdle;
-const TapState kFTB = ImmediateInterpreter::kTtcFirstTapBegan;
-const TapState kTpC = ImmediateInterpreter::kTtcTapComplete;
-const TapState kSTB = ImmediateInterpreter::kTtcSubsequentTapBegan;
-const TapState kDrg = ImmediateInterpreter::kTtcDrag;
-const TapState kDRl = ImmediateInterpreter::kTtcDragRelease;
-const TapState kDRt = ImmediateInterpreter::kTtcDragRetouch;
-const unsigned kBL = GESTURES_BUTTON_LEFT;
-const unsigned kBM = GESTURES_BUTTON_MIDDLE;
-const unsigned kBR = GESTURES_BUTTON_RIGHT;
+class TapToClickStateMachineTest : public ::testing::Test {
+protected:
+  void set_gesture_properties() {
+    ii_->drag_lock_enable_.val_ = true;
+    ii_->motion_tap_prevent_timeout_.val_ = 0;
+    ii_->tapping_finger_min_separation_.val_ = 1.0;
+    ii_->tap_drag_timeout_.val_ = 0.05;
+    ii_->tap_enable_.val_ = true;
+    ii_->tap_drag_enable_.val_ = tap_drag_enable_;
+    ii_->tap_move_dist_.val_ = 1.0;
+    ii_->tap_timeout_.val_ = tap_timeout_;
+    ii_->inter_tap_timeout_.val_ = 0.05;
+    ii_->three_finger_click_enable_.val_ = true;
+    ii_->t5r2_three_finger_click_enable_.val_ = true;
+    ii_->zero_finger_click_enable_.val_ = true;
+  }
 
-TEST(ImmediateInterpreterTest, TapToClickStateMachineTest) {
-  std::unique_ptr<ImmediateInterpreter> ii;
+  void check_hwstates(const std::vector<HWStateGs>& states,
+                      std::optional<std::string> label = std::nullopt) {
+    EXPECT_EQ(kIdl, ii_->tap_to_click_state_);
+    for (size_t i = 0; i < states.size(); ++i) {
+      std::string label_or_empty = label.has_value() ? " (" + *label + ")" : "";
+      SCOPED_TRACE(StringPrintf("State %zu%s", i, label_or_empty.c_str()));
 
-  HardwareProperties hwprops = {
-    0,  // left edge
-    0,  // top edge
-    200,  // right edge
-    200,  // bottom edge
-    1.0,  // pixels/TP width
-    1.0,  // pixels/TP height
-    1.0,  // screen DPI x
-    1.0,  // screen DPI y
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    5,  // max fingers
-    5,  // max touch
-    0,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    0,  // is haptic pad
+      unsigned buttons_down = 0;
+      unsigned buttons_up = 0;
+      stime_t timeout = NO_DEADLINE;
+      bool same_fingers = false;
+      const HardwareState* hwstate = &states[i].hws;
+      stime_t now = states[i].callback_now;
+      if (states[i].callback_now >= 0.0) {
+        hwstate = nullptr;
+      } else {
+        now = states[i].hws.timestamp;
+      }
+
+      if (!hwstate || hwstate->timestamp != 0.0) {
+        same_fingers = ii_->state_buffer_.Get(1)->SameFingersAs(states[i].hws);
+      }
+
+      if (hwstate)
+        ii_->state_buffer_.PushState(*hwstate);
+      for (auto finger: states[i].gesturing_fingers)
+        ii_->origin_timestamps_.emplace(finger, 0);
+      ii_->UpdateTapState(
+          hwstate, states[i].gesturing_fingers, same_fingers, now,
+          &buttons_down, &buttons_up, &timeout);
+      ii_->prev_gs_fingers_ = states[i].gesturing_fingers;
+      EXPECT_EQ(states[i].expected_down, buttons_down);
+      EXPECT_EQ(states[i].expected_up, buttons_up);
+      if (states[i].timeout)
+        EXPECT_GT(timeout, 0.0);
+      else
+        EXPECT_DOUBLE_EQ(NO_DEADLINE, timeout);
+      EXPECT_EQ(states[i].expected_state, ii_->tap_to_click_state_);
+    }
+  }
+
+  void run_test(const std::vector<HWStateGs>& states,
+                std::optional<std::string> label = std::nullopt) {
+    ii_.reset(new ImmediateInterpreter(nullptr, nullptr));
+    TestInterpreterWrapper wrapper(ii_.get(), &hwprops_);
+    set_gesture_properties();
+    check_hwstates(states, label);
+  }
+
+  // Algorithmically adds a resting thumb to all cases in states, and then tests
+  // them.
+  void run_test_with_added_resting_thumb(const std::vector<HWStateGs>& states) {
+    std::vector<HWStateGs> states_with_thumbs = states;
+    std::vector<std::vector<FingerState> > thumb_fs(states.size());
+    const FingerState fs_thumb = {0, 0, 0, 0, 80, 0, 5, 9, 71, 0};
+    // Start out with the thumb being able to gesture.
+    bool thumb_gestures = true;
+    for (size_t i = 0; i < states_with_thumbs.size(); ++i) {
+      HardwareState* hs = &states_with_thumbs[i].hws;
+      if (hs->finger_cnt > 0) {
+        // Once a finger is present, the thumb can't gesture.
+        thumb_gestures = false;
+      }
+      std::vector<FingerState>& newfs = thumb_fs[i];
+      newfs.resize(hs->finger_cnt + 1);
+      newfs[0] = fs_thumb;
+      for (size_t j = 0; j < hs->finger_cnt; ++j)
+        newfs[j + 1] = hs->fingers[j];
+      std::set<short>& gs = states_with_thumbs[i].gesturing_fingers;
+      if (thumb_gestures)
+        gs.insert(fs_thumb.tracking_id);
+      hs->fingers = &thumb_fs[i][0];
+      hs->finger_cnt++;
+      hs->touch_cnt++;
+    }
+
+    run_test(states_with_thumbs, "with resting thumb");
+  }
+
+  // Removes pressure data from the states, then tests them.
+  void run_test_without_pressure_data(const std::vector<HWStateGs>& states) {
+    HardwareProperties hwprops = hwprops_;
+    hwprops.reports_pressure = false;
+
+    std::vector<HWStateGs> states_without_pressure = states;
+    std::vector<std::vector<FingerState>> finger_states(states.size());
+    for (size_t i = 0; i < states_without_pressure.size(); i++) {
+      HWStateGs& state = states_without_pressure[i];
+      if (state.hws.finger_cnt == 0) {
+        continue;
+      }
+      for (size_t j = 0; j < state.hws.finger_cnt; j++) {
+        FingerState fs_without_pressure = state.hws.fingers[j];
+        fs_without_pressure.pressure = 0;
+        finger_states[i].push_back(fs_without_pressure);
+      }
+      state.hws.fingers = &finger_states[i][0];
+    }
+
+    ii_.reset(new ImmediateInterpreter(nullptr, nullptr));
+    TestInterpreterWrapper wrapper(ii_.get(), &hwprops);
+    set_gesture_properties();
+    check_hwstates(states_without_pressure, "without pressure data");
+  }
+
+  std::unique_ptr<ImmediateInterpreter> ii_;
+  bool tap_drag_enable_ = true;
+  double tap_timeout_ = 0.05;
+ private:
+  const HardwareProperties hwprops_ = {
+    .left = 0,
+    .top = 0,
+    .right = 200,
+    .bottom = 200,
+    .res_x = 1.0,  // pixels/TP width
+    .res_y = 1.0,  // pixels/TP height
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 5,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = false,
+    .support_semi_mt = false,
+    .is_button_pad = true,
+    .has_wheel = false,
+    .wheel_is_hi_res = false,
+    .is_haptic_pad = false,
   };
-  TestInterpreterWrapper wrapper(ii.get(), &hwprops);
+};
 
+TEST_F(TapToClickStateMachineTest, OneFingerTap) {
+  FingerState fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kTpC, true},
+    {make_hwstate(0.07, 0, 0, 0, nullptr), .07, MkSet(), kBL, kBL, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerTapWithoutDraggingEnabled) {
+  FingerState fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), kBL, kBL, kIdl, false},
+  };
+  tap_drag_enable_ = false;
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerTapWithClick) {
+  FingerState fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, kBL, 1, 1, &fs), -1, MkSet(91), 0, 0, kIdl, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+    {make_hwstate(0.07, 0, 0, 0, nullptr), .07, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerSwipe) {
   FingerState fs[] = {
-    // TM, Tm, WM, Wm, Press, Orientation, X, Y, TrID
+    {0, 0, 0, 0, 50, 0, 4, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 6, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(95), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 1, 1, &fs[1]), -1, MkSet(95), 0, 0, kIdl, false},
+    {make_hwstate(0.02, 0, 1, 1, &fs[2]), -1, MkSet(95), 0, 0, kIdl, false},
+    {make_hwstate(0.03, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, DoubleOneFingerTap) {
+  FingerState fs[] = {
     {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
-    {0, 0, 0, 0, 75, 0, 4, 9, 92, 0},
+    {0, 0, 0, 0, 50, 0, 4, 4, 93, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kTpC, true},
+    {make_hwstate(0.02, 0, 1, 1, &fs[1]), -1, MkSet(93), 0, 0, kSTB, false},
+    {make_hwstate(0.03, 0, 0, 0, nullptr), -1, MkSet(), kBL, kBL, kTpC, true},
+    {make_hwstate(0.09, 0, 0, 0, nullptr), .09, MkSet(), kBL, kBL, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, TripleOneFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
     {0, 0, 0, 0, 50, 0, 4, 4, 93, 0},
     {0, 0, 0, 0, 50, 0, 4, 4, 94, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kTpC, true},
+    {make_hwstate(0.02, 0, 1, 1, &fs[1]), -1, MkSet(93), 0, 0, kSTB, false},
+    {make_hwstate(0.03, 0, 0, 0, nullptr), -1, MkSet(), kBL, kBL, kTpC, true},
+    {make_hwstate(0.04, 0, 1, 1, &fs[2]), -1, MkSet(94), 0, 0, kSTB, false},
+    {make_hwstate(0.05, 0, 0, 0, nullptr), -1, MkSet(), kBL, kBL, kTpC, true},
+    {make_hwstate(0.11, 0, 0, 0, nullptr), .11, MkSet(), kBL, kBL, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerTapAndDrag) {
+  FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState drag_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 6, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,1,1,&drag_fs[0]),-1,MkSet(95),0,0,kSTB,false},
+    {make_hwstate(0.13,0,1,1,&drag_fs[1]),-1,MkSet(95),kBL,0,kDrg,false},
+    {make_hwstate(0.14,0,1,1,&drag_fs[2]),-1,MkSet(95),0,0,kDrg,false},
+    {make_hwstate(0.15,0,0,0,nullptr),-1,MkSet(),0,0,kDRl,true},
+    {make_hwstate(0.99,0,0,0,nullptr),.99,MkSet(),0,kBL,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerTapThenMoveAfterDelayDoesNotDrag) {
+  FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState move_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 6, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.22,0,1,1,&move_fs[0]),-1,MkSet(95),kBL,kBL,kIdl,false},
+    {make_hwstate(0.23,0,1,1,&move_fs[1]),-1,MkSet(95),0,0,kIdl,false},
+    {make_hwstate(0.25,0,1,1,&move_fs[2]),-1,MkSet(95),0,0,kIdl,false},
+    {make_hwstate(0.26,0,0,0,nullptr),-1,MkSet(),0,0,kIdl,false},
+    {make_hwstate(0.99,0,0,0,nullptr),.99,MkSet(),0,0,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+
+TEST_F(TapToClickStateMachineTest, OneFingerTapAndMoveDrags) {
+  FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState move_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 6, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,1,1,&move_fs[0]),-1,MkSet(95),0,0,kSTB,false},
+    {make_hwstate(0.03,0,1,1,&move_fs[1]),-1,MkSet(95),kBL,0,kDrg,false},
+    {make_hwstate(0.04,0,1,1,&move_fs[2]),-1,MkSet(95),0,0,kDrg,false},
+    {make_hwstate(0.05,0,0,0,nullptr),-1,MkSet(),0,0,kDRl,true},
+    {make_hwstate(0.99,0,0,0,nullptr),.99,MkSet(),0,kBL,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerTapDragLock) {
+  FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState drag_fs[] = {
     {0, 0, 0, 0, 50, 0, 4, 4, 95, 0},
     {0, 0, 0, 0, 50, 0, 6, 4, 95, 0},
     {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
     {0, 0, 0, 0, 50, 0, 4, 4, 96, 0},
     {0, 0, 0, 0, 50, 0, 6, 4, 96, 0},
     {0, 0, 0, 0, 50, 0, 8, 4, 96, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,1,1,&drag_fs[0]),-1,MkSet(95),0,0,kSTB,false},
+    {make_hwstate(0.08,0,1,1,&drag_fs[1]),-1,MkSet(95),kBL,0,kDrg,false},
+    {make_hwstate(0.09,0,1,1,&drag_fs[2]),-1,MkSet(95),0,0,kDrg,false},
+    {make_hwstate(0.10,0,0,0,nullptr),-1,MkSet(),0,0,kDRl,true},
+    {make_hwstate(0.11,0,1,1,&drag_fs[3]),-1,MkSet(96),0,0,kDRt,false},
+    {make_hwstate(0.12,0,1,1,&drag_fs[4]),-1,MkSet(96),0,0,kDrg,false},
+    {make_hwstate(0.13,0,1,1,&drag_fs[5]),-1,MkSet(96),0,0,kDrg,false},
+    {make_hwstate(0.14,0,0,0,nullptr),-1,MkSet(),0,0,kDRl,true},
+    {make_hwstate(0.99,0,0,0,nullptr),.99,MkSet(),0,kBL,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},  // 10
+TEST_F(TapToClickStateMachineTest, OneFingerLongPress) {
+  FingerState fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.02, 0, 1, 1, &fs), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.04, 0, 1, 1, &fs), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.06, 0, 1, 1, &fs), -1, MkSet(91), 0, 0, kIdl, false},
+    {make_hwstate(0.07, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerTapThenLongPress) {
+  FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState press_fs = {0, 0, 0, 0, 50, 0, 4, 4, 95, 0};
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,1,1,&press_fs),-1,MkSet(95),0,0,kSTB,false},
+    {make_hwstate(0.14,0,1,1,&press_fs),-1,MkSet(95),kBL,0,kDrg,false},
+    {make_hwstate(0.16,0,1,1,&press_fs),-1,MkSet(95),0,0,kDrg,false},
+    {make_hwstate(0.18,0,1,1,&press_fs),-1,MkSet(95),0,0,kDrg,false},
+    {make_hwstate(0.19,0,0,0,nullptr),-1,MkSet(),0,0,kDRl,true},
+    {make_hwstate(0.99,0,0,0,nullptr),.99,MkSet(),0,kBL,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, TwoFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(97, 98), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), kBR, kBR, kIdl, false},
+    {make_hwstate(0.07, 0, 0, 0, nullptr), .07, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, ThreeFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0,  4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0,  9, 1, 98, 0},
+    {0, 0, 0, 0, 50, 0, 14, 1, 99, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,3,3,&fs[0]),-1,MkSet(97,98,99),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),kBM,kBM,kIdl,false},
+    {make_hwstate(0.07,0,0,0,nullptr),.07,MkSet(),0,0,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest,
+       TwoFingerTapWithOneFingerVeryLightGivesLeftClick) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0,  3, 0, 9, 1, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(97, 98), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kTpC, true},
+    {make_hwstate(0.07, 0, 0, 0, nullptr), .07, MkSet(), kBL, kBL, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+}
+
+TEST_F(TapToClickStateMachineTest, TwoFingerScroll) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
     {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
     {0, 0, 0, 0, 50, 0, 4, 5, 97, 0},
     {0, 0, 0, 0, 50, 0, 9, 5, 98, 0},
     {0, 0, 0, 0, 50, 0, 4, 9, 97, 0},
     {0, 0, 0, 0, 50, 0, 9, 9, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(97, 98), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 2, 2, &fs[2]), -1, MkSet(97, 98), 0, 0, kIdl, false},
+    {make_hwstate(0.02, 0, 2, 2, &fs[4]), -1, MkSet(97, 98), 0, 0, kIdl, false},
+    {make_hwstate(0.03, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    {0, 0, 0, 0, 80, 0, 5, 9, 70, 0},  // 16; thumb
+TEST_F(TapToClickStateMachineTest, OneFingerTapThenTwoFingerTap) {
+  FingerState fs[] = {
     {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
-    {0, 0, 0, 0, 80, 0, 5, 9, 71, 0},  // thumb-new id
 
-    {0, 0, 0, 0, 50, 0, 8.0, 4, 95, 0},  // 19; very close together fingers:
-    {0, 0, 0, 0, 50, 0, 8.1, 4, 96, 0},
-    {0, 0, 0, 0, 15, 0, 9.5, 4, 95, 0},  // very light pressure
-    {0, 0, 0, 0, 15, 0, 11,  4, 96, 0},
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,2,2,&fs[1]),-1,MkSet(97,98),kBL,kBL,kFTB,false},
+    {make_hwstate(0.03,0,0,0,nullptr),-1,MkSet(),kBR,kBR,kIdl,false},
+    {make_hwstate(0.09,0,0,0,nullptr),.09,MkSet(),0,0,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    {0, 0, 0, 0, 50, 0, 20, 4, 95, 0},  // 23; Two fingers very far apart
-    {0, 0, 0, 0, 50, 0, 90, 4, 96, 0},
+TEST_F(TapToClickStateMachineTest, OneFingerTapThenMultiFrameTwoFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
 
-    {0, 0, 0, 0, 50, 0, 50, 40, 95, 0},  // 25
-    {0, 0, 0, 0, 15, 0, 70, 40, 96, 0},  // very light pressure
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kTpC, true},
+    {make_hwstate(0.02, 0, 1, 1, &fs[1]), -1, MkSet(97), 0, 0, kSTB, false},
+    {make_hwstate(0.03, 0, 1, 1, &fs[2]), -1, MkSet(98), kBL, kBL, kFTB, false},
+    {make_hwstate(0.04, 0, 0, 0, nullptr), -1, MkSet(), kBR, kBR, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},  // 27
-    {0, 0, 0, 0,  3, 0, 9, 1, 98, 0},
+TEST_F(TapToClickStateMachineTest, TwoFingerTapThenOneFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(97, 98), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), kBR, kBR, kIdl, false},
+    {make_hwstate(0.02, 0, 1, 1, &fs[2]), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.03, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kTpC, true},
+    {make_hwstate(0.09, 0, 0, 0, nullptr), .09, MkSet(), kBL, kBL, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    {0, 0, 0, 0, 50, 0,  4, 1, 97, 0},  // 29
+TEST_F(TapToClickStateMachineTest, ThreeFingerTapThenOneFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0,  4, 1, 97, 0},
     {0, 0, 0, 0, 50, 0,  9, 1, 98, 0},
     {0, 0, 0, 0, 50, 0, 14, 1, 99, 0},
+    {0, 0, 0, 0, 50, 0,  4, 4, 91, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,3,3,&fs[0]),-1,MkSet(97,98,99),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),kBM,kBM,kIdl,false},
+    {make_hwstate(0.02,0,1,1,&fs[3]),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.03,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.09,0,0,0,nullptr),.09,MkSet(),kBL,kBL,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    {0, 0, 0, 0, 50, 0, 50, 40, 95, 0},  // 32
+TEST_F(TapToClickStateMachineTest, DoubleTwoFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 4, 4, 96, 0},
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(95, 96), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), kBR, kBR, kIdl, false},
+    {make_hwstate(0.02, 0, 2, 2, &fs[2]), -1, MkSet(97, 98), 0, 0, kFTB, false},
+    {make_hwstate(0.03, 0, 0, 0, nullptr), -1, MkSet(), kBR, kBR, kIdl, false},
+    {make_hwstate(0.09, 0, 0, 0, nullptr), .09, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, DrumrollSeparationOnFastSwipe) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 50, 40, 95, 0},
     {0, 0, 0, 0, 50, 0, 70, 40, 96, GESTURES_FINGER_NO_TAP},
-
-    {0, 0, 0, 0, 50, 0, 4, 4, 91, GESTURES_FINGER_PALM},  // 34
   };
-  HWStateGs hwsgs[] = {
-    // Simple 1-finger tap
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.07,0,0,0,NULL),.07,MkSet(),kBL,kBL,kIdl,false},
-    // Simple 1-finger tap w/o dragging enabled
-    {N,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBL,kBL,kIdl,false},
-    // 1-finger tap with click
-    {S,make_hwstate(0.00,kBL,1,1,&fs[0]),-1,MkSet(91),0,0,kIdl,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    {C,make_hwstate(0.07,0,0,0,NULL),.07,MkSet(),0,0,kIdl,false},
-    // 1-finger swipe
-    {S,make_hwstate(0.00,0,1,1,&fs[4]),-1,MkSet(95),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,1,1,&fs[5]),-1,MkSet(95),0,0,kIdl,false},
-    {C,make_hwstate(0.02,0,1,1,&fs[6]),-1,MkSet(95),0,0,kIdl,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // Double 1-finger tap
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[2]),-1,MkSet(93),0,0,kSTB,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),kBL,kBL,kTpC,true},
-    {C,make_hwstate(0.09,0,0,0,NULL),.09,MkSet(),kBL,kBL,kIdl,false},
-    // Triple 1-finger tap
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[2]),-1,MkSet(93),0,0,kSTB,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),kBL,kBL,kTpC,true},
-    {C,make_hwstate(0.04,0,1,1,&fs[3]),-1,MkSet(94),0,0,kSTB,false},
-    {C,make_hwstate(0.05,0,0,0,NULL),-1,MkSet(),kBL,kBL,kTpC,true},
-    {C,make_hwstate(0.11,0,0,0,NULL),.11,MkSet(),kBL,kBL,kIdl,false},
-    // 1-finger tap + drag
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[4]),-1,MkSet(95),0,0,kSTB,false},
-    {C,make_hwstate(0.13,0,1,1,&fs[5]),-1,MkSet(95),kBL,0,kDrg,false},
-    {C,make_hwstate(0.14,0,1,1,&fs[6]),-1,MkSet(95),0,0,kDrg,false},
-    {C,make_hwstate(0.15,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
-    {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,kBL,kIdl,false},
-    // 1-finger tap + move (drag expected)
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[4]),-1,MkSet(95),0,0,kSTB,false},
-    {C,make_hwstate(0.03,0,1,1,&fs[5]),-1,MkSet(95),kBL,0,kDrg,false},
-    {C,make_hwstate(0.04,0,1,1,&fs[6]),-1,MkSet(95),0,0,kDrg,false},
-    {C,make_hwstate(0.05,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
-    {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,kBL,kIdl,false},
-    // 1-finger tap, move, release, move again (drag lock)
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[4]),-1,MkSet(95),0,0,kSTB,false},
-    {C,make_hwstate(0.08,0,1,1,&fs[5]),-1,MkSet(95),kBL,0,kDrg,false},
-    {C,make_hwstate(0.09,0,1,1,&fs[6]),-1,MkSet(95),0,0,kDrg,false},
-    {C,make_hwstate(0.10,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
-    {C,make_hwstate(0.11,0,1,1,&fs[7]),-1,MkSet(96),0,0,kDRt,false},
-    {C,make_hwstate(0.12,0,1,1,&fs[8]),-1,MkSet(96),0,0,kDrg,false},
-    {C,make_hwstate(0.13,0,1,1,&fs[9]),-1,MkSet(96),0,0,kDrg,false},
-    {C,make_hwstate(0.14,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
-    {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,kBL,kIdl,false},
-    // 1-finger long press
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.02,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.04,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.06,0,1,1,&fs[0]),-1,MkSet(91),0,0,kIdl,false},
-    {C,make_hwstate(0.07,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // 1-finger tap then long press
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[4]),-1,MkSet(95),0,0,kSTB,false},
-    {C,make_hwstate(0.14,0,1,1,&fs[4]),-1,MkSet(95),kBL,0,kDrg,false},
-    {C,make_hwstate(0.16,0,1,1,&fs[4]),-1,MkSet(95),0,0,kDrg,false},
-    {C,make_hwstate(0.18,0,1,1,&fs[4]),-1,MkSet(95),0,0,kDrg,false},
-    {C,make_hwstate(0.19,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
-    {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,kBL,kIdl,false},
-    // 2-finger tap (right click)
-    {S,make_hwstate(0.00,0,2,2,&fs[10]),-1,MkSet(97,98),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    {C,make_hwstate(0.07,0,0,0,NULL),.07,MkSet(),0,0,kIdl,false},
-    // 3-finger tap (middle click)
-    {S,make_hwstate(0.00,0,3,3,&fs[29]),-1,MkSet(97,98,99),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBM,kBM,kIdl,false},
-    {C,make_hwstate(0.07,0,0,0,NULL),.07,MkSet(),0,0,kIdl,false},
-    // 2-finger tap, but one finger is very very light, so left tap
-    {S,make_hwstate(0.00,0,2,2,&fs[27]),-1,MkSet(97,98),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.07,0,0,0,NULL),.07,MkSet(),kBL,kBL,kIdl,false},
-    // 2-finger scroll
-    {S,make_hwstate(0.00,0,2,2,&fs[10]),-1,MkSet(97,98),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,2,2,&fs[12]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(0.02,0,2,2,&fs[14]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // left tap, right tap
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,2,2,&fs[10]),-1,MkSet(97,98),kBL,kBL,kFTB,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    {C,make_hwstate(0.09,0,0,0,NULL),.09,MkSet(),0,0,kIdl,false},
-    // left tap, multi-frame right tap
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[10]),-1,MkSet(97),0,0,kSTB,false},
-    {C,make_hwstate(0.03,0,1,1,&fs[11]),-1,MkSet(98),kBL,kBL,kFTB,false},
-    {C,make_hwstate(0.04,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    // right tap, left tap
-    {S,make_hwstate(0.00,0,2,2,&fs[10]),-1,MkSet(97,98),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    {C,make_hwstate(0.02,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.09,0,0,0,NULL),.09,MkSet(),kBL,kBL,kIdl,false},
-    // middle tap, left tap
-    {S,make_hwstate(0.00,0,3,3,&fs[29]),-1,MkSet(97,98,99),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBM,kBM,kIdl,false},
-    {C,make_hwstate(0.02,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.09,0,0,0,NULL),.09,MkSet(),kBL,kBL,kIdl,false},
-    // right double-tap
-    {S,make_hwstate(0.00,0,2,2,&fs[6]),-1,MkSet(95,96),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    {C,make_hwstate(0.02,0,2,2,&fs[10]),-1,MkSet(97,98),0,0,kFTB,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    {C,make_hwstate(0.09,0,0,0,NULL),.09,MkSet(),0,0,kIdl,false},
-    // left drumroll separation on fast swipe
-    {S,make_hwstate(0.00,0,1,1,&fs[32]),-1,MkSet(95),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,1,1,&fs[33]),-1,MkSet(96),0,0,kIdl,false},
-    {C,make_hwstate(0.02,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // left tap, right-drag
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,2,2,&fs[10]),-1,MkSet(97,98),kBL,kBL,kFTB,false},
-    {C,make_hwstate(0.03,0,2,2,&fs[12]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(0.04,0,2,2,&fs[14]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(0.05,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // left tap, right multi-frame drag
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[10]),-1,MkSet(97),0,0,kSTB,false},
-    {C,make_hwstate(0.03,0,2,2,&fs[12]),-1,MkSet(97,98),kBL,kBL,kIdl,false},
-    {C,make_hwstate(0.04,0,2,2,&fs[14]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(0.05,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // left tap, drag + finger joined later
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[10]),-1,MkSet(97),0,0,kSTB,false},
-    {C,make_hwstate(0.13,0,1,1,&fs[10]),-1,MkSet(97),kBL,0,kDrg,false},
-    {C,make_hwstate(0.14,0,2,2,&fs[12]),-1,MkSet(97,98),0,kBL,kIdl,false},
-    {C,make_hwstate(0.15,0,2,2,&fs[14]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(0.16,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // right tap, left-drag
-    {S,make_hwstate(0.00,0,2,2,&fs[14]),-1,MkSet(97,98),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    {C,make_hwstate(0.02,0,1,1,&fs[4]),-1,MkSet(95),0,0,kFTB,false},
-    {C,make_hwstate(0.03,0,1,1,&fs[5]),-1,MkSet(95),0,0,kIdl,false},
-    {C,make_hwstate(0.04,0,1,1,&fs[6]),-1,MkSet(95),0,0,kIdl,false},
-    {C,make_hwstate(0.05,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // right tap, right-drag
-    {S,make_hwstate(0.00,0,2,2,&fs[6]),-1,MkSet(95,96),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    {C,make_hwstate(0.02,0,2,2,&fs[10]),-1,MkSet(97,98),0,0,kFTB,false},
-    {C,make_hwstate(0.03,0,2,2,&fs[12]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(0.04,0,2,2,&fs[14]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(0.05,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // drag then right-tap
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[4]),-1,MkSet(95),0,0,kSTB,false},
-    {C,make_hwstate(0.10,0,1,1,&fs[5]),-1,MkSet(95),kBL,0,kDrg,false},
-    {C,make_hwstate(0.11,0,1,1,&fs[6]),-1,MkSet(95),0,0,kDrg,false},
-    {C,make_hwstate(0.12,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
-    {C,make_hwstate(0.13,0,2,2,&fs[10]),-1,MkSet(97,98),0,0,kDRt,false},
-    {C,make_hwstate(0.14,0,0,0,NULL),-1,MkSet(),0,kBL,kTpC,true},
-    {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),kBR,kBR,kIdl,false},
-    // slow double tap
-    {D,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.10,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.12,0,1,1,&fs[2]),-1,MkSet(93),0,0,kSTB,false},
-    {C,make_hwstate(0.22,0,0,0,NULL),-1,MkSet(),kBL,kBL,kTpC,true},
-    {C,make_hwstate(0.90,0,0,0,NULL),.9,MkSet(),kBL,kBL,kIdl,false},
-    // right tap, very close fingers - shouldn't tap
-    {S,make_hwstate(0.00,0,2,2,&fs[19]),-1,MkSet(95,96),0,0,kIdl,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // very light left tap - shouldn't tap
-    {S,make_hwstate(0.00,0,1,1,&fs[21]),-1,MkSet(95),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // very light right tap - shouldn't tap
-    {S,make_hwstate(0.00,0,2,2,&fs[21]),-1,MkSet(95,96),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // half very light right tap - should tap
-    {S,make_hwstate(0.00,0,2,2,&fs[20]),-1,MkSet(95,96),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    // Right tap, w/ fingers too far apart - shouldn't right tap
-    {S,make_hwstate(0.00,0,2,2,&fs[23]),-1,MkSet(95,96),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.07,0,0,0,NULL),.07,MkSet(),kBL,kBL,kIdl,false},
-    // Two fingers merge into one, then leave - shouldn't tap
-    {S,make_hwstate(0.00,0,2,2,&fs[6]),-1,MkSet(95,96),0,0,kFTB,false},
-    {C,make_hwstate(1.00,0,2,2,&fs[6]),-1,MkSet(95,96),0,0,kIdl,false},
-    {C,make_hwstate(1.01,0,1,1,&fs[17]),-1,MkSet(91),0,0,kIdl,false},
-    {C,make_hwstate(1.02,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // 1-finger marked as palm for a long time then unmarked - shouldn't tap
-    {S,make_hwstate(0.00,0,1,1,&fs[34]),-1,MkSet(),0,0,kIdl,false},
-    {C,make_hwstate(1.50,0,1,1,&fs[0]),-1,MkSet(91),0,0,kIdl,false},
-    {C,make_hwstate(1.51,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-
-    //{C,make_hwstate(0.08,0,0,0,NULL),.07,MkSet(),0,0,kIdl,false},
-    // Two fingers seem to tap, the bigger of which is the only one that
-    // meets the minimum pressure threshold. Then that higher pressure finger
-    // is no longer gesturing (e.g., it gets classified as a thumb).
-    // There should be no tap b/c the one remaining finger didn't meet the
-    // minimum pressure threshold.
-    {S,make_hwstate(0.00,0,2,2,&fs[25]),-1,MkSet(95,96),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,2,2,&fs[25]),-1,MkSet(96),0,0,kFTB,false},
-    {C,make_hwstate(0.02,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // 2f click - shouldn't tap
-    {S,make_hwstate(0.00,0,2,2,&fs[0]),-1,MkSet(91,92),0,0,kFTB,false},
-    {C,make_hwstate(0.01,1,2,2,&fs[0]),-1,MkSet(91,92),0,0,kIdl,false},
-    {C,make_hwstate(0.02,0,2,2,&fs[0]),-1,MkSet(91,92),0,0,kIdl,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // T5R2 tap tests:
-    // (1f and 2f tap w/o resting thumb and 1f w/ resting thumb are the same as
-    // above)
-    // 2f tap w/ resting thumb
-    {T,make_hwstate(0.00,0,1,1,&fs[16]),-1,MkSet(70),0,0,kFTB,false},
-    {C,make_hwstate(1.00,0,1,1,&fs[16]),-1,MkSet(70),0,0,kIdl,false},
-    {C,make_hwstate(1.01,0,1,3,&fs[16]),-1,MkSet(70),0,0,kFTB,false},
-    {C,make_hwstate(1.02,0,2,3,&fs[16]),-1,MkSet(70,91),0,0,kFTB,false},
-    {C,make_hwstate(1.03,0,0,2,NULL),-1,MkSet(),0,0,kFTB,false},
-    {C,make_hwstate(1.04,0,1,1,&fs[18]),-1,MkSet(71),kBR,kBR,kIdl,false},
-    // 3f tap w/o resting thumb
-    {S,make_hwstate(0.00,0,2,3,&fs[0]),-1,MkSet(91,92),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,1,NULL),-1,MkSet(),0,0,kFTB,false},
-    {C,make_hwstate(0.02,0,0,0,NULL),-1,MkSet(),kBM,kBM,kIdl,false},
-    // 3f tap w/o resting thumb (slightly different)
-    {S,make_hwstate(0.00,0,2,3,&fs[0]),-1,MkSet(91,92),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,2,3,&fs[0]),-1,MkSet(91,92),0,0,kFTB,false},
-    {C,make_hwstate(0.02,0,0,0,NULL),-1,MkSet(),kBM,kBM,kIdl,false},
-    // 3f tap w/ resting thumb
-    {S,make_hwstate(0.00,0,1,1,&fs[16]),-1,MkSet(70),0,0,kFTB,false},
-    {C,make_hwstate(1.00,0,1,1,&fs[16]),-1,MkSet(70),0,0,kIdl,false},
-    {C,make_hwstate(1.01,0,1,4,&fs[16]),-1,MkSet(70),0,0,kFTB,false},
-    {C,make_hwstate(1.02,0,2,4,&fs[16]),-1,MkSet(70,91),0,0,kFTB,false},
-    {C,make_hwstate(1.03,0,1,1,&fs[16]),-1,MkSet(70),kBM,kBM,kIdl,false},
-    // 4f tap w/o resting thumb
-    {S,make_hwstate(0.00,0,2,3,&fs[0]),-1,MkSet(91,92),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,1,4,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.02,0,2,4,&fs[0]),-1,MkSet(91,92),0,0,kFTB,false},
-    {C,make_hwstate(0.03,0,0,0,NULL),-1,MkSet(),kBR,kBR,kIdl,false},
-    // 4f tap w/ resting thumb
-    {S,make_hwstate(0.00,0,1,1,&fs[16]),-1,MkSet(70),0,0,kFTB,false},
-    {C,make_hwstate(1.00,0,1,1,&fs[16]),-1,MkSet(70),0,0,kIdl,false},
-    {C,make_hwstate(1.01,0,1,5,&fs[16]),-1,MkSet(70),0,0,kFTB,false},
-    {C,make_hwstate(1.02,0,1,1,&fs[16]),-1,MkSet(70),kBR,kBR,kIdl,false},
-    // 4f tap w/ resting thumb (slightly different)
-    {S,make_hwstate(0.00,0,1,1,&fs[16]),-1,MkSet(70),0,0,kFTB,false},
-    {C,make_hwstate(1.00,0,1,1,&fs[16]),-1,MkSet(70),0,0,kIdl,false},
-    {C,make_hwstate(1.01,0,1,5,&fs[16]),-1,MkSet(70),0,0,kFTB,false},
-    {C,make_hwstate(1.02,0,2,5,&fs[16]),-1,MkSet(70,91),0,0,kFTB,false},
-    {C,make_hwstate(1.03,0,1,1,&fs[16]),-1,MkSet(70),kBR,kBR,kIdl,false},
-    // 3f letting go, shouldn't tap at all
-    {S,make_hwstate(0.00,0,2,3,&fs[0]),-1,MkSet(91,92),0,0,kFTB,false},
-    {C,make_hwstate(1.01,0,2,3,&fs[0]),-1,MkSet(91,92),0,0,kIdl,false},
-    {C,make_hwstate(1.02,0,0,2,NULL),-1,MkSet(),0,0,kIdl,false},
-    {C,make_hwstate(1.03,0,2,2,&fs[10]),-1,MkSet(97,98),0,0,kIdl,false},
-    {C,make_hwstate(1.04,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    // tap then move with delay between touches. no drag expected
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.22,0,1,1,&fs[4]),-1,MkSet(95),kBL,kBL,kIdl,false},
-    {C,make_hwstate(0.23,0,1,1,&fs[5]),-1,MkSet(95),0,0,kIdl,false},
-    {C,make_hwstate(0.25,0,1,1,&fs[6]),-1,MkSet(95),0,0,kIdl,false},
-    {C,make_hwstate(0.26,0,0,0,NULL),-1,MkSet(),0,0,kIdl,false},
-    {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,0,kIdl,false},
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(95), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 1, 1, &fs[1]), -1, MkSet(96), 0, 0, kIdl, false},
+    {make_hwstate(0.02, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
   };
-  const size_t kT5R2TestFirstIndex = NonT5R2States(hwsgs, arraysize(hwsgs));
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-  // Algorithmically add a resting thumb to a copy of all above cases
-  const size_t hwsgs_full_size = arraysize(hwsgs) + kT5R2TestFirstIndex;
-  std::vector<HWStateGs> hwsgs_full;
-  hwsgs_full.reserve(hwsgs_full_size);
-  hwsgs_full.insert(hwsgs_full.end(), hwsgs, hwsgs + arraysize(hwsgs));
-  hwsgs_full.insert(hwsgs_full.end(), hwsgs, hwsgs + kT5R2TestFirstIndex);
-  std::vector<std::vector<FingerState> > thumb_fs(arraysize(hwsgs));
-  const FingerState& fs_thumb = fs[18];
-  bool thumb_gestures = true;
-  for (size_t i = 0; i < kT5R2TestFirstIndex; ++i) {
-    HardwareState* hs = &hwsgs_full[i + arraysize(hwsgs)].hws;
-    if (hwsgs_full[i].IsStart())
-      thumb_gestures = true;  // Start out w/ thumb being able to gesture
-    if (hs->finger_cnt > 0)
-      thumb_gestures = false;  // Once a finger is present, thumb can't gesture
-    std::vector<FingerState>& newfs = thumb_fs[i];
-    newfs.resize(hs->finger_cnt + 1);
-    newfs[0] = fs_thumb;
-    for (size_t j = 0; j < hs->finger_cnt; ++j)
-      newfs[j + 1] = hs->fingers[j];
-    std::set<short>& gs = hwsgs_full[i + arraysize(hwsgs)].gs;
-    if (thumb_gestures)
-      gs.insert(fs_thumb.tracking_id);
-    hs->fingers = &thumb_fs[i][0];
-    hs->finger_cnt++;
-    hs->touch_cnt++;
-  }
+TEST_F(TapToClickStateMachineTest, OneFingerTapThenTwoFingerDrag) {
+  FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState drag_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+    {0, 0, 0, 0, 50, 0, 4, 5, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 5, 98, 0},
+    {0, 0, 0, 0, 50, 0, 4, 9, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 9, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,2,2,&drag_fs[0]),-1,MkSet(97,98),kBL,kBL,kFTB,false},
+    {make_hwstate(0.03,0,2,2,&drag_fs[2]),-1,MkSet(97,98),0,0,kIdl,false},
+    {make_hwstate(0.04,0,2,2,&drag_fs[4]),-1,MkSet(97,98),0,0,kIdl,false},
+    {make_hwstate(0.05,0,0,0,nullptr),-1,MkSet(),0,0,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-  for (size_t i = 0; i < hwsgs_full_size; ++i) {
-    string desc;
-    if (i < arraysize(hwsgs))
-      desc = StringPrintf("State %zu, Line Number %ld", i,
-                          hwsgs[i].LineNumber());
-    else
-      desc = StringPrintf("State %zu (resting thumb), Line Number %ld",
-                          i - arraysize(hwsgs),
-                          hwsgs[i - arraysize(hwsgs)].LineNumber());
+TEST_F(TapToClickStateMachineTest, OneFingerTapThenMultiFrameTwoFingerDrag) {
+  FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState drag_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 4, 5, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 5, 98, 0},
+    {0, 0, 0, 0, 50, 0, 4, 9, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 9, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,1,1,&drag_fs[0]),-1,MkSet(97),0,0,kSTB,false},
+    {make_hwstate(0.03,0,2,2,&drag_fs[1]),-1,MkSet(97,98),kBL,kBL,kIdl,false},
+    {make_hwstate(0.04,0,2,2,&drag_fs[3]),-1,MkSet(97,98),0,0,kIdl,false},
+    {make_hwstate(0.05,0,0,0,nullptr),-1,MkSet(),0,0,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    unsigned bdown = 0;
-    unsigned bup = 0;
-    stime_t tm = NO_DEADLINE;
-    bool same_fingers = false;
-    HardwareState* hwstate = &hwsgs_full[i].hws;
-    stime_t now = hwsgs_full[i].callback_now;
-    if (hwsgs_full[i].callback_now >= 0.0) {
-      hwstate = NULL;
-    } else {
-      now = hwsgs_full[i].hws.timestamp;
-    }
+TEST_F(TapToClickStateMachineTest, OneFingerTapAndDragWithExtraFingerLater) {
+  FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState drag_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 4, 5, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 5, 98, 0},
+    {0, 0, 0, 0, 50, 0, 4, 9, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 9, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,1,1,&drag_fs[0]),-1,MkSet(97),0,0,kSTB,false},
+    {make_hwstate(0.13,0,1,1,&drag_fs[0]),-1,MkSet(97),kBL,0,kDrg,false},
+    {make_hwstate(0.14,0,2,2,&drag_fs[1]),-1,MkSet(97,98),0,kBL,kIdl,false},
+    {make_hwstate(0.15,0,2,2,&drag_fs[3]),-1,MkSet(97,98),0,0,kIdl,false},
+    {make_hwstate(0.16,0,0,0,nullptr),-1,MkSet(),0,0,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    if (hwstate && hwstate->timestamp == 0.0) {
-      // Reset imm interpreter
-      fprintf(stderr, "Resetting imm interpreter, i = %zd\n", i);
-      ii.reset(new ImmediateInterpreter(NULL, NULL));
-      wrapper.Reset(ii.get());
-      ii->drag_lock_enable_.val_ = 1;
-      ii->motion_tap_prevent_timeout_.val_ = 0;
-      ii->tapping_finger_min_separation_.val_ = 1.0;
-      ii->tap_drag_timeout_.val_ = 0.05;
-      ii->tap_enable_.val_ = 1;
-      ii->tap_drag_enable_.val_ =
-          !(hwsgs_full[i].line_number_and_flags & HWStateFlagStartNoDrag);
-      ii->tap_move_dist_.val_ = 1.0;
-      ii->tap_timeout_.val_ = ii->inter_tap_timeout_.val_ = 0.05;
-      ii->three_finger_click_enable_.val_ = 1;
-      ii->t5r2_three_finger_click_enable_.val_ = 1;
-      ii->zero_finger_click_enable_.val_ = 1;
-      // For the slow tap case, we need to make tap_timeout_ bigger
-      if (hwsgs_full[i].line_number_and_flags & HWStateFlagStartDoubleTap)
-        ii->tap_timeout_.val_ = 0.11;
-      EXPECT_EQ(kIdl, ii->tap_to_click_state_);
-    } else {
-      same_fingers = ii->state_buffer_.Get(1)->SameFingersAs(hwsgs_full[i].hws);
-    }
+TEST_F(TapToClickStateMachineTest, TwoFingerTapThenOneFingerDrag) {
+  FingerState tap_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 9, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 9, 98, 0},
+  };
+  FingerState drag_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 6, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,2,2,&tap_fs[0]),-1,MkSet(97,98),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),kBR,kBR,kIdl,false},
+    {make_hwstate(0.02,0,1,1,&drag_fs[0]),-1,MkSet(95),0,0,kFTB,false},
+    {make_hwstate(0.03,0,1,1,&drag_fs[1]),-1,MkSet(95),0,0,kIdl,false},
+    {make_hwstate(0.04,0,1,1,&drag_fs[2]),-1,MkSet(95),0,0,kIdl,false},
+    {make_hwstate(0.05,0,0,0,nullptr),-1,MkSet(),0,0,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
 
-    if (hwstate)
-      ii->state_buffer_.PushState(*hwstate);
-    for (auto finger: hwsgs_full[i].gs)
-      ii->origin_timestamps_.emplace(finger, 0);
-    ii->UpdateTapState(
-        hwstate, hwsgs_full[i].gs, same_fingers, now, &bdown, &bup, &tm);
-    ii->prev_gs_fingers_ = hwsgs_full[i].gs;
-    EXPECT_EQ(hwsgs_full[i].expected_down, bdown) << desc;
-    EXPECT_EQ(hwsgs_full[i].expected_up, bup) << desc;
-    if (hwsgs_full[i].timeout)
-      EXPECT_GT(tm, 0.0) << desc;
-    else
-      EXPECT_DOUBLE_EQ(NO_DEADLINE, tm) << desc;
-    EXPECT_EQ(hwsgs_full[i].expected_state, ii->tap_to_click_state_)
-        << desc;
-  }
+TEST_F(TapToClickStateMachineTest, TwoFingerTapAndDrag) {
+  FingerState tap_fs[] = {
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 4, 4, 96, 0},
+  };
+  FingerState drag_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+    {0, 0, 0, 0, 50, 0, 4, 5, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 5, 98, 0},
+    {0, 0, 0, 0, 50, 0, 4, 9, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 9, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,2,2,&tap_fs[0]),-1,MkSet(95,96),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),kBR,kBR,kIdl,false},
+    {make_hwstate(0.02,0,2,2,&drag_fs[0]),-1,MkSet(97,98),0,0,kFTB,false},
+    {make_hwstate(0.03,0,2,2,&drag_fs[2]),-1,MkSet(97,98),0,0,kIdl,false},
+    {make_hwstate(0.04,0,2,2,&drag_fs[4]),-1,MkSet(97,98),0,0,kIdl,false},
+    {make_hwstate(0.05,0,0,0,nullptr),-1,MkSet(),0,0,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerDragThenTwoFingerTap) {
+  FingerState tap_fs1 = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  FingerState drag_fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 6, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+  };
+  FingerState tap_fs2[] = {
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&tap_fs1),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,1,1,&drag_fs[0]),-1,MkSet(95),0,0,kSTB,false},
+    {make_hwstate(0.10,0,1,1,&drag_fs[1]),-1,MkSet(95),kBL,0,kDrg,false},
+    {make_hwstate(0.11,0,1,1,&drag_fs[2]),-1,MkSet(95),0,0,kDrg,false},
+    {make_hwstate(0.12,0,0,0,nullptr),-1,MkSet(),0,0,kDRl,true},
+    {make_hwstate(0.13,0,2,2,&tap_fs2[0]),-1,MkSet(97,98),0,0,kDRt,false},
+    {make_hwstate(0.14,0,0,0,nullptr),-1,MkSet(),0,kBL,kTpC,true},
+    {make_hwstate(0.99,0,0,0,nullptr),.99,MkSet(),kBR,kBR,kIdl,false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, SlowDoubleTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+    {0, 0, 0, 0, 50, 0, 4, 4, 93, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.10, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kTpC, true},
+    {make_hwstate(0.12, 0, 1, 1, &fs[1]), -1, MkSet(93), 0, 0, kSTB, false},
+    {make_hwstate(0.22, 0, 0, 0, nullptr), -1, MkSet(), kBL, kBL, kTpC, true},
+    {make_hwstate(0.90, 0, 0, 0, nullptr), .9, MkSet(), kBL, kBL, kIdl, false},
+  };
+  tap_timeout_ = 0.11;
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, TwoFingerTapWithVeryCloseFingersIgnored) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 8.0, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 8.1, 4, 96, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(95, 96), 0, 0, kIdl, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, VeryLightTapIgnored) {
+  FingerState fs = {0, 0, 0, 0, 15, 0, 9.5, 4, 95, 0};
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs), -1, MkSet(95), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+}
+
+TEST_F(TapToClickStateMachineTest, VeryLightTwoFingerTapIgnored) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 15, 0, 9.5, 4, 95, 0},
+    {0, 0, 0, 0, 15, 0, 11,  4, 96, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(95,96), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+}
+
+TEST_F(TapToClickStateMachineTest,
+       TwoFingerTapWithOneVeryLightGivesRightClick) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 8.1, 4, 96, 0},
+    {0, 0, 0, 0, 15, 0, 9.5, 4, 95, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(95, 96), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), kBR, kBR, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+}
+
+TEST_F(TapToClickStateMachineTest, TwoFingerTapTooFarApartGivesLeftClick) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 20, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 90, 4, 96, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(95, 96), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kTpC, true},
+    {make_hwstate(0.07, 0, 0, 0, nullptr), .07, MkSet(), kBL, kBL, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, TwoFingersMergingDoesntClick) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 8, 4, 95, 0},
+    {0, 0, 0, 0, 50, 0, 4, 4, 96, 0},
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(95, 96), 0, 0, kFTB, false},
+    {make_hwstate(1.00, 0, 2, 2, &fs[0]), -1, MkSet(95, 96), 0, 0, kIdl, false},
+    {make_hwstate(1.01, 0, 1, 1, &fs[2]), -1, MkSet(91), 0, 0, kIdl, false},
+    {make_hwstate(1.02, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, OneFingerMarkedAsPalmIgnored) {
+  FingerState palm_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, GESTURES_FINGER_PALM};
+  FingerState fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &palm_fs), -1, MkSet(), 0, 0, kIdl, false},
+    {make_hwstate(1.50, 0, 1, 1, &fs), -1, MkSet(91), 0, 0, kIdl, false},
+    {make_hwstate(1.51, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest,
+       TwoFingersBelowPressureThresholdAndNotGesturing) {
+  // Two fingers seem to tap, the bigger of which is the only one that meets the
+  // minimum pressure threshold. Then that higher pressure finger is no longer
+  // gesturing (e.g., it gets classified as a thumb).
+  // There should be no tap because the one remaining finger didn't meet the
+  // minimum pressure threshold.
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 50, 40, 95, 0},
+    {0, 0, 0, 0, 15, 0, 70, 40, 96, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(95, 96), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 2, 2, &fs[0]), -1, MkSet(96), 0, 0, kFTB, false},
+    {make_hwstate(0.02, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+}
+
+TEST_F(TapToClickStateMachineTest, TwoFingerClickNotRegisteredAsTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+    {0, 0, 0, 0, 75, 0, 4, 9, 92, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 2, &fs[0]), -1, MkSet(91, 92), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 1, 2, 2, &fs[0]), -1, MkSet(91, 92), 0, 0, kIdl, false},
+    {make_hwstate(0.02, 0, 2, 2, &fs[0]), -1, MkSet(91, 92), 0, 0, kIdl, false},
+    {make_hwstate(0.03, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
+  run_test_with_added_resting_thumb(states);
+  run_test_without_pressure_data(states);
+}
+
+TEST_F(TapToClickStateMachineTest, T5R2TwoFingerTapWithRestingThumb) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 80, 0, 5, 9, 70, 0},  // thumb
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+    {0, 0, 0, 0, 80, 0, 5, 9, 71, 0},  // thumb with new ID
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(70), 0, 0, kFTB, false},
+    {make_hwstate(1.00, 0, 1, 1, &fs[0]), -1, MkSet(70), 0, 0, kIdl, false},
+    {make_hwstate(1.01, 0, 1, 3, &fs[0]), -1, MkSet(70), 0, 0, kFTB, false},
+    {make_hwstate(1.02, 0, 2, 3, &fs[0]), -1, MkSet(70, 91), 0, 0, kFTB, false},
+    {make_hwstate(1.03, 0, 0, 2, nullptr), -1, MkSet(), 0, 0, kFTB, false},
+    {make_hwstate(1.04, 0, 1, 1, &fs[2]), -1, MkSet(71), kBR, kBR, kIdl, false},
+  };
+  run_test(states);
+}
+
+TEST_F(TapToClickStateMachineTest, T5R2ThreeFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+    {0, 0, 0, 0, 75, 0, 4, 9, 92, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 3, &fs[0]), -1, MkSet(91, 92), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 0, 1, nullptr), -1, MkSet(), 0, 0, kFTB, false},
+    {make_hwstate(0.02, 0, 0, 0, nullptr), -1, MkSet(), kBM, kBM, kIdl, false},
+  };
+  run_test(states);
+}
+
+TEST_F(TapToClickStateMachineTest, T5R2ThreeFingerTap2) {
+  // Another three-finger tap test, slightly different to the one above.
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+    {0, 0, 0, 0, 75, 0, 4, 9, 92, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 3, &fs[0]), -1, MkSet(91, 92), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 2, 3, &fs[0]), -1, MkSet(91, 92), 0, 0, kFTB, false},
+    {make_hwstate(0.02, 0, 0, 0, nullptr), -1, MkSet(), kBM, kBM, kIdl, false},
+  };
+  run_test(states);
+}
+
+TEST_F(TapToClickStateMachineTest, T5R2ThreeFingerTapWithRestingThumb) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 80, 0, 5, 9, 70, 0},  // thumb
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(70), 0, 0, kFTB, false},
+    {make_hwstate(1.00, 0, 1, 1, &fs[0]), -1, MkSet(70), 0, 0, kIdl, false},
+    {make_hwstate(1.01, 0, 1, 4, &fs[0]), -1, MkSet(70), 0, 0, kFTB, false},
+    {make_hwstate(1.02, 0, 2, 4, &fs[0]), -1, MkSet(70, 91), 0, 0, kFTB, false},
+    {make_hwstate(1.03, 0, 1, 1, &fs[0]), -1, MkSet(70), kBM, kBM, kIdl, false},
+  };
+  run_test(states);
+}
+
+TEST_F(TapToClickStateMachineTest, T5R2FourFingerTap) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+    {0, 0, 0, 0, 75, 0, 4, 9, 92, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 3, &fs[0]), -1, MkSet(91, 92), 0, 0, kFTB, false},
+    {make_hwstate(0.01, 0, 1, 4, &fs[0]), -1, MkSet(91), 0, 0, kFTB, false},
+    {make_hwstate(0.02, 0, 2, 4, &fs[0]), -1, MkSet(91, 92), 0, 0, kFTB, false},
+    {make_hwstate(0.03, 0, 0, 0, nullptr), -1, MkSet(), kBR, kBR, kIdl, false},
+  };
+  run_test(states);
+}
+
+TEST_F(TapToClickStateMachineTest, T5R2FourFingerTapWithRestingThumb) {
+  FingerState thumb_fs = {0, 0, 0, 0, 80, 0, 5, 9, 70, 0};
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00,0,1,1,&thumb_fs),-1,MkSet(70),0,0,kFTB,false},
+    {make_hwstate(1.00,0,1,1,&thumb_fs),-1,MkSet(70),0,0,kIdl,false},
+    {make_hwstate(1.01,0,1,5,&thumb_fs),-1,MkSet(70),0,0,kFTB,false},
+    {make_hwstate(1.02,0,1,1,&thumb_fs),-1,MkSet(70),kBR,kBR,kIdl,false},
+  };
+  run_test(states);
+}
+
+TEST_F(TapToClickStateMachineTest, T5R2FourFingerTapWithRestingThumb2) {
+  // Another four-finger tap test, slightly different to the one above.
+  FingerState fs[] = {
+    {0, 0, 0, 0, 80, 0, 5, 9, 70, 0},  // thumb
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 1, 1, &fs[0]), -1, MkSet(70), 0, 0, kFTB, false},
+    {make_hwstate(1.00, 0, 1, 1, &fs[0]), -1, MkSet(70), 0, 0, kIdl, false},
+    {make_hwstate(1.01, 0, 1, 5, &fs[0]), -1, MkSet(70), 0, 0, kFTB, false},
+    {make_hwstate(1.02, 0, 2, 5, &fs[0]), -1, MkSet(70, 91), 0, 0, kFTB, false},
+    {make_hwstate(1.03, 0, 1, 1, &fs[0]), -1, MkSet(70), kBR, kBR, kIdl, false},
+  };
+  run_test(states);
+}
+
+TEST_F(TapToClickStateMachineTest, T5R2ThreeFingersLettingGoIgnored) {
+  FingerState fs[] = {
+    {0, 0, 0, 0, 50, 0, 4, 4, 91, 0},
+    {0, 0, 0, 0, 75, 0, 4, 9, 92, 0},
+    {0, 0, 0, 0, 50, 0, 4, 1, 97, 0},
+    {0, 0, 0, 0, 50, 0, 9, 1, 98, 0},
+  };
+  std::vector<HWStateGs> states = {
+    {make_hwstate(0.00, 0, 2, 3, &fs[0]), -1, MkSet(91, 92), 0, 0, kFTB, false},
+    {make_hwstate(1.01, 0, 2, 3, &fs[0]), -1, MkSet(91, 92), 0, 0, kIdl, false},
+    {make_hwstate(1.02, 0, 0, 2, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+    {make_hwstate(1.03, 0, 2, 2, &fs[2]), -1, MkSet(97, 98), 0, 0, kIdl, false},
+    {make_hwstate(1.04, 0, 0, 0, nullptr), -1, MkSet(), 0, 0, kIdl, false},
+  };
+  run_test(states);
 }
 
 namespace {
@@ -2266,7 +2747,7 @@ TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest) {
   for (size_t i = 0; i < arraysize(inputs); i++) {
     const TapToClickLowPressureBeginOrEndInputs& input = inputs[i];
     if (reset_next_time) {
-      ii.reset(new ImmediateInterpreter(NULL, NULL));
+      ii.reset(new ImmediateInterpreter(nullptr, nullptr));
       wrapper.Reset(ii.get());
       ii->tap_enable_.val_ = 1;
       reset_next_time = false;
@@ -2280,13 +2761,13 @@ TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest) {
         (fs[1].tracking_id == -1 ? 1 : 2);
     HardwareState hs = make_hwstate(input.now, 0, finger_cnt, finger_cnt, fs);
     stime_t timeout = NO_DEADLINE;
-    Gesture* gs = wrapper.SyncInterpret(&hs, &timeout);
+    Gesture* gs = wrapper.SyncInterpret(hs, &timeout);
     if (finger_cnt > 0) {
       // Expect no timeout
       EXPECT_LT(timeout, 0);
     } else {
       // No timeout b/c it's right click. Expect the right click gesture
-      ASSERT_NE(static_cast<Gesture*>(NULL), gs) << "timeout:" << timeout;
+      ASSERT_NE(nullptr, gs) << "timeout:" << timeout;
       EXPECT_EQ(kGestureTypeButtonsChange, gs->type);
       EXPECT_EQ(GESTURES_BUTTON_RIGHT, gs->details.buttons.down);
       EXPECT_EQ(GESTURES_BUTTON_RIGHT, gs->details.buttons.up);
@@ -2328,8 +2809,8 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
   HardwareState hwstates[] = {
     // Simple 1-finger tap
     make_hwstate(0.01, 0, 1, 1, &fs),
-    make_hwstate(0.02, 0, 0, 0, NULL),
-    make_hwstate(0.30, 0, 0, 0, NULL),
+    make_hwstate(0.02, 0, 0, 0, nullptr),
+    make_hwstate(0.30, 0, 0, 0, nullptr),
   };
 
   enum {
@@ -2338,7 +2819,7 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
     kMaxTests
   };
   for (size_t test = 0; test != kMaxTests; test++) {
-    ii.reset(new ImmediateInterpreter(NULL, NULL));
+    ii.reset(new ImmediateInterpreter(nullptr, nullptr));
     wrapper.Reset(ii.get());
     ii->motion_tap_prevent_timeout_.val_ = 0;
     ii->tap_enable_.val_ = 1;
@@ -2412,17 +2893,17 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
 
   HWStateGs hwsgs_list[] = {
     // 1-finger tap, move, release, move again (drag lock)
-    {S,make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
-    {C,make_hwstate(0.01,0,0,0,NULL),-1,MkSet(),0,0,kTpC,true},
-    {C,make_hwstate(0.02,0,1,1,&fs[1]),-1,MkSet(92),0,0,kSTB,false},
-    {C,make_hwstate(0.08,0,1,1,&fs[2]),-1,MkSet(92),kBL,0,kDrg,false},
-    {C,make_hwstate(0.09,0,1,1,&fs[3]),-1,MkSet(92),0,0,kDrg,false},
-    {C,make_hwstate(0.10,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
-    {C,make_hwstate(0.11,0,1,1,&fs[4]),-1,MkSet(93),0,0,kDRt,false},
-    {C,make_hwstate(0.12,0,1,1,&fs[5]),-1,MkSet(93),0,0,kDrg,false},
-    {C,make_hwstate(0.13,0,1,1,&fs[6]),-1,MkSet(93),0,0,kDrg,false},
-    {C,make_hwstate(0.14,0,0,0,NULL),-1,MkSet(),0,0,kDRl,true},
-    {C,make_hwstate(0.99,0,0,0,NULL),.99,MkSet(),0,kBL,kIdl,false}
+    {make_hwstate(0.00,0,1,1,&fs[0]),-1,MkSet(91),0,0,kFTB,false},
+    {make_hwstate(0.01,0,0,0,nullptr),-1,MkSet(),0,0,kTpC,true},
+    {make_hwstate(0.02,0,1,1,&fs[1]),-1,MkSet(92),0,0,kSTB,false},
+    {make_hwstate(0.08,0,1,1,&fs[2]),-1,MkSet(92),kBL,0,kDrg,false},
+    {make_hwstate(0.09,0,1,1,&fs[3]),-1,MkSet(92),0,0,kDrg,false},
+    {make_hwstate(0.10,0,0,0,nullptr),-1,MkSet(),0,0,kDRl,true},
+    {make_hwstate(0.11,0,1,1,&fs[4]),-1,MkSet(93),0,0,kDRt,false},
+    {make_hwstate(0.12,0,1,1,&fs[5]),-1,MkSet(93),0,0,kDrg,false},
+    {make_hwstate(0.13,0,1,1,&fs[6]),-1,MkSet(93),0,0,kDrg,false},
+    {make_hwstate(0.14,0,0,0,nullptr),-1,MkSet(),0,0,kDRl,true},
+    {make_hwstate(0.99,0,0,0,nullptr),.99,MkSet(),0,kBL,kIdl,false}
   };
 
   for (int iter = 0; iter < 5; ++iter) {
@@ -2462,7 +2943,7 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
       HardwareState* hwstate = &hwsgs.hws;
       stime_t now = hwsgs.callback_now;
       if (hwsgs.callback_now >= 0.0)
-        hwstate = NULL;
+        hwstate = nullptr;
       else
         now = hwsgs.hws.timestamp;
 
@@ -2470,7 +2951,7 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
       if (hwstate && hwstate->timestamp == 0.0) {
         // Reset imm interpreter
         fprintf(stderr, "Resetting imm interpreter, i = %zd\n", i);
-        ii.reset(new ImmediateInterpreter(NULL, NULL));
+        ii.reset(new ImmediateInterpreter(nullptr, nullptr));
         wrapper.Reset(ii.get());
         ii->drag_lock_enable_.val_ = 1;
         ii->motion_tap_prevent_timeout_.val_ = 0;
@@ -2498,11 +2979,12 @@ TEST(ImmediateInterpreterTest, TapToClickEnableTest) {
       unsigned bdown = 0;
       unsigned bup = 0;
       stime_t tm = NO_DEADLINE;
-      for (auto finger: hwsgs.gs)
+      for (auto finger: hwsgs.gesturing_fingers)
         ii->origin_timestamps_.emplace(finger, 0);
       ii->UpdateTapState(
-          hwstate, hwsgs.gs, same_fingers, now, &bdown, &bup, &tm);
-      ii->prev_gs_fingers_ = hwsgs.gs;
+          hwstate, hwsgs.gesturing_fingers, same_fingers, now, &bdown, &bup,
+          &tm);
+      ii->prev_gs_fingers_ = hwsgs.gesturing_fingers;
 
       switch (iter) {
         case 0:  // tap should be enabled
@@ -2536,7 +3018,7 @@ struct ClickTestHardwareStateAndExpectations {
 };
 
 TEST(ImmediateInterpreterTest, ClickTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -2573,47 +3055,47 @@ TEST(ImmediateInterpreterTest, ClickTest) {
   };
   ClickTestHardwareStateAndExpectations records[] = {
     // reset
-    {make_hwstate(0,0,0,0,NULL),NO_DEADLINE,0,0},
+    {make_hwstate(0,0,0,0,nullptr),NO_DEADLINE,0,0},
 
     // button down, 2 fingers touch, button up, 2 fingers lift
-    {make_hwstate(1,1,0,0,NULL),NO_DEADLINE,0,0},
+    {make_hwstate(1,1,0,0,nullptr),NO_DEADLINE,0,0},
     {make_hwstate(1.01,1,2,2,&finger_states[0]), NO_DEADLINE, 0, 0},
     {make_hwstate(2,0,2,2,&finger_states[0]),
      NO_DEADLINE, GESTURES_BUTTON_RIGHT, GESTURES_BUTTON_RIGHT},
-    {make_hwstate(3,0,0,0,NULL), NO_DEADLINE, 0, 0},
+    {make_hwstate(3,0,0,0,nullptr), NO_DEADLINE, 0, 0},
 
     // button down, 2 close fingers touch, fingers lift
-    {make_hwstate(7,1,0,0,NULL), NO_DEADLINE, 0, 0},
+    {make_hwstate(7,1,0,0,nullptr), NO_DEADLINE, 0, 0},
     {make_hwstate(7.01,1,2,2,&finger_states[2]), NO_DEADLINE, 0, 0},
     {make_hwstate(7.02,0,2,2,&finger_states[2]),
      NO_DEADLINE, GESTURES_BUTTON_LEFT,GESTURES_BUTTON_LEFT},
-    {make_hwstate(8,0,0,0,NULL), NO_DEADLINE, 0, 0},
+    {make_hwstate(8,0,0,0,nullptr), NO_DEADLINE, 0, 0},
 
     // button down with 2 fingers, button up, fingers lift
     {make_hwstate(9.01,1,2,2,&finger_states[4]),NO_DEADLINE,0,0},
     {make_hwstate(9.02,1,2,2,&finger_states[4]),NO_DEADLINE,0,0},
     {make_hwstate(9.5,0,2,2,&finger_states[4]),
      NO_DEADLINE, GESTURES_BUTTON_RIGHT,GESTURES_BUTTON_RIGHT},
-    {make_hwstate(10,0,0,0,NULL), NO_DEADLINE, 0, 0},
+    {make_hwstate(10,0,0,0,nullptr), NO_DEADLINE, 0, 0},
 
     // button down with 2 fingers, timeout, button up, fingers lift
     {make_hwstate(11,1,2,2,&finger_states[4]), NO_DEADLINE, 0, 0},
-    {make_hwstate(0,0,0,0,NULL),11.5,GESTURES_BUTTON_RIGHT,0},
+    {make_hwstate(0,0,0,0,nullptr),11.5,GESTURES_BUTTON_RIGHT,0},
     {make_hwstate(12,0,2,2,&finger_states[4]), NO_DEADLINE, 0,
      GESTURES_BUTTON_RIGHT},
-    {make_hwstate(10,0,0,0,NULL), NO_DEADLINE, 0, 0}
+    {make_hwstate(10,0,0,0,nullptr), NO_DEADLINE, 0, 0}
   };
 
   for (size_t i = 0; i < arraysize(records); ++i) {
-    Gesture* result = NULL;
+    Gesture* result = nullptr;
     if (records[i].timeout < 0.0)
-      result = wrapper.SyncInterpret(&records[i].hs, NULL);
+      result = wrapper.SyncInterpret(records[i].hs, nullptr);
     else
-      result = wrapper.HandleTimer(records[i].timeout, NULL);
+      result = wrapper.HandleTimer(records[i].timeout, nullptr);
     if (records[i].expected_down == 0 && records[i].expected_up == 0) {
-      EXPECT_EQ(static_cast<Gesture*>(NULL), result) << "i=" << i;
+      EXPECT_EQ(nullptr, result) << "i=" << i;
     } else {
-      ASSERT_NE(static_cast<Gesture*>(NULL), result) << "i=" << i;
+      ASSERT_NE(nullptr, result) << "i=" << i;
       EXPECT_EQ(records[i].expected_down, result->details.buttons.down);
       EXPECT_EQ(records[i].expected_up, result->details.buttons.up);
     }
@@ -2652,122 +3134,124 @@ TEST(ImmediateInterpreterTest, BigHandsRightClickTest) {
     false,  // is haptic pad
   };
   BigHandsRightClickInputAndExpectations records[] = {
-    { make_hwstate(1329527921.327647, 0, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.327647, 0, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 50.013428, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 41.862095, 0, 57.458694, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.344421, 0, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.344421, 0, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 50.301102, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.007469, 0, 57.479977, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.361196, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.361196, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 50.608433, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.065464, 0, 57.494164, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.372364, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.372364, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 50.840954, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.071739, 0, 57.507217, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.383517, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.383517, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 51.047310, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.054974, 0, 57.527523, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.394680, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.394680, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 51.355824, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.066948, 0, 57.550964, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.405842, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.405842, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 51.791901, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.188736, 0, 57.569374, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.416791, 1, 2, 2, NULL), GESTURES_BUTTON_RIGHT, 0,
+    { make_hwstate(1329527921.416791, 1, 2, 2, nullptr), GESTURES_BUTTON_RIGHT,
+      0,
       { { 0, 0, 0, 0, 52.264156, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.424179, 0, 57.586361, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.427937, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.427937, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 52.725105, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.676739, 0, 57.609421, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.439094, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.439094, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 53.191925, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 42.868217, 0, 57.640007, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.461392, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.461392, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 53.602665, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.016544, 0, 57.676689, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.483690, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.483690, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 53.879429, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.208221, 0, 57.711613, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.511815, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.511815, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 54.059937, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.467258, 0, 57.736385, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.539940, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.539940, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 54.253189, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.717934, 0, 57.750286, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.556732, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.556732, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 54.500740, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.863792, 0, 57.758759, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.573523, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.573523, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 54.737640, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.825844, 0, 57.771137, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.584697, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.584697, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 54.906223, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.654804, 0, 57.790218, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.595872, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.595872, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.001118, 0, 20.250002, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.542431, 0, 57.809731, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.618320, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.618320, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.039989, 0, 20.252811, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.585777, 0, 57.824154, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.640768, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.640768, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.045246, 0, 20.264456, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.715435, 0, 57.832584, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.691161, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.691161, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.068935, 0, 20.285036, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.845741, 0, 57.836266, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.741554, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.741554, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.195026, 0, 20.306564, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.941154, 0, 57.836994, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.758389, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.758389, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.430550, 0, 20.322674, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.962692, 0, 57.836308, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.775225, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.775225, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.681423, 0, 20.332201, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.846741, 0, 57.835224, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.786418, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.786418, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.803486, 0, 20.336439, 59.400002, 130, 0 },
         { 0, 0, 0, 0, 43.604134, 0, 57.834267, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.803205, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.803205, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.738258, 0, 20.337351, 59.396629, 130, 0 },
         { 0, 0, 0, 0, 43.340977, 0, 57.833622, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.819993, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.819993, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.647045, 0, 20.336643, 59.382656, 130, 0 },
         { 0, 0, 0, 0, 43.140343, 0, 57.833279, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.831121, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.831121, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.670898, 0, 20.335459, 59.357960, 130, 0 },
         { 0, 0, 0, 0, 43.019653, 0, 57.827530, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.842232, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.842232, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.769543, 0, 20.334396, 59.332127, 130, 0 },
         { 0, 0, 0, 0, 42.964531, 0, 57.807049, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.853342, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.853342, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.872444, 0, 20.333672, 59.312794, 130, 0 },
         { 0, 0, 0, 0, 42.951347, 0, 57.771957, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.864522, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.864522, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.949341, 0, 20.333281, 59.301361, 130, 0 },
         { 0, 0, 0, 0, 42.959034, 0, 57.729061, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.875702, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.875702, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.994751, 0, 20.333134, 59.296276, 130, 0 },
         { 0, 0, 0, 0, 42.973259, 0, 57.683277, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.886840, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.886840, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 56.014912, 0, 20.333128, 59.295181, 130, 0 },
         { 0, 0, 0, 0, 42.918892, 0, 57.640221, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.898031, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.898031, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.951756, 0, 20.333181, 59.296028, 130, 0 },
         { 0, 0, 0, 0, 42.715969, 0, 57.601479, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.909149, 1, 2, 2, NULL), 0, 0,
+    { make_hwstate(1329527921.909149, 1, 2, 2, nullptr), 0, 0,
       { { 0, 0, 0, 0, 55.736336, 0, 20.333244, 59.297451, 130, 0 },
         { 0, 0, 0, 0, 42.304108, 0, 57.563725, 43.700001, 131, 0 } } },
-    { make_hwstate(1329527921.920301, 0, 2, 2, NULL), 0, GESTURES_BUTTON_RIGHT,
+    { make_hwstate(1329527921.920301, 0, 2, 2, nullptr), 0,
+      GESTURES_BUTTON_RIGHT,
       { { 0, 0, 0, 0, 55.448730, 0, 20.333294, 59.298725, 130, 0 },
         { 0, 0, 0, 0, 41.444939, 0, 57.525326, 43.700001, 131, 0 } } }
   };
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   TestInterpreterWrapper wrapper(&ii, &hwprops);
   for (size_t i = 0; i < arraysize(records); i++) {
     // Make the hwstate point to the fingers
-    HardwareState* hs = &records[i].hs;
-    hs->fingers = records[i].fs;
-    Gesture* gs_out = wrapper.SyncInterpret(hs, NULL);
+    HardwareState& hs = records[i].hs;
+    hs.fingers = records[i].fs;
+    Gesture* gs_out = wrapper.SyncInterpret(hs, nullptr);
     if (!gs_out || gs_out->type != kGestureTypeButtonsChange) {
       // We got no output buttons gesture. Make sure we expected that
       EXPECT_EQ(0, records[i].out_buttons_down);
@@ -2783,7 +3267,7 @@ TEST(ImmediateInterpreterTest, BigHandsRightClickTest) {
 }
 
 TEST(ImmediateInterpreterTest, ChangeTimeoutTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -2818,22 +3302,22 @@ TEST(ImmediateInterpreterTest, ChangeTimeoutTest) {
     make_hwstate(0.10, 0, 1, 1, &finger_states[1]),
     make_hwstate(0.12, 0, 1, 1, &finger_states[2]),
     make_hwstate(0.16, 0, 1, 1, &finger_states[3]),
-    make_hwstate(0.5, 0, 0, 0, NULL),
+    make_hwstate(0.5, 0, 0, 0, nullptr),
     // One finger moves after another finger leaves
     make_hwstate(1.09, 0, 2, 2, &finger_states[0]),
     make_hwstate(1.10, 0, 1, 1, &finger_states[1]),
     make_hwstate(1.12, 0, 1, 1, &finger_states[2]),
     make_hwstate(1.36, 0, 1, 1, &finger_states[3]),
-    make_hwstate(1.5, 0, 0, 0, NULL),
+    make_hwstate(1.5, 0, 0, 0, nullptr),
   };
 
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[0], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[0], nullptr));
 
   // One finger moves, change_timeout_ is not applied.
-  Gesture* gs = wrapper.SyncInterpret(&hardware_states[1], NULL);
-  ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  Gesture* gs = wrapper.SyncInterpret(hardware_states[1], nullptr);
+  ASSERT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(0, gs->details.move.dx);
   EXPECT_EQ(10, gs->details.move.dy);
@@ -2841,8 +3325,8 @@ TEST(ImmediateInterpreterTest, ChangeTimeoutTest) {
   EXPECT_EQ(0.12, gs->end_time);
 
   // One finger moves, change_timeout_ does not block the gesture.
-  gs = wrapper.SyncInterpret(&hardware_states[2], NULL);
-  EXPECT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[2], nullptr);
+  EXPECT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(10, gs->details.move.dx);
   EXPECT_EQ(0, gs->details.move.dy);
@@ -2850,27 +3334,27 @@ TEST(ImmediateInterpreterTest, ChangeTimeoutTest) {
   EXPECT_EQ(0.16, gs->end_time);
 
   // No finger.
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[3], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[3], nullptr));
 
   // Start with 2 fingers.
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[4], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[4], nullptr));
   // One finger leaves, finger_leave_time_ recorded.
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[5], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[5], nullptr));
   EXPECT_EQ(ii.finger_leave_time_, 1.10);
   // One finger moves, change_timeout_ blocks the gesture.
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[6], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[6], nullptr));
 
   // One finger moves, finger_leave_time_ + change_timeout_
   // has been passed.
-  gs = wrapper.SyncInterpret(&hardware_states[7], NULL);
-  EXPECT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+  gs = wrapper.SyncInterpret(hardware_states[7], nullptr);
+  EXPECT_NE(nullptr, gs);
   EXPECT_EQ(kGestureTypeMove, gs->type);
   EXPECT_EQ(10, gs->details.move.dx);
   EXPECT_EQ(0, gs->details.move.dy);
   EXPECT_EQ(1.12, gs->start_time);
   EXPECT_EQ(1.36, gs->end_time);
 
-  EXPECT_EQ(NULL, wrapper.SyncInterpret(&hardware_states[8], NULL));
+  EXPECT_EQ(nullptr, wrapper.SyncInterpret(hardware_states[8], nullptr));
 }
 
 // Tests that fingers that have been present a while, but are stationary,
@@ -2889,7 +3373,7 @@ struct PinchTestInput {
 };
 
 TEST(ImmediateInterpreterTest, PinchTests) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   ii.pinch_enable_.val_ = 1;
   HardwareProperties hwprops = {
     0,  // left edge
@@ -2957,14 +3441,14 @@ TEST(ImmediateInterpreterTest, PinchTests) {
 
   PinchTestInput input_states[] = {
     // time, buttons, finger count, touch count, finger states pointer
-    {make_hwstate(0.00, 0, 0, 0, NULL), kAny},
+    {make_hwstate(0.00, 0, 0, 0, nullptr), kAny},
 
     // fast pinch outwards
     {make_hwstate(0.11, 0, 2, 2, &finger_states[0]), kAny},
     {make_hwstate(0.12, 0, 2, 2, &finger_states[4]), kAny},
     {make_hwstate(0.13, 0, 2, 2, &finger_states[8]), kAny},
     {make_hwstate(0.14, 0, 2, 2, &finger_states[10]), kPinch},
-    {make_hwstate(0.15, 0, 0, 0, NULL), kAny},
+    {make_hwstate(0.15, 0, 0, 0, nullptr), kAny},
 
     // slow pinch
     {make_hwstate(1.01, 0, 2, 2, &finger_states[0]), kAny},
@@ -2979,14 +3463,14 @@ TEST(ImmediateInterpreterTest, PinchTests) {
     {make_hwstate(1.10, 0, 2, 2, &finger_states[8]), kAny},
     {make_hwstate(1.11, 0, 2, 2, &finger_states[10]), kPinch},
     {make_hwstate(1.12, 0, 2, 2, &finger_states[10]), kNull},
-    {make_hwstate(1.13, 0, 0, 0, NULL), kAny},
+    {make_hwstate(1.13, 0, 0, 0, nullptr), kAny},
 
     // single finger pinch
     {make_hwstate(2.01, 0, 2, 2, &finger_states[22]), kAny},
     {make_hwstate(2.02, 0, 2, 2, &finger_states[26]), kAny},
     {make_hwstate(2.03, 0, 2, 2, &finger_states[30]), kAny},
     {make_hwstate(2.04, 0, 2, 2, &finger_states[30]), kNoPinch},
-    {make_hwstate(2.05, 0, 0, 0, NULL), kAny},
+    {make_hwstate(2.05, 0, 0, 0, nullptr), kAny},
 
 
     // first single finger pinch, then second moves too.
@@ -2995,34 +3479,34 @@ TEST(ImmediateInterpreterTest, PinchTests) {
     {make_hwstate(3.03, 0, 2, 2, &finger_states[6]), kAny},
     {make_hwstate(3.04, 0, 2, 2, &finger_states[8]), kAny},
     {make_hwstate(3.05, 0, 2, 2, &finger_states[10]), kPinch},
-    {make_hwstate(3.06, 0, 0, 0, NULL), kAny},
+    {make_hwstate(3.06, 0, 0, 0, nullptr), kAny},
 
     // fast pinch inwards
     {make_hwstate(4.01, 0, 2, 2, &finger_states[10]), kAny},
     {make_hwstate(4.02, 0, 2, 2, &finger_states[8]), kAny},
     {make_hwstate(4.03, 0, 2, 2, &finger_states[4]), kAny},
     {make_hwstate(4.04, 0, 2, 2, &finger_states[0]), kPinch},
-    {make_hwstate(4.05, 0, 0, 0, NULL), kAny},
+    {make_hwstate(4.05, 0, 0, 0, nullptr), kAny},
   };
 
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
   for (size_t idx = 0; idx < arraysize(input_states); ++idx) {
-    Gesture* gs = wrapper.SyncInterpret(&input_states[idx].hs, NULL);
+    Gesture* gs = wrapper.SyncInterpret(input_states[idx].hs, nullptr);
     // assert pinch detected
     if (input_states[idx].expected_result == kPinch) {
-      ASSERT_NE(reinterpret_cast<Gesture*>(NULL), gs);
+      ASSERT_NE(nullptr, gs);
       EXPECT_EQ(kGestureTypePinch, gs->type) << "idx=" << idx;
     }
     // assert pinch not detected
     if (input_states[idx].expected_result == kNoPinch) {
-      if (gs != NULL) {
+      if (gs != nullptr) {
         EXPECT_NE(kGestureTypePinch, gs->type);
       }
     }
-    // assert if NULL is not given back
+    // assert if nullptr is not given back
     if (input_states[idx].expected_result == kNull) {
-      ASSERT_EQ(reinterpret_cast<Gesture*>(NULL), gs);
+      ASSERT_EQ(nullptr, gs);
     }
   }
 }
@@ -3170,9 +3654,9 @@ TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest) {
   for (size_t i = 0; i < arraysize(inputs); i++) {
     const AvoidAccidentalPinchTestInput& input = inputs[i];
     if (input.flag == kS) {
-      ii.reset(new ImmediateInterpreter(NULL, NULL));
+      ii.reset(new ImmediateInterpreter(nullptr, nullptr));
       ii->pinch_enable_.val_ = true;
-      MetricsProperties* mprops = new MetricsProperties(NULL);
+      MetricsProperties* mprops = new MetricsProperties(nullptr);
       mprops->two_finger_close_vertical_distance_thresh.val_ = 35.0;
       wrapper.Reset(ii.get(), mprops);
       EXPECT_EQ(ImmediateInterpreter::TapToClickState::kTtcIdle,
@@ -3185,7 +3669,7 @@ TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest) {
     };
     HardwareState hs = make_hwstate(input.now, 0, 2, 2, fs);
     stime_t timeout = NO_DEADLINE;
-    Gesture* gs = wrapper.SyncInterpret(&hs, &timeout);
+    Gesture* gs = wrapper.SyncInterpret(hs, &timeout);
     if (input.expected_gesture != kAny) {
       if (gs)
         EXPECT_EQ(input.expected_gesture, gs->type);
@@ -3194,7 +3678,7 @@ TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest) {
 }
 
 TEST(ImmediateInterpreterTest, SemiMtActiveAreaTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
 
   HardwareProperties old_hwprops = {
     0,  // left edge
@@ -3242,7 +3726,7 @@ TEST(ImmediateInterpreterTest, SemiMtActiveAreaTest) {
 
   // The finger will not change the tap_to_click_state_ at all.
   for (size_t idx = 0; idx < arraysize(old_hardware_states); ++idx) {
-    wrapper.SyncInterpret(&old_hardware_states[idx], NULL);
+    wrapper.SyncInterpret(old_hardware_states[idx], nullptr);
     EXPECT_EQ(kIdl, ii.tap_to_click_state_);
   }
 
@@ -3289,13 +3773,13 @@ TEST(ImmediateInterpreterTest, SemiMtActiveAreaTest) {
   // With new active area, the finger changes the tap_to_click_state_ to
   // FirstTapBegan.
   for (size_t idx = 0; idx < arraysize(new_hardware_states); ++idx) {
-    wrapper.SyncInterpret(&new_hardware_states[idx], NULL);
+    wrapper.SyncInterpret(new_hardware_states[idx], nullptr);
     EXPECT_EQ(ii.kTtcFirstTapBegan, ii.tap_to_click_state_);
   }
 }
 
 TEST(ImmediateInterpreterTest, SemiMtNoPinchTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   ii.pinch_enable_.val_ = 1;
 
   HardwareProperties hwprops = {
@@ -3351,7 +3835,7 @@ TEST(ImmediateInterpreterTest, SemiMtNoPinchTest) {
 
   Gesture *gesture;
   for (size_t idx = 0; idx < arraysize(hardware_states); ++idx) {
-    gesture = wrapper.SyncInterpret(&hardware_states[idx], NULL);
+    gesture = wrapper.SyncInterpret(hardware_states[idx], nullptr);
     // reset finger flags
     for (size_t fidx = 0; fidx < hardware_states[idx].finger_cnt; ++fidx)
       hardware_states[idx].fingers[fidx].flags = 0;
@@ -3364,7 +3848,7 @@ TEST(ImmediateInterpreterTest, SemiMtNoPinchTest) {
   hwprops.support_semi_mt = 1;
   wrapper.Reset(&ii, &hwprops);
   for (size_t idx = 0; idx < arraysize(hardware_states); ++idx) {
-    gesture = wrapper.SyncInterpret(&hardware_states[idx], NULL);
+    gesture = wrapper.SyncInterpret(hardware_states[idx], nullptr);
     // reset finger flags
     for (size_t fidx = 0; fidx < hardware_states[idx].finger_cnt; ++fidx)
       hardware_states[idx].fingers[fidx].flags = 0;
@@ -3374,7 +3858,7 @@ TEST(ImmediateInterpreterTest, SemiMtNoPinchTest) {
 }
 
 TEST(ImmediateInterpreterTest, WarpedFingersTappingTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
 
   HardwareProperties hwprops = {
     0,  // left edge
@@ -3420,7 +3904,7 @@ TEST(ImmediateInterpreterTest, WarpedFingersTappingTest) {
     make_hwstate(3897.124791, 0, 2, 2, &finger_state[0]),
     make_hwstate(3897.136733, 0, 2, 2, &finger_state[2]),
     make_hwstate(3897.148675, 0, 1, 1, &finger_state[4]),
-    make_hwstate(3897.160675, 0, 0, 0, NULL),
+    make_hwstate(3897.160675, 0, 0, 0, nullptr),
   };
 
   ii.tap_enable_.val_ = 1;
@@ -3428,16 +3912,16 @@ TEST(ImmediateInterpreterTest, WarpedFingersTappingTest) {
 
   Gesture *gesture;
   for (size_t idx = 0; idx < arraysize(hardware_states); ++idx)
-    gesture = wrapper.SyncInterpret(&hardware_states[idx], NULL);
+    gesture = wrapper.SyncInterpret(hardware_states[idx], nullptr);
 
-  ASSERT_NE(gesture, static_cast<Gesture*>(NULL));
+  ASSERT_NE(gesture, nullptr);
   EXPECT_EQ(gesture->type, kGestureTypeButtonsChange);
 }
 
 // Test that fling_buffer_depth controls the number of scroll samples to use
 // to compute fling.
 TEST(ImmediateInterpreterTest, FlingDepthTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
   HardwareProperties hwprops = {
     0,  // left edge
     0,  // top edge
@@ -3510,14 +3994,14 @@ TEST(ImmediateInterpreterTest, FlingDepthTest) {
 
   // Fill scroll buffer with a set of scrolls
   ii.scroll_buffer_.Clear();
-  const HardwareState* prev_hs = NULL;
+  const HardwareState* prev_hs = nullptr;
   for (size_t idx = 0; idx < arraysize(hardware_states); ++idx) {
     const HardwareState* hs = &hardware_states[idx];
-    if (prev_hs != NULL) {
+    if (prev_hs != nullptr) {
       // Cheating here, only using first finger to compute scroll
       const FingerState* fs = &hs->fingers[0];
       const FingerState* prev_fs = prev_hs->GetFingerState(fs->tracking_id);
-      EXPECT_NE(reinterpret_cast<const FingerState*>(NULL), prev_fs);
+      EXPECT_NE(nullptr, prev_fs);
       float dx = fs->position_x - prev_fs->position_x;
       float dy = fs->position_y - prev_fs->position_y;
       float dt = hs->timestamp - prev_hs->timestamp;
@@ -3535,7 +4019,7 @@ TEST(ImmediateInterpreterTest, FlingDepthTest) {
 }
 
 TEST(ImmediateInterpreterTest, ScrollResetTapTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
 
   HardwareProperties hwprops = {
     0,  // left edge
@@ -3593,8 +4077,8 @@ TEST(ImmediateInterpreterTest, ScrollResetTapTest) {
   TestInterpreterWrapper wrapper(&ii, &hwprops);
 
   for (size_t idx = 0; idx < arraysize(hardware_states); ++idx) {
-    Gesture* gs = wrapper.SyncInterpret(&hardware_states[idx], NULL);
-    if (gs != NULL) {
+    Gesture* gs = wrapper.SyncInterpret(hardware_states[idx], nullptr);
+    if (gs != nullptr) {
       if (idx == 2)
         EXPECT_EQ(kGestureTypeScroll, gs->type);
       else
@@ -3606,7 +4090,7 @@ TEST(ImmediateInterpreterTest, ScrollResetTapTest) {
 }
 
 TEST(ImmediateInterpreterTest, ZeroClickInitializationTest) {
-  ImmediateInterpreter ii(NULL, NULL);
+  ImmediateInterpreter ii(nullptr, nullptr);
 
   HardwareProperties hwprops = {
     0,  // left edge
