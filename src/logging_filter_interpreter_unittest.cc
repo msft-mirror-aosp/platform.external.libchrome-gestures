@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstdio>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -85,7 +86,15 @@ TEST(LoggingFilterInterpreterTest, LogResetHandlerTest) {
   std::string str = interpreter.EncodeActivityLog();
   EXPECT_NE(0, str.size());
 
-  const char* filename = "testlog.dump";
+  // std::tmpnam is considered unsafe because another process could create the
+  // temporary file after time std::tmpnam returns the name but before the code
+  // actually opens it. Because this is just test code, we don't need to be
+  // concerned about such security holes here.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  const char* filename = std::tmpnam(nullptr);
+#pragma GCC diagnostic pop
+  ASSERT_NE(nullptr, filename) << "Couldn't generate a temporary file name";
   interpreter.log_location_.SetValue(Json::Value(filename));
   interpreter.IntWasWritten(&interpreter.logging_notify_);
 
