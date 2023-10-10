@@ -12,6 +12,7 @@
 
 #include "include/gestures.h"
 #include "include/palm_classifying_filter_interpreter.h"
+#include "include/string_util.h"
 #include "include/unittest_util.h"
 #include "include/util.h"
 
@@ -115,6 +116,68 @@ TEST(PalmClassifyingFilterInterpreterTest, PalmTest) {
         EXPECT_FALSE(SetContainsValue(pci.pointing_, 4));
         EXPECT_TRUE(SetContainsValue(pci.palm_, 4));
         break;
+    }
+  }
+}
+
+TEST(PalmClassifyingFilterInterpreterTest, ExternallyMarkedPalmTest) {
+  PalmClassifyingFilterInterpreterTestInterpreter* base_interpreter =
+    new PalmClassifyingFilterInterpreterTestInterpreter;
+  PalmClassifyingFilterInterpreter pci(nullptr, base_interpreter, nullptr);
+  HardwareProperties hwprops = {
+    .right = 1000,
+    .bottom = 1000,
+    .res_x = 500,
+    .res_y = 500,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 2,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
+  };
+
+  TestInterpreterWrapper wrapper(&pci, &hwprops);
+
+  const float kPr = pci.palm_pressure_.val_ / 2;
+
+  FingerState finger_states[] = {
+    // TM, Tm, WM, Wm, Press, Orientation, X, Y, TrID, flags, ToolType
+    {0, 0, 0, 0, kPr, 0, 600, 500, 1, 0},
+    {0, 0, 0, 0, kPr, 0, 600, 500, 1, 0},
+    // mark the touch as palm
+    {0, 0, 0, 0, kPr, 0, 600, 500, 1, 0, FingerState::ToolType::kPalm},
+    {0, 0, 0, 0, kPr, 0, 600, 500, 1, 0, FingerState::ToolType::kPalm},
+  };
+  HardwareState hardware_state[] = {
+    // time, buttons, finger count, touch count, finger states pointer
+    make_hwstate(0.00, 0, 1, 1, &finger_states[0]),
+    make_hwstate(4.00, 0, 1, 1, &finger_states[1]),
+    make_hwstate(5.00, 0, 1, 1, &finger_states[2]),
+    make_hwstate(5.01, 0, 1, 1, &finger_states[3]),
+  };
+
+  for (size_t i = 0; i < arraysize(hardware_state); ++i) {
+    SCOPED_TRACE(StringPrintf("i = %zu", i));
+    if(i > 1) {
+      base_interpreter->expected_flags_ = GESTURES_FINGER_PALM;
+    }
+    else {
+      base_interpreter->expected_flags_ = 0;
+    }
+    wrapper.SyncInterpret(hardware_state[i], nullptr);
+    if (i > 1) {
+      // After the second frame finger is marked as palm
+      EXPECT_FALSE(SetContainsValue(pci.pointing_, 1));
+      EXPECT_TRUE(SetContainsValue(pci.palm_, 1));
+    }
+    else {
+      EXPECT_TRUE(SetContainsValue(pci.pointing_, 1));
+      EXPECT_FALSE(SetContainsValue(pci.palm_, 1));
     }
   }
 }

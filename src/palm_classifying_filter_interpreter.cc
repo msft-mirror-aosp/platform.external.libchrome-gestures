@@ -191,6 +191,11 @@ void PalmClassifyingFilterInterpreter::UpdatePalmState(
       pointing_.erase(fs.tracking_id);
       continue;
     }
+    // Mark externally reported palms
+    if(fs.tool_type == FingerState::ToolType::kPalm){
+      palm_.insert(fs.tracking_id);
+      pointing_.erase(fs.tracking_id);
+    }
   }
 
   if (hwstate.finger_cnt == 1 &&

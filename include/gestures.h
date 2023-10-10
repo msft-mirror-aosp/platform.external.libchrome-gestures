@@ -165,6 +165,10 @@ struct HardwareProperties {
 // Describes a single contact on a touch surface. Generally, the fields have the
 // same meaning as the equivalent ABS_MT_... axis in the Linux evdev protocol.
 struct FingerState {
+  enum class ToolType {
+    kFinger = 0,
+    kPalm,
+  };
   // The large and small radii of the ellipse of the finger touching the pad.
   float touch_major, touch_minor;
 
@@ -188,6 +192,8 @@ struct FingerState {
   // A bit field of flags that are used internally by the library. (See the
   // GESTURES_FINGER_* constants.) Should be set to 0 on incoming FingerStates.
   unsigned flags;
+
+  ToolType tool_type = ToolType::kFinger;
 #ifdef __cplusplus
   bool NonFlagsEquals(const FingerState& that) const {
     return touch_major == that.touch_major &&
