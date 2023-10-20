@@ -1550,6 +1550,8 @@ std::set<short> MkSet(short id1, short id2, short id3) {
 
 TEST(ImmediateInterpreterTest, TapRecordTest) {
   ImmediateInterpreter ii(nullptr, nullptr);
+  HardwareProperties hwprops = {};
+  TestInterpreterWrapper wrapper(&ii, &hwprops);
   TapRecord tr(&ii);
   EXPECT_FALSE(tr.TapComplete());
   // two finger IDs:
@@ -1575,15 +1577,13 @@ TEST(ImmediateInterpreterTest, TapRecordTest) {
     make_hwstate(0.5, 0, 1, 1, &fs[2]),
   };
 
-  /* Hack: Tap recorder points to immediate interpreter and assummes it contains
-   * valid values, so we need to insert some origin timestamps */
-  const_cast<ImmediateInterpreter*>(tr.immediate_interpreter_)->
-                                                    origin_timestamps_[kF1] = 0;
-  const_cast<ImmediateInterpreter*>(tr.immediate_interpreter_)->
-                                                    origin_timestamps_[kF2] = 0;
+  // Hack: TapRecord uses ImmediateInterpreter's FingerMetrics for origin
+  // timestamps, so we need to populate those.
+  ii.metrics_->Update(hw[0]);
   tr.Update(hw[0], nullstate, MkSet(kF1), MkSet(), MkSet());
   EXPECT_FALSE(tr.Moving(hw[0], kTapMoveDist));
   EXPECT_FALSE(tr.TapComplete());
+  ii.metrics_->Update(hw[1]);
   tr.Update(hw[1], hw[0], MkSet(), MkSet(), MkSet());
   EXPECT_FALSE(tr.Moving(hw[1], kTapMoveDist));
   EXPECT_FALSE(tr.TapComplete());
@@ -1693,8 +1693,13 @@ protected:
 
       if (hwstate)
         ii_->state_buffer_.PushState(*hwstate);
-      for (auto finger: states[i].gesturing_fingers)
-        ii_->origin_timestamps_.emplace(finger, 0);
+      // TODO(b/307933752): this is unrealistic compared to the actual code that
+      // tracks origin timestamps, but making it more realistic (by calling
+      // ii_->metrics_->Update(*hwstate)) causes
+      // OneFingerTapThenMoveAfterDelayDoesNotDrag to fail.
+      for (auto finger: states[i].gesturing_fingers) {
+        ii_->metrics_->SetFingerOriginTimestampForTesting(finger, 0);
+      }
       ii_->UpdateTapState(
           hwstate, states[i].gesturing_fingers, same_fingers, now,
           &buttons_down, &buttons_up, &timeout);
@@ -1907,6 +1912,11 @@ TEST_F(TapToClickStateMachineTest, OneFingerTapAndDrag) {
 }
 
 TEST_F(TapToClickStateMachineTest, OneFingerTapThenMoveAfterDelayDoesNotDrag) {
+  // TODO(b/307933752): this test fails if more realistic origin timestamps are
+  // set in TapToClickStateMachineTest::check_hwstates (i.e. calling
+  // ii_->metrics_->Update instead of setting the origin timestamps of
+  // gesturing_fingers to 0). Check whether that's a problem with the test or
+  // the code it's testing.
   FingerState tap_fs = {0, 0, 0, 0, 50, 0, 4, 4, 91, 0};
   FingerState move_fs[] = {
     {0, 0, 0, 0, 50, 0, 4, 4, 95, 0},
@@ -2751,8 +2761,7 @@ TEST(ImmediateInterpreterTest, TapToClickKeyboardTest) {
       stime_t timeout = NO_DEADLINE;
       std::set<short> gs =
           hwstates[i].finger_cnt == 1 ? MkSet(91) : MkSet();
-      for (auto finger: gs)
-        ii->origin_timestamps_.emplace(finger, 0);
+      ii->metrics_->Update(hwstates[i]);
       ii->UpdateTapState(
           &hwstates[i],
           gs,
@@ -2891,13 +2900,13 @@ TEST_P(ImmediateInterpreterTtcEnableTest, TapToClickEnableTest) {
     if (hwstate && hwstate->timestamp == pause_time)
       ii.tap_paused_.val_ = true;
 
-    if (hwstate)
+    if (hwstate) {
+      ii.metrics_->Update(*hwstate);
       ii.state_buffer_.PushState(*hwstate);
+    }
     unsigned buttons_down = 0;
     unsigned buttons_up = 0;
     stime_t timeout = NO_DEADLINE;
-    for (auto finger: hwsgs.gesturing_fingers)
-      ii.origin_timestamps_.emplace(finger, 0);
     ii.UpdateTapState(
         hwstate, hwsgs.gesturing_fingers, same_fingers, now, &buttons_down,
         &buttons_up, &timeout);

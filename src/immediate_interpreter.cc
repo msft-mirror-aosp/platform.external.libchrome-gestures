@@ -1256,11 +1256,10 @@ void ImmediateInterpreter::HandleTimerImpl(stime_t now, stime_t* timeout) {
 
 void ImmediateInterpreter::FillOriginInfo(
     const HardwareState& hwstate) {
-  RemoveMissingIdsFromMap(&origin_timestamps_, hwstate);
   RemoveMissingIdsFromMap(&distance_walked_, hwstate);
   for (size_t i = 0; i < hwstate.finger_cnt; i++) {
     const FingerState& fs = hwstate.fingers[i];
-    if (MapContainsKey(origin_timestamps_, fs.tracking_id) &&
+    if (distance_walked_.find(fs.tracking_id) != distance_walked_.end() &&
         state_buffer_.Size() > 1 &&
         state_buffer_.Get(1).GetFingerState(fs.tracking_id)) {
       float delta_x = hwstate.GetFingerState(fs.tracking_id)->position_x -
@@ -1271,7 +1270,6 @@ void ImmediateInterpreter::FillOriginInfo(
                                                 delta_y * delta_y);
       continue;
     }
-    origin_timestamps_[fs.tracking_id] = hwstate.timestamp;
     distance_walked_[fs.tracking_id] = 0.0;
   }
 }
@@ -1349,8 +1347,8 @@ bool ImmediateInterpreter::EarlyZoomPotential(const HardwareState& hwstate)
   if (finger1 == nullptr || finger2 == nullptr)
     return false;
   // Wait for a longer time if fingers arrived together
-  stime_t t1 = origin_timestamps_.at(id1);
-  stime_t t2 = origin_timestamps_.at(id2);
+  stime_t t1 = metrics_->GetFinger(id1)->origin_time();
+  stime_t t2 = metrics_->GetFinger(id2)->origin_time();
   if (fabs(t1 - t2) < evaluation_timeout_.val_ &&
       hwstate.timestamp - max(t1, t2) <
           thumb_pinch_evaluation_timeout_.val_ * thumb_pinch_delay_factor_.val_)
@@ -1572,7 +1570,7 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
                         (min_fs->flags & GESTURES_FINGER_WARP_Y_MOVE));
   float min_dist_sq = DistanceTravelledSq(*min_fs, false, true);
   float min_dt = hwstate.timestamp -
-      origin_timestamps_[min_fs->tracking_id];
+      metrics_->GetFinger(min_fs->tracking_id)->origin_time();
   float thumb_dist_sq_thresh = min_dist_sq *
       thumb_movement_factor_.val_ * thumb_movement_factor_.val_;
   float thumb_speed_sq_thresh = min_dist_sq *
@@ -1583,10 +1581,12 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
 
   if (pinch_enable_.val_ && hwstate.finger_cnt == 2) {
     float dt1 = hwstate.timestamp -
-                origin_timestamps_[hwstate.fingers[0].tracking_id];
+                metrics_->GetFinger(hwstate.fingers[0].tracking_id)
+                        ->origin_time();
     float dist_sq1 = DistanceTravelledSq(hwstate.fingers[0], true, true);
     float dt2 = hwstate.timestamp -
-                origin_timestamps_[hwstate.fingers[1].tracking_id];
+                metrics_->GetFinger(hwstate.fingers[1].tracking_id)
+                        ->origin_time();
     float dist_sq2 = DistanceTravelledSq(hwstate.fingers[1], true, true);
     if (dist_sq1 * dt1 && dist_sq2 * dt2)
       similar_movement = max((dist_sq1 * dt1 * dt1) / (dist_sq2 * dt2 * dt2),
@@ -1604,7 +1604,8 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
       thumb_dist_sq_thresh *= thumb_pinch_threshold_ratio_.val_;
     }
     float dist_sq = DistanceTravelledSq(fs, false, true);
-    float dt = hwstate.timestamp - origin_timestamps_[fs.tracking_id];
+    float dt = hwstate.timestamp -
+               metrics_->GetFinger(fs.tracking_id)->origin_time();
     bool closer_to_origin = dist_sq <= thumb_dist_sq_thresh;
     bool slower_moved = (dist_sq * min_dt &&
                          dist_sq * min_dt * min_dt <
@@ -1646,13 +1647,15 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
             dist_sq * min_dt * min_dt / (thumb_speed_sq_thresh * dt * dt) >
                 thumb_pinch_min_movement_.val_ &&
             similar_movement;
-        bool might_be_pinch = (slow_pinch_guess &&
-                               hwstate.timestamp -
-                                   origin_timestamps_[fs.tracking_id] < 2 *
-                                   thumb_pinch_evaluation_timeout_.val_ &&
-                               ZoomFingersAreConsistent(state_buffer_));
+        stime_t origin_time =
+            metrics_->GetFinger(fs.tracking_id) ->origin_time();
+        bool might_be_pinch =
+            slow_pinch_guess &&
+            hwstate.timestamp - origin_time < 2 *
+                thumb_pinch_evaluation_timeout_.val_ &&
+            ZoomFingersAreConsistent(state_buffer_);
         if (relatively_motionless ||
-            hwstate.timestamp - origin_timestamps_[fs.tracking_id] >
+            hwstate.timestamp - origin_time >
                 thumb_pinch_evaluation_timeout_.val_) {
           if (!might_be_pinch)
             continue;
@@ -1834,8 +1837,10 @@ void ImmediateInterpreter::UpdateCurrentGestureType(
                 // ambiguous. Only move if they've been down long enough.
                 if (new_gs_type == kGestureTypeMove &&
                     hwstate.timestamp -
-                        min(origin_timestamps_[fingers[0]->tracking_id],
-                            origin_timestamps_[fingers[1]->tracking_id]) <
+                        min(metrics_->GetFinger(fingers[0]->tracking_id)
+                                    ->origin_time(),
+                            metrics_->GetFinger(fingers[1]->tracking_id)
+                                    ->origin_time()) <
                     evaluation_timeout_.val_)
                   new_gs_type = kGestureTypeNull;
               }
