@@ -215,6 +215,8 @@ struct FingerState {
 #define GESTURES_BUTTON_RIGHT 4
 #define GESTURES_BUTTON_BACK 8
 #define GESTURES_BUTTON_FORWARD 16
+#define GESTURES_BUTTON_SIDE 32
+#define GESTURES_BUTTON_EXTRA 64
 
 // Describes one frame of data from the input device.
 struct HardwareState {
