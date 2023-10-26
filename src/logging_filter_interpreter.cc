@@ -28,6 +28,8 @@ LoggingFilterInterpreter::LoggingFilterInterpreter(PropRegistry* prop_reg,
   InitName();
   if (prop_reg && log_.get())
     prop_reg->set_activity_log(log_.get());
+  event_debug_logging_enable_.SetDelegate(this);
+  IntWasWritten(&event_debug_logging_enable_);
   event_logging_enable_.SetDelegate(this);
   BoolWasWritten(&event_logging_enable_);
   logging_notify_.SetDelegate(this);
