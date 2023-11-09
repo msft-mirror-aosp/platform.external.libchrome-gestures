@@ -665,6 +665,7 @@ typedef struct GesturesPropProvider {
 namespace gestures {
 
 class Interpreter;
+class IntProperty;
 class PropRegistry;
 class LoggingFilterInterpreter;
 class Tracer;
@@ -710,6 +711,7 @@ struct GestureInterpreter {
   std::unique_ptr<Tracer> tracer_;
   std::unique_ptr<Interpreter> interpreter_;
   std::unique_ptr<MetricsProperties> mprops_;
+  std::unique_ptr<IntProperty> stack_version_;
 
   GesturesTimerProvider* timer_provider_;
   void* timer_provider_data_;

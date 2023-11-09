@@ -531,8 +531,9 @@ void GestureInterpreter::set_callback(GestureReadyFunction callback,
 
 void GestureInterpreter::InitializeTouchpad(void) {
   if (prop_reg_.get()) {
-    IntProperty stack_version(prop_reg_.get(), "Touchpad Stack Version", 2);
-    if (stack_version.val_ == 2) {
+    stack_version_ = std::make_unique<IntProperty>(prop_reg_.get(),
+                                                   "Touchpad Stack Version", 2);
+    if (stack_version_->val_ == 2) {
       InitializeTouchpad2();
       return;
     }
