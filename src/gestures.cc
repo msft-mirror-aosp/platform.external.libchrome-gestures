@@ -203,7 +203,11 @@ void HardwareState::DeepCopy(const HardwareState& that,
   buttons_down = that.buttons_down;
   touch_cnt = that.touch_cnt;
   finger_cnt = min(that.finger_cnt, max_finger_cnt);
-  memcpy(fingers, that.fingers, finger_cnt * sizeof(FingerState));
+  if(that.fingers != nullptr) {
+    memcpy(fingers, that.fingers, finger_cnt * sizeof(FingerState));
+  } else if (finger_cnt > 0) {
+    Err("HardwareState with no finger data but %d finger count", finger_cnt);
+  }
   rel_x = that.rel_x;
   rel_y = that.rel_y;
   rel_wheel = that.rel_wheel;

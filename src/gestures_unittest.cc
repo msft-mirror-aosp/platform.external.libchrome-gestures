@@ -527,4 +527,48 @@ TEST(GesturesTest, HardwareStateToStringTest) {
   return;
 }
 
+TEST(GesturesTest, HardwareStateDeepCopyWithFingersTest) {
+  FingerState fingerStates[] = {
+    { 1.0, 2.0, 3.0, 4.5, 30.0, 11.0, 20.0, 30.0, 14, 0 },
+    { 1.5, 2.5, 3.5, 5.0, 30.5, 11.5, 20.5, 30.5, 15, 0 }
+  };
+  const HardwareState hardwareState = make_hwstate(1.123, 1, 2, 2, fingerStates);
+
+  HardwareState hardwareStateCopy;
+  hardwareStateCopy.fingers = new FingerState[hardwareState.finger_cnt];
+  hardwareStateCopy.DeepCopy(hardwareState, hardwareState.finger_cnt);
+
+  EXPECT_EQ(hardwareStateCopy.String(), hardwareState.String());
+  delete[] hardwareStateCopy.fingers;
+}
+
+TEST(GesturesTest, HardwareStateDeepCopyWithoutFingersTest) {
+  const HardwareState hardwareState = make_hwstate(1.123, 1, 0, 2, nullptr);
+
+  HardwareState hardwareStateCopy;
+  hardwareStateCopy.DeepCopy(hardwareState, hardwareState.finger_cnt);
+
+  EXPECT_EQ(hardwareStateCopy.String(), hardwareState.String());
+}
+
+TEST(GesturesTest, InvalidHardwareStateDeepCopyTest) {
+  // 2 finger_cnt without any fingersState(s) specified
+  const HardwareState invalidHardwareState = make_hwstate(1.123, 1, 2, 2, nullptr);
+
+  HardwareState hardwareStateCopy;
+  hardwareStateCopy.DeepCopy(invalidHardwareState, invalidHardwareState.finger_cnt);
+
+  EXPECT_EQ(invalidHardwareState.timestamp, hardwareStateCopy.timestamp);
+  EXPECT_EQ(invalidHardwareState.buttons_down, hardwareStateCopy.buttons_down);
+  EXPECT_EQ(invalidHardwareState.finger_cnt, hardwareStateCopy.finger_cnt);
+  EXPECT_EQ(invalidHardwareState.touch_cnt, hardwareStateCopy.touch_cnt);
+  EXPECT_EQ(invalidHardwareState.fingers, hardwareStateCopy.fingers);
+  EXPECT_EQ(invalidHardwareState.rel_x, hardwareStateCopy.rel_x);
+  EXPECT_EQ(invalidHardwareState.rel_y, hardwareStateCopy.rel_y);
+  EXPECT_EQ(invalidHardwareState.rel_wheel, hardwareStateCopy.rel_wheel);
+  EXPECT_EQ(invalidHardwareState.rel_wheel_hi_res, hardwareStateCopy.rel_wheel_hi_res);
+  EXPECT_EQ(invalidHardwareState.rel_hwheel, hardwareStateCopy.rel_wheel);
+  EXPECT_EQ(invalidHardwareState.msc_timestamp, hardwareStateCopy.msc_timestamp);
+}
+
 }  // namespace gestures
