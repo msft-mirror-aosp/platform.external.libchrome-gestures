@@ -243,12 +243,14 @@ struct HardwareState {
   // The number of fingers touching the pad, which may be more than finger_cnt.
   unsigned short touch_cnt;
   // A pointer to an array of FingerState structs with finger_cnt entries,
-  // representing the contacts currently being tracked. The order in which
-  // FingerStates appear need not be stable between HardwareStates — only the
-  // tracking ID is used to track individual contacts over time. Accordingly,
-  // when a finger is lifted from the pad (and therefore its ABS_MT_TRACKING_ID
-  // becomes -1), the client should simply stop including it in this array,
-  // rather than including a final FingerState for it.
+  // representing the contacts currently being tracked. If finger_cnt is 0, this
+  // pointer will be null.
+  //
+  // The order in which FingerStates appear need not be stable between
+  // HardwareStates — only the tracking ID is used to track individual contacts
+  // over time. Accordingly, when a finger is lifted from the pad (and therefore
+  // its ABS_MT_TRACKING_ID becomes -1), the client should simply stop including
+  // it in this array, rather than including a final FingerState for it.
   struct FingerState* fingers;
 
   // Mouse axes, which have the same meanings as the Linux evdev axes of the
