@@ -39,12 +39,17 @@ cc_defaults {
         "-D_FILE_OFFSET_BITS=64",
         "-DGESTURES_INTERNAL=1",
     ],
+    sanitize: {
+        all_undefined: true,
+        integer_overflow: true,
+        undefined: true,
+    },
     arch: {
-        arm: {
+        x86_64: {
             sanitize: {
-                all_undefined: true,
-                integer_overflow: true,
-                undefined: true,
+                all_undefined: false,
+                integer_overflow: false,
+                undefined: false,
             },
         }
     },
