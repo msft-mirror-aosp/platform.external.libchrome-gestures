@@ -11,6 +11,7 @@
 #include <functional>
 #include <limits>
 #include <tuple>
+#include <vector>
 
 #include "include/gestures.h"
 #include "include/logging.h"
@@ -1733,7 +1734,7 @@ FingerMap ImmediateInterpreter::GetGesturingFingers(
     return {};
   }
 
-  const FingerState* fs[hwstate.finger_cnt];
+  std::vector<FingerState*> fs(hwstate.finger_cnt);
   for (size_t i = 0; i < hwstate.finger_cnt; ++i)
     fs[i] = &hwstate.fingers[i];
 
@@ -1743,11 +1744,12 @@ FingerMap ImmediateInterpreter::GetGesturingFingers(
   FingerMap ret;
   size_t sorted_cnt;
   if (hwstate.finger_cnt > kMaxGesturingFingers) {
-    std::partial_sort(fs, fs + kMaxGesturingFingers, fs + hwstate.finger_cnt,
+    std::partial_sort(fs.begin(), fs.begin() + kMaxGesturingFingers,
+                      fs.end(),
                       compare);
     sorted_cnt = kMaxGesturingFingers;
   } else {
-    std::sort(fs, fs + hwstate.finger_cnt, compare);
+    std::sort(fs.begin(), fs.end(), compare);
     sorted_cnt = hwstate.finger_cnt;
   }
   for (size_t i = 0; i < sorted_cnt; i++)
@@ -1975,8 +1977,10 @@ void ImmediateInterpreter::SortFingersByProximity(
   // that until we have enough points
   size_t dist_sq_capacity =
       (finger_ids.size() * (finger_ids.size() - 1)) / 2;
-  DistSqElt dist_sq[dist_sq_capacity];
-  size_t dist_sq_len = 0;
+
+  std::vector<DistSqElt> dist_sq;
+  dist_sq.reserve(dist_sq_capacity);
+
   for (size_t i = 0; i < hwstate.finger_cnt; i++) {
     const FingerState& fs1 = hwstate.fingers[i];
     if (!SetContainsValue(finger_ids, fs1.tracking_id))
@@ -1989,24 +1993,20 @@ void ImmediateInterpreter::SortFingersByProximity(
         DistSq(fs1, fs2),
         { fs1.tracking_id, fs2.tracking_id }
       };
-      if (dist_sq_len >= dist_sq_capacity) {
-        Err("%s: Array overrun", __func__);
-        break;
-      }
-      dist_sq[dist_sq_len++] = elt;
+      dist_sq.push_back(elt);
     }
   }
 
   DistSqCompare distSqCompare;
-  std::sort(dist_sq, dist_sq + dist_sq_len, distSqCompare);
+  std::sort(dist_sq.begin(), dist_sq.end(), distSqCompare);
 
   if (out_sorted_ids == nullptr) {
     Err("out_sorted_ids became null");
     return;
   }
-  for (size_t i = 0; i < dist_sq_len; i++) {
-    short id1 = dist_sq[i].tracking_id[0];
-    short id2 = dist_sq[i].tracking_id[1];
+  for (auto const & d: dist_sq) {
+    short id1 = d.tracking_id[0];
+    short id2 = d.tracking_id[1];
     bool contains1 = out_sorted_ids->find(id1) != out_sorted_ids->end();
     bool contains2 = out_sorted_ids->find(id2) != out_sorted_ids->end();
     if (contains1 == contains2 && !out_sorted_ids->empty()) {
@@ -2463,8 +2463,10 @@ GestureType ImmediateInterpreter::GetMultiFingerGestureType(
     return kGestureTypeNull;
   }
 
-  const FingerState* x_fingers[num_fingers];
-  const FingerState* y_fingers[num_fingers];
+  assert(num_fingers <= (int) kMaxGesturingFingers);
+
+  const FingerState* x_fingers[kMaxGesturingFingers];
+  const FingerState* y_fingers[kMaxGesturingFingers];
   for (int i = 0; i < num_fingers; i++) {
     x_fingers[i] = fingers[i];
     y_fingers[i] = fingers[i];
@@ -2478,13 +2480,13 @@ GestureType ImmediateInterpreter::GetMultiFingerGestureType(
   bool horizontal =
       (x_fingers[num_fingers - 1]->position_x - x_fingers[0]->position_x) >=
       (y_fingers[num_fingers -1]->position_y - y_fingers[0]->position_y);
-  const FingerState* sorted_fingers[num_fingers];
+  const FingerState* sorted_fingers[4];
   for (int i = 0; i < num_fingers; i++) {
     sorted_fingers[i] = horizontal ? x_fingers[i] : y_fingers[i];
   }
 
-  float dx[num_fingers];
-  float dy[num_fingers];
+  float dx[kMaxGesturingFingers];
+  float dy[kMaxGesturingFingers];
   float dy_sum = 0;
   float dx_sum = 0;
   for (int i = 0; i < num_fingers; i++) {
