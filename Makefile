@@ -138,9 +138,6 @@ CXXFLAGS+=\
 	-ftest-coverage \
 	-fprofile-arcs
 LINK_FLAGS+=-lgcov
-else
-CXXFLAGS+=\
-	-DXLOGGING
 endif
 
 PKG_CONFIG ?= pkg-config
