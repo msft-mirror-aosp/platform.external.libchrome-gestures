@@ -129,6 +129,15 @@ CXXFLAGS+=\
 	-DGESTURES_INTERNAL=1 \
 	-I.
 
+ifeq (yes,$(SANITIZE_GESTURES))
+CXXFLAGS+=\
+	-fsanitize=undefined \
+	-fno-sanitize-recover=all
+LINK_FLAGS+=\
+	-fsanitize=undefined \
+	-fno-sanitize-recover=all
+endif
+
 # Local compilation needs these flags, esp for code coverage testing
 ifeq (g++,$(CXX))
 CXXFLAGS+=\
