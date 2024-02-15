@@ -17,7 +17,7 @@ NonLinearityFilterInterpreter::NonLinearityFilterInterpreter(
                                                         PropRegistry* prop_reg,
                                                         Interpreter* next,
                                                         Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       x_range_len_(0), y_range_len_(0), p_range_len_(0),
       enabled_(prop_reg, "Enable non-linearity correction", false),
       data_location_(prop_reg, "Non-linearity correction data file", "None") {
@@ -110,10 +110,13 @@ abort_load:
   fclose(data_fd);
 }
 
-void NonLinearityFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void NonLinearityFilterInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                                       stime_t* timeout) {
-  if (enabled_.val_ && err_.get() && hwstate->finger_cnt == 1) {
-    FingerState* finger = &(hwstate->fingers[0]);
+  const char name[] = "NonLinearityFilterInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
+  if (enabled_.val_ && err_.get() && hwstate.finger_cnt == 1) {
+    FingerState* finger = &(hwstate.fingers[0]);
     if (finger) {
       Error error = GetError(finger->position_x, finger->position_y,
                              finger->pressure);
@@ -121,6 +124,7 @@ void NonLinearityFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
       finger->position_y -= error.y_error;
     }
   }
+  LogHardwareStatePost(name, hwstate);
   next_->SyncInterpret(hwstate, timeout);
 }
 

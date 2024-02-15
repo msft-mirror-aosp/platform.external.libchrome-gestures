@@ -35,6 +35,7 @@ namespace gestures {
 
 class BoxFilterInterpreter : public FilterInterpreter, public PropertyDelegate {
   FRIEND_TEST(BoxFilterInterpreterTest, SimpleTest);
+  FRIEND_TEST(BoxFilterInterpreterTest, ZeroSizeBoxTest);
  public:
   // Takes ownership of |next|:
   BoxFilterInterpreter(PropRegistry* prop_reg, Interpreter* next,
@@ -42,7 +43,7 @@ class BoxFilterInterpreter : public FilterInterpreter, public PropertyDelegate {
   virtual ~BoxFilterInterpreter() {}
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout);
 
  private:
   std::map<short, FingerState> previous_output_;

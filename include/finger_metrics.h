@@ -74,6 +74,7 @@ class FingerMetrics {
  public:
   FingerMetrics();
   explicit FingerMetrics(short tracking_id);
+  FingerMetrics(short tracking_id, stime_t timestamp);
   FingerMetrics(const FingerState& state, stime_t timestamp);
 
   // Update the finger metrics from a FingerState.
@@ -132,7 +133,7 @@ class Metrics {
   vector<FingerMetrics, kMaxFingers>& fingers() { return fingers_; }
 
   // Find a FingerMetrics instance by it's tracking id.
-  // Returns NULL if not found.
+  // Returns nullptr if not found.
   FingerMetrics* GetFinger(short tracking_id) {
       return const_cast<FingerMetrics*>(
           const_cast<const Metrics*>(this)->GetFinger(tracking_id));
@@ -147,6 +148,12 @@ class Metrics {
 
   // Clear all finger information
   void Clear();
+
+  // Set the origin timestamp for a particular finger for testing purposes.
+  // Prefer calling Update with a whole HardwareState instead.
+  // TODO(b/307933752): remove this method once its last usage (in
+  // TapToClickStateMachineTest::check_hwstates) is removed.
+  void SetFingerOriginTimestampForTesting(short tracking_id, stime_t time);
 
  private:
   vector<FingerMetrics, kMaxFingers> fingers_;

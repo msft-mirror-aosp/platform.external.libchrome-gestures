@@ -11,7 +11,7 @@ namespace gestures {
 
 StuckButtonInhibitorFilterInterpreter::StuckButtonInhibitorFilterInterpreter(
     Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       incoming_button_must_be_up_(true),
       sent_buttons_down_(0),
       next_expects_timer_(false) {
@@ -19,30 +19,43 @@ StuckButtonInhibitorFilterInterpreter::StuckButtonInhibitorFilterInterpreter(
 }
 
 void StuckButtonInhibitorFilterInterpreter::SyncInterpretImpl(
-    HardwareState* hwstate, stime_t* timeout) {
-  HandleHardwareState(*hwstate);
+    HardwareState& hwstate, stime_t* timeout) {
+  const char name[] =
+      "StuckButtonInhibitorFilterInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
+  HandleHardwareState(hwstate);
+
   stime_t next_timeout = NO_DEADLINE;
+  LogHardwareStatePost(name, hwstate);
   next_->SyncInterpret(hwstate, &next_timeout);
   HandleTimeouts(next_timeout, timeout);
 }
 
 void StuckButtonInhibitorFilterInterpreter::HandleTimerImpl(
     stime_t now, stime_t* timeout) {
-  if (!next_expects_timer_) {
+  const char name[] = "StuckButtonInhibitorFilterInterpreter::HandleTimerImpl";
+  LogHandleTimerPre(name, now, timeout);
+
+  stime_t next_timeout = NO_DEADLINE;
+  if (next_expects_timer_) {
+    next_->HandleTimer(now, &next_timeout);
+  } else {
     if (!sent_buttons_down_) {
       Err("Bug: got callback, but no gesture to send.");
       return;
     } else {
       Err("Mouse button seems stuck down. Sending button-up.");
-      ProduceGesture(Gesture(kGestureButtonsChange,
-                             now, now, 0, sent_buttons_down_,
-                             false)); // is_tap
+      auto button_change = Gesture(kGestureButtonsChange,
+                                   now, now, 0, sent_buttons_down_,
+                                   false); // is_tap
+      LogGestureProduce(name, button_change);
+      ProduceGesture(button_change);
       sent_buttons_down_ = 0;
     }
   }
-  stime_t next_timeout = NO_DEADLINE;
-  next_->HandleTimer(now, &next_timeout);
   HandleTimeouts(next_timeout, timeout);
+  LogHandleTimerPost(name, now, timeout);
 }
 
 void StuckButtonInhibitorFilterInterpreter::HandleHardwareState(
@@ -53,6 +66,9 @@ void StuckButtonInhibitorFilterInterpreter::HandleHardwareState(
 
 void StuckButtonInhibitorFilterInterpreter::ConsumeGesture(
     const Gesture& gesture) {
+  const char name[] = "StuckButtonInhibitorFilterInterpreter::ConsumeGesture";
+  LogGestureConsume(name, gesture);
+
   if (gesture.type == kGestureTypeButtonsChange) {
     Gesture result = gesture;
     // process buttons going down
@@ -72,8 +88,10 @@ void StuckButtonInhibitorFilterInterpreter::ConsumeGesture(
     sent_buttons_down_ &= ~result.details.buttons.up;
     if (!result.details.buttons.up && !result.details.buttons.down)
       return; // skip gesture
+    LogGestureProduce(name, result);
     ProduceGesture(result);
   } else {
+    LogGestureProduce(name, gesture);
     ProduceGesture(gesture);
   }
 }

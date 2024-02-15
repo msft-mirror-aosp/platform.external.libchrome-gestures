@@ -18,11 +18,11 @@ namespace {
 class FlingStopFilterInterpreterTestInterpreter : public Interpreter {
  public:
   FlingStopFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         sync_interpret_called_(false), handle_timer_called_(true),
         next_timeout_(NO_DEADLINE) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     sync_interpret_called_ = true;
     *timeout = next_timeout_;
   }
@@ -55,7 +55,7 @@ struct SimpleTestInputs {
 TEST(FlingStopFilterInterpreterTest, SimpleTest) {
   FlingStopFilterInterpreterTestInterpreter* base_interpreter =
       new FlingStopFilterInterpreterTestInterpreter;
-  FlingStopFilterInterpreter interpreter(NULL, base_interpreter, NULL,
+  FlingStopFilterInterpreter interpreter(nullptr, base_interpreter, nullptr,
                                          GESTURES_DEVCLASS_TOUCHPAD);
   TestInterpreterWrapper wrapper(&interpreter);
 
@@ -111,14 +111,14 @@ TEST(FlingStopFilterInterpreterTest, SimpleTest) {
 
     stime_t timeout = kND;
 
-    Gesture* ret = NULL;
+    Gesture* ret = nullptr;
     if (input.touch_cnt >= 0) {
       FingerState fs[5];
       memset(fs, 0, sizeof(fs));
       unsigned short touch_cnt = static_cast<unsigned short>(input.touch_cnt);
       HardwareState hs = make_hwstate(input.now, 0, touch_cnt, touch_cnt, fs);
 
-      ret = wrapper.SyncInterpret(&hs, &timeout);
+      ret = wrapper.SyncInterpret(hs, &timeout);
 
       EXPECT_EQ(input.expected_call_next,
                 base_interpreter->sync_interpret_called_) << "i=" << i;
@@ -140,6 +140,50 @@ TEST(FlingStopFilterInterpreterTest, SimpleTest) {
               ret->details.fling.fling_state == GESTURES_FLING_TAP_DOWN)
         << "i=" << i;
   }
+}
+
+TEST(FlingStopFilterInterpreterTest, FlingGestureTest) {
+  FlingStopFilterInterpreterTestInterpreter* base_interpreter =
+      new FlingStopFilterInterpreterTestInterpreter;
+  FlingStopFilterInterpreter interpreter(nullptr, base_interpreter, nullptr,
+                                         GESTURES_DEVCLASS_TOUCHPAD);
+
+  Gesture fling(kGestureFling, 0.0, 1.0, 0.0, 0.0, GESTURES_FLING_TAP_DOWN);
+  Gesture swipelift(kGestureSwipeLift, 1.0, 2.0);
+  Gesture swipe4flift(kGestureFourFingerSwipeLift, 1.0, 2.0);
+  Gesture move(kGestureMove, 1.0, 2.0, 3.0, 4.0);
+
+  interpreter.fling_stop_already_sent_ = true;
+  interpreter.ConsumeGesture(fling);
+  interpreter.ConsumeGesture(fling);
+  EXPECT_EQ(interpreter.prev_gesture_type_, kGestureTypeFling);
+  interpreter.ConsumeGesture(swipelift);
+  EXPECT_EQ(interpreter.prev_gesture_type_, kGestureTypeSwipeLift);
+  interpreter.ConsumeGesture(swipe4flift);
+  EXPECT_EQ(interpreter.prev_gesture_type_, kGestureTypeFourFingerSwipeLift);
+
+  interpreter.fling_stop_already_sent_ = false;
+  interpreter.ConsumeGesture(fling);
+  interpreter.ConsumeGesture(fling);
+  EXPECT_EQ(interpreter.prev_gesture_type_, kGestureTypeFling);
+  interpreter.ConsumeGesture(swipelift);
+  EXPECT_EQ(interpreter.prev_gesture_type_, kGestureTypeSwipeLift);
+  interpreter.ConsumeGesture(swipe4flift);
+  EXPECT_EQ(interpreter.prev_gesture_type_, kGestureTypeFourFingerSwipeLift);
+
+  interpreter.ConsumeGesture(move);
+  EXPECT_EQ(interpreter.prev_gesture_type_, kGestureTypeMove);
+}
+
+TEST(FlingStopFilterInterpreterTest, FlingStopMultimouseMoveTest) {
+  FlingStopFilterInterpreterTestInterpreter* base_interpreter =
+      new FlingStopFilterInterpreterTestInterpreter;
+  FlingStopFilterInterpreter interpreter(nullptr, base_interpreter, nullptr,
+                                         GESTURES_DEVCLASS_MULTITOUCH_MOUSE);
+
+  Gesture move(kGestureMove, 1.0, 2.0, 3.0, 4.0);
+  interpreter.ConsumeGesture(move);
+  EXPECT_EQ(interpreter.prev_gesture_type_, kGestureTypeMove);
 }
 
 }  // namespace gestures

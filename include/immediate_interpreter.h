@@ -127,12 +127,12 @@ class HardwareStateBuffer {
   // Pops most recently pushed state
   void PopState();
 
-  const HardwareState* Get(size_t idx) const {
-    return &states_[(idx + newest_index_) % size_];
+  const HardwareState& Get(size_t idx) const {
+    return states_[(idx + newest_index_) % size_];
   }
 
-  HardwareState* Get(size_t idx) {
-    return const_cast<HardwareState*>(
+  HardwareState& Get(size_t idx) {
+    return const_cast<HardwareState&>(
         const_cast<const HardwareStateBuffer*>(this)->Get(idx));
   }
 
@@ -344,6 +344,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(ImmediateInterpreterTest, ClickTest);
   FRIEND_TEST(ImmediateInterpreterTest, FlingDepthTest);
   FRIEND_TEST(ImmediateInterpreterTest, GetGesturingFingersTest);
+  FRIEND_TEST(ImmediateInterpreterTest, GetGesturingFingersWithEmptyStateTest);
   FRIEND_TEST(ImmediateInterpreterTest, PalmAtEdgeTest);
   FRIEND_TEST(ImmediateInterpreterTest, PalmReevaluateTest);
   FRIEND_TEST(ImmediateInterpreterTest, PalmTest);
@@ -355,15 +356,15 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(ImmediateInterpreterTest, StationaryPalmTest);
   FRIEND_TEST(ImmediateInterpreterTest, SwipeTest);
   FRIEND_TEST(ImmediateInterpreterTest, TapRecordTest);
-  FRIEND_TEST(ImmediateInterpreterTest, TapToClickEnableTest);
   FRIEND_TEST(ImmediateInterpreterTest, TapToClickKeyboardTest);
   FRIEND_TEST(ImmediateInterpreterTest, TapToClickLowPressureBeginOrEndTest);
-  FRIEND_TEST(ImmediateInterpreterTest, TapToClickStateMachineTest);
   FRIEND_TEST(ImmediateInterpreterTest, ThumbRetainReevaluateTest);
   FRIEND_TEST(ImmediateInterpreterTest, ThumbRetainTest);
   FRIEND_TEST(ImmediateInterpreterTest, WarpedFingersTappingTest);
   FRIEND_TEST(ImmediateInterpreterTest, ZeroClickInitializationTest);
+  FRIEND_TEST(ImmediateInterpreterTtcEnableTest, TapToClickEnableTest);
   friend class TapRecord;
+  friend class TapToClickStateMachineTest;
   friend class FingerButtonClick;
 
  public:
@@ -381,7 +382,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   virtual ~ImmediateInterpreter() {}
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout);
 
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
 
@@ -396,8 +397,10 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
 
   stime_t tap_max_finger_age() const { return tap_max_finger_age_.val_; }
 
-  stime_t finger_origin_timestamp(short finger_id) const {
-    return origin_timestamps_.at(finger_id);
+  bool device_reports_pressure() const { return hwprops_->reports_pressure; }
+
+  stime_t finger_origin_timestamp(short tracking_id) const {
+    return metrics_->GetFinger(tracking_id)->origin_time();
   }
 
  private:
@@ -625,10 +628,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   Gesture result_;
   Gesture prev_result_;
 
-  // Time when a contact arrived. Persists even when fingers change.
-  std::map<short, stime_t> origin_timestamps_;
-
-  // Total distance travelled by a finger since the origin_timestamps_.
+  // Total distance travelled by a finger since its origin timestamp.
   std::map<short, float> distance_walked_;
 
   // Button data
@@ -641,7 +641,7 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   bool sent_button_down_;
 
   // If we haven't sent a button down by this time, send one
-  stime_t button_down_timeout_;
+  stime_t button_down_deadline_;
 
   // When fingers change, we record the time
   stime_t changed_time_;

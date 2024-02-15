@@ -27,10 +27,10 @@ class StuckButtonInhibitorFilterInterpreterTestInterpreter :
       public Interpreter {
  public:
   StuckButtonInhibitorFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         called_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     HandleTimer(0.0, timeout);
   }
 
@@ -76,19 +76,20 @@ bool GestureEq(const Gesture& a, const Gesture& b) {
 TEST(StuckButtonInhibitorFilterInterpreterTest, SimpleTest) {
   StuckButtonInhibitorFilterInterpreterTestInterpreter* base_interpreter =
       new StuckButtonInhibitorFilterInterpreterTestInterpreter;
-  StuckButtonInhibitorFilterInterpreter interpreter(base_interpreter, NULL);
+  StuckButtonInhibitorFilterInterpreter interpreter(base_interpreter, nullptr);
 
   HardwareProperties hwprops = {
-    0, 0, 100, 100,  // left, top, right, bottom
-    10,  // x res (pixels/mm)
-    10,  // y res (pixels/mm)
-    133, 133,  // scrn DPI X, Y
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    2, 5,  // max fingers, max_touch
-    0, 0, 0,  // t5r2, semi, button pad
-    0, 0,  // has wheel, vertical wheel is high resolution
-    0,  // haptic pad
+    .right = 100, .bottom = 100,
+    .res_x = 10,
+    .res_y = 10,
+    .screen_x_dpi = 0,
+    .screen_y_dpi = 0,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 2, .max_touch_cnt = 5,
+    .supports_t5r2 = 0, .support_semi_mt = 0, .is_button_pad = 0,
+    .has_wheel = 0, .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -143,23 +144,23 @@ TEST(StuckButtonInhibitorFilterInterpreterTest, SimpleTest) {
     { -1.0, make_hwstate(1.1, 0, 1, 1, &fs),  true,   kND, move,  kND, move },
     // Button down, followed by nothing, so we timeout and send button up
     { -1.0, make_hwstate(1.2, 0, 1, 1, &fs),  true,   kND, down,  kND, down },
-    { -1.0, make_hwstate(1.3, 0, 0, 0, NULL), true,   1.0, null,  kND, null },
-    {  2.3, make_hwstate(0.0, 0, 0, 0, NULL), false,  kND, up,    kND, null },
+    { -1.0, make_hwstate(1.3, 0, 0, 0, nullptr), true,  1.0, null,  kND, null },
+    {  2.3, make_hwstate(0.0, 0, 0, 0, nullptr), false, kND, up,    kND, null },
     // Next sends button up in timeout
     { -1.0, make_hwstate(3.2, 0, 1, 1, &fs),  true,   kND, down,  kND, down },
-    { -1.0, make_hwstate(3.3, 0, 0, 0, NULL), true,   0.5, null,  0.5, null },
-    {  3.8, make_hwstate(0.0, 0, 0, 0, NULL), true,   kND, up,    kND, up   },
+    { -1.0, make_hwstate(3.3, 0, 0, 0, nullptr), true,  0.5, null,  0.5, null },
+    {  3.8, make_hwstate(0.0, 0, 0, 0, nullptr), true,  kND, up,    kND, up   },
     // Double down/up squash
     { -1.0, make_hwstate(4.2, 0, 1, 1, &fs),  true,   kND, down,  kND, down },
     { -1.0, make_hwstate(4.3, 0, 1, 1, &fs),  true,   kND, null,  kND, down },
-    { -1.0, make_hwstate(4.4, 0, 0, 0, NULL), true,   kND, up,    kND, up   },
-    { -1.0, make_hwstate(4.5, 0, 0, 0, NULL), true,   kND, null,  kND, up   },
+    { -1.0, make_hwstate(4.4, 0, 0, 0, nullptr), true,  kND, up,    kND, up   },
+    { -1.0, make_hwstate(4.5, 0, 0, 0, nullptr), true,  kND, null,  kND, up   },
     // Right down, left double up/down squash
     { -1.0, make_hwstate(5.1, 0, 1, 1, &fs),  true,   kND, rdwn,  kND, rdwn },
     { -1.0, make_hwstate(5.2, 0, 1, 1, &fs),  true,   kND, down,  kND, rldn },
     { -1.0, make_hwstate(5.3, 0, 1, 1, &fs),  true,   kND, null,  kND, down },
-    { -1.0, make_hwstate(5.4, 0, 0, 0, NULL), true,   1.0, rup,   kND, rup  },
-    { -1.0, make_hwstate(5.5, 0, 0, 0, NULL), true,   kND, up,    kND, rlup },
+    { -1.0, make_hwstate(5.4, 0, 0, 0, nullptr), true,  1.0, rup,   kND, rup  },
+    { -1.0, make_hwstate(5.5, 0, 0, 0, nullptr), true,  kND, up,    kND, rlup },
   };
 
   for (size_t i = 0; i < arraysize(recs); ++i) {
@@ -170,9 +171,9 @@ TEST(StuckButtonInhibitorFilterInterpreterTest, SimpleTest) {
           make_pair(rec.next_gs_, rec.next_timeout_));
     }
     stime_t timeout = NO_DEADLINE;
-    Gesture* result = NULL;
+    Gesture* result = nullptr;
     if (rec.now_ < 0.0) {
-      result = wrapper.SyncInterpret(&rec.hs_, &timeout);
+      result = wrapper.SyncInterpret(rec.hs_, &timeout);
     } else {
       result = wrapper.HandleTimer(rec.now_, &timeout);
     }
