@@ -31,11 +31,7 @@ TEST(StringUtilTest, SimpleTest) {
   EXPECT_EQ(trimmed_from, TRIM_ALL);
   EXPECT_EQ(str.size(), expected_length-2);
 
-  std::vector<std::string> split;
-  SplitString(str, ' ', &split);
-  EXPECT_EQ(split.size(), 15);
-
-  bool matches = StartsWithASCII(split[0], pstr, true);
+  bool matches = StartsWithASCII(str, pstr, true);
   EXPECT_TRUE(matches);
 }
 

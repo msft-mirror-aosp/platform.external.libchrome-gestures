@@ -43,15 +43,6 @@ bool StartsWithASCII(const std::string& str,
                      const std::string& search,
                      bool case_sensitive);
 
-// |str| should not be in a multi-byte encoding like Shift-JIS or GBK in which
-// the trailing byte of a multi-byte character can be in the ASCII range.
-// UTF-8, and other single/multi-byte ASCII-compatible encodings are OK.
-// Note: |c| must be in the ASCII range.
-void SplitString(const std::string& str,
-                 char c,
-                 std::vector<std::string>* r);
-
-
 }  // namespace gestures
 
 #endif  // GESTURES_STRING_UTIL_H_

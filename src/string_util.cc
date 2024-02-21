@@ -85,28 +85,6 @@ static void StringAppendVT(std::string* dst,
   }
 }
 
-template <typename STR>
-void SplitStringT(const STR& str,
-                  const typename STR::value_type s,
-                  bool trim_whitespace,
-                  std::vector<STR>* r) {
-  r->clear();
-  size_t last = 0;
-  size_t c = str.size();
-  for (size_t i = 0; i <= c; ++i) {
-    if (i == c || str[i] == s) {
-      STR tmp(str, last, i - last);
-      if (trim_whitespace)
-        TrimWhitespaceASCII(tmp, TRIM_ALL, &tmp);
-      // Avoid converting an empty or all-whitespace source string into a vector
-      // of one empty string.
-      if (i != c || !r->empty() || !tmp.empty())
-        r->push_back(tmp);
-      last = i + 1;
-    }
-  }
-}
-
 template<typename STR>
 TrimPositions TrimStringT(const STR& input,
                           const typename STR::value_type trim_chars[],
@@ -161,12 +139,6 @@ bool StartsWithASCII(const std::string& str,
     return str.compare(0, search.length(), search) == 0;
   else
     return strncasecmp(str.c_str(), search.c_str(), search.length()) == 0;
-}
-
-void SplitString(const std::string& str,
-                 char c,
-                 std::vector<std::string>* r) {
-  SplitStringT(str, c, true, r);
 }
 
 TrimPositions TrimWhitespaceASCII(const std::string& input,
