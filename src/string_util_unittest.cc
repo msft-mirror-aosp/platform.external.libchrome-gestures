@@ -30,9 +30,6 @@ TEST(StringUtilTest, SimpleTest) {
   TrimPositions trimmed_from = TrimWhitespaceASCII(str, TRIM_ALL, &str);
   EXPECT_EQ(trimmed_from, TRIM_ALL);
   EXPECT_EQ(str.size(), expected_length-2);
-
-  bool matches = StartsWithASCII(str, pstr, true);
-  EXPECT_TRUE(matches);
 }
 
 }  // namespace gestures

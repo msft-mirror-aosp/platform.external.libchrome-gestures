@@ -132,15 +132,6 @@ std::string StringPrintf(const char* format, ...) {
   return result;
 }
 
-bool StartsWithASCII(const std::string& str,
-                     const std::string& search,
-                     bool case_sensitive) {
-  if (case_sensitive)
-    return str.compare(0, search.length(), search) == 0;
-  else
-    return strncasecmp(str.c_str(), search.c_str(), search.length()) == 0;
-}
-
 TrimPositions TrimWhitespaceASCII(const std::string& input,
                                   TrimPositions positions,
                                   std::string* output) {

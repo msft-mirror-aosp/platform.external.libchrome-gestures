@@ -38,11 +38,6 @@ TrimPositions TrimWhitespaceASCII(const std::string& input,
                                               TrimPositions positions,
                                               std::string* output);
 
-// Returns true if str starts with search, or false otherwise.
-bool StartsWithASCII(const std::string& str,
-                     const std::string& search,
-                     bool case_sensitive);
-
 }  // namespace gestures
 
 #endif  // GESTURES_STRING_UTIL_H_
