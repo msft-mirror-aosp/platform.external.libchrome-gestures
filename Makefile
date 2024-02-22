@@ -131,10 +131,10 @@ CXXFLAGS+=\
 
 ifeq (yes,$(SANITIZE_GESTURES))
 CXXFLAGS+=\
-	-fsanitize=undefined \
+	-fsanitize=address,undefined \
 	-fno-sanitize-recover=all
 LINK_FLAGS+=\
-	-fsanitize=undefined \
+	-fsanitize=address,undefined \
 	-fno-sanitize-recover=all
 endif
 
