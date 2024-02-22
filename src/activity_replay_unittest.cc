@@ -34,7 +34,7 @@ void SplitStringT(const STR& str,
     if (i == c || str[i] == s) {
       STR tmp(str, last, i - last);
       if (trim_whitespace)
-        TrimWhitespaceASCII(tmp, TRIM_ALL, &tmp);
+        tmp = TrimWhitespaceASCII(tmp);
       // Avoid converting an empty or all-whitespace source string into a vector
       // of one empty string.
       if (i != c || !r->empty() || !tmp.empty())
