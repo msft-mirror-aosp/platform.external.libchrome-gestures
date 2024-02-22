@@ -123,7 +123,7 @@ void BoolArrayProperty::CreatePropImpl() {
 Json::Value BoolArrayProperty::NewValue() const {
   Json::Value list(Json::arrayValue);
   for (size_t i = 0; i < count_; i++)
-    list.append(new Json::Value(vals_[i] != 0));
+    list.append(Json::Value(vals_[i] != 0));
   return list;
 }
 
