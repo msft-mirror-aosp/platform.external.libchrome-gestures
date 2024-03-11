@@ -506,7 +506,7 @@ void GestureInterpreter::SetTimerProvider(GesturesTimerProvider* tp,
     interpret_timer_ = nullptr;
   }
   if (interpret_timer_)
-    Log("How was interpret_timer_ not null?!");
+    Err("How was interpret_timer_ not null?!");
   timer_provider_ = tp;
   timer_provider_data_ = data;
   if (timer_provider_)

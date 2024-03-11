@@ -2540,7 +2540,7 @@ stime_t ImmediateInterpreter::TimeoutForTtcState(TapToClickState state) {
     case kTtcDragRelease: return tap_drag_timeout_.val_;
     case kTtcDragRetouch: return tap_timeout_.val_;
     default:
-      Log("Unknown state!");
+      Err("Unknown TapToClickState %u!", state);
       return 0.0;
   }
 }
@@ -2735,7 +2735,7 @@ void ImmediateInterpreter::UpdateTapState(
         break;
       }
       if (!hwstate) {
-        Log("hwstate is null but no timeout?!");
+        Err("hwstate is null but not a timeout?!");
         break;
       }
       tap_record_.Update(
@@ -2785,7 +2785,7 @@ void ImmediateInterpreter::UpdateTapState(
       break;
     case kTtcSubsequentTapBegan:
       if (!is_timeout && !hwstate) {
-        Log("hwstate is null but not a timeout?!");
+        Err("hwstate is null but not a timeout?!");
         break;
       }
       if (hwstate)
@@ -2889,7 +2889,7 @@ void ImmediateInterpreter::UpdateTapState(
         break;
       }
       if (!hwstate) {
-        Log("not timeout but hwstate is null?!");
+        Err("hwstate is null but not a timeout?!");
         break;
       }
       if (tap_record_.Moving(*hwstate, tap_move_dist_.val_))

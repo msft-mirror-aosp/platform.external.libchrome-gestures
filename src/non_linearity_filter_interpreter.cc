@@ -74,6 +74,7 @@ void NonLinearityFilterInterpreter::LoadData() {
   }
   FILE* data_fd = fopen(data_location_.val_, "rb");
   if (!data_fd) {
+    // TODO(b/329268257): make this an Err, not a Log.
     Log("Unable to open non-linearity filter data '%s'", data_location_.val_);
     return;
   }
