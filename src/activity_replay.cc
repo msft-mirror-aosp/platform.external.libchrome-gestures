@@ -168,10 +168,6 @@ bool ActivityReplay::ParseHardwareProperties(const Json::Value& obj,
            props.res_x, float, true);
   PARSE_HP(obj, ActivityLog::kKeyHardwarePropYResolution, isDouble, asDouble,
            props.res_y, float, true);
-  PARSE_HP(obj, ActivityLog::kKeyHardwarePropXDpi, isDouble, asDouble,
-           props.screen_x_dpi, float, true);
-  PARSE_HP(obj, ActivityLog::kKeyHardwarePropYDpi, isDouble, asDouble,
-           props.screen_y_dpi, float, true);
   PARSE_HP(obj, ActivityLog::kKeyHardwarePropOrientationMinimum,
            isDouble, asDouble, props.orientation_minimum, float, false);
   PARSE_HP(obj, ActivityLog::kKeyHardwarePropOrientationMaximum,
