@@ -22,6 +22,8 @@ namespace gestures {
 
 class FlingStopFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(FlingStopFilterInterpreterTest, SimpleTest);
+  FRIEND_TEST(FlingStopFilterInterpreterTest, FlingGestureTest);
+  FRIEND_TEST(FlingStopFilterInterpreterTest, FlingStopMultimouseMoveTest);
  public:
   // Takes ownership of |next|:
   FlingStopFilterInterpreter(PropRegistry* prop_reg,
@@ -31,7 +33,7 @@ class FlingStopFilterInterpreter : public FilterInterpreter {
   virtual ~FlingStopFilterInterpreter() {}
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout);
 
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
 

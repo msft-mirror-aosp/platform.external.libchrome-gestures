@@ -11,9 +11,9 @@
 #include "include/filter_interpreter.h"
 #include "include/finger_metrics.h"
 #include "include/gestures.h"
-#include "include/list.h"
 #include "include/prop_registry.h"
 #include "include/tracer.h"
+#include "include/util.h"
 
 #ifndef GESTURES_LOOKAHEAD_FILTER_INTERPRETER_H_
 #define GESTURES_LOOKAHEAD_FILTER_INTERPRETER_H_
@@ -30,16 +30,19 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(LookaheadFilterInterpreterTest, QuickMoveTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, QuickSwipeTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest);
-  FRIEND_TEST(LookaheadFilterInterpreterTest, SimpleTest);
+  FRIEND_TEST(LookaheadFilterInterpreterParmTest, SimpleTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, VariableDelayTest);
+  FRIEND_TEST(LookaheadFilterInterpreterTest, AddFingerFlingTest);
+  FRIEND_TEST(LookaheadFilterInterpreterTest, ConsumeGestureTest);
+
  public:
   LookaheadFilterInterpreter(PropRegistry* prop_reg, Interpreter* next,
                              Tracer* tracer);
   virtual ~LookaheadFilterInterpreter() {}
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate,
+  virtual void SyncInterpretImpl(HardwareState& hwstate,
                                  stime_t* timeout);
 
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
@@ -62,10 +65,7 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
     std::map<short, short> output_ids_;  // input tracking ids -> output
 
     stime_t due_;
-    bool completed_;
-
-    QState* next_;
-    QState* prev_;
+    bool completed_ = false;
   };
 
   void LogVectors();
@@ -109,14 +109,14 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
   stime_t ExtraVariableDelay() const;
 
   List<QState> queue_;
-  List<QState> free_list_;
 
   // The last id assigned to a contact (part of drumroll suppression)
   short last_id_;
 
   unsigned short max_fingers_per_hwstate_;
 
-  stime_t interpreter_due_;
+  // Last detected due_ time as an absolute deadline
+  stime_t interpreter_due_deadline_;
 
   // We want to present time to next_ in a monotonically increasing manner,
   // so this keeps track of the most recent timestamp we've given next_.

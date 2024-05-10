@@ -5,6 +5,7 @@
 #include "include/lookahead_filter_interpreter.h"
 
 #include <algorithm>
+#include <memory>
 #include <math.h>
 
 #include "include/tracer.h"
@@ -21,9 +22,9 @@ static const stime_t kMaxDelay = 0.09;  // 90ms
 
 LookaheadFilterInterpreter::LookaheadFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next, Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
-      last_id_(0), max_fingers_per_hwstate_(0), interpreter_due_(-1.0),
-      last_interpreted_time_(-1.0),
+    : FilterInterpreter(nullptr, next, tracer, false),
+      last_id_(0), max_fingers_per_hwstate_(0),
+      interpreter_due_deadline_(-1.0), last_interpreted_time_(-1.0),
       min_nonsuppress_speed_(prop_reg, "Input Queue Min Nonsuppression Speed",
                              200.0),
       min_delay_(prop_reg, "Input Queue Delay", 0.0),
@@ -43,57 +44,59 @@ LookaheadFilterInterpreter::LookaheadFilterInterpreter(
   InitName();
 }
 
-void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void LookaheadFilterInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                                        stime_t* timeout) {
-  // Push back into queue
-  if (free_list_.Empty()) {
-    Err("Can't accept new hwstate b/c we're out of nodes!");
-    Err("Now: %f, interpreter_due_ %f", hwstate->timestamp, interpreter_due_);
-    Err("Dump of queue:");
-    for (QState* it = queue_.Begin(); it != queue_.End(); it = it->next_)
-      Err("Due: %f%s", it->due_, it->completed_ ? " (c)" : "");
-    return;
-  }
-  QState* node = free_list_.PopFront();
-  node->set_state(*hwstate);
+  const char name[] = "LookaheadFilterInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
+  // Keep track of where the last node is in the current queue_
+  auto const queue_was_not_empty = !queue_.empty();
+  QState* old_back_node = queue_was_not_empty ? &queue_.back() : nullptr;
+
+  // Allocate and initialize a new node on the end of the queue_
+  auto& new_node = queue_.emplace_back(hwprops_->max_finger_cnt);
+  new_node.state_.DeepCopy(hwstate, hwprops_->max_finger_cnt);
   double delay = max(0.0, min<stime_t>(kMaxDelay, min_delay_.val_));
-  node->due_ = hwstate->timestamp + delay;
-  node->completed_ = false;
-  if (queue_.Empty())
-    node->output_ids_.clear();
-  else
-    node->output_ids_ = queue_.Tail()->output_ids_;
-  // At this point, if ExtraVariableDelay() > 0, queue_.Tail()->due_ may have
-  // ExtraVariableDelay() applied, but node->due_ does not, yet.
-  if (!queue_.Empty() &&
-      (queue_.Tail()->due_ - node->due_ > ExtraVariableDelay())) {
-    Err("Clock changed backwards. Flushing queue.");
-    stime_t next_timeout = NO_DEADLINE;
-    QState* q_node = queue_.Head();
-    do {
-      if (!q_node->completed_)
-        next_->SyncInterpret(&q_node->state_, &next_timeout);
-      q_node = q_node->next_;
-      free_list_.PushBack(queue_.PopFront());
-    } while (!queue_.Empty());
-    interpreter_due_ = -1.0;
-    last_interpreted_time_ = -1.0;
+  new_node.due_ = hwstate.timestamp + delay;
+
+  if (queue_was_not_empty) {
+    new_node.output_ids_ = old_back_node->output_ids_;
+
+    // At this point, if ExtraVariableDelay() > 0, old_back_node.due_ may have
+    // ExtraVariableDelay() applied, but new_node.due_ does not, yet.
+    if (old_back_node->due_ - new_node.due_ > ExtraVariableDelay()) {
+      Err("Clock changed backwards. Flushing queue.");
+      stime_t next_timeout = NO_DEADLINE;
+      auto q_node_iter = queue_.begin();
+      do {
+        if (!q_node_iter->completed_)
+          next_->SyncInterpret(q_node_iter->state_, &next_timeout);
+        ++q_node_iter;
+        queue_.pop_front();
+      } while (queue_.size() > 1);
+      interpreter_due_deadline_ = -1.0;
+      last_interpreted_time_ = -1.0;
+    }
   }
-  queue_.PushBack(node);
+
   AssignTrackingIds();
   AttemptInterpolation();
-  UpdateInterpreterDue(interpreter_due_ < 0.0 ?
-                       interpreter_due_ : interpreter_due_ + hwstate->timestamp,
-                       hwstate->timestamp, timeout);
-  HandleTimerImpl(hwstate->timestamp, timeout);
+
+  // Update the timeout and interpreter_due_deadline_ based on above processing
+  UpdateInterpreterDue(interpreter_due_deadline_, hwstate.timestamp, timeout);
+
+  // Make sure to handle any state expiration processing that is needed
+  HandleTimerImpl(hwstate.timestamp, timeout);
 
   // Copy finger flags for upstream filters.
-  QState* q_node = queue_.Head();
-  if (q_node->state_.SameFingersAs(*hwstate)) {
-    for (size_t i = 0; i < hwstate->finger_cnt; i++) {
-      hwstate->fingers[i].flags = q_node->state_.fingers[i].flags;
+  QState& q_node = queue_.front();
+  if (q_node.state_.SameFingersAs(hwstate)) {
+    for (size_t i = 0; i < hwstate.finger_cnt; i++) {
+      hwstate.fingers[i].flags = q_node.state_.fingers[i].flags;
    }
   }
+
+  LogHardwareStatePost(name, hwstate);
 }
 
 // Interpolates the two hardware states into out.
@@ -143,27 +146,27 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
     // Always reassign trackingID on the very first hwstate so that
     // the next hwstate can inherit the trackingID mapping.
     if (queue_.size() == 1) {
-      QState* tail = queue_.Tail();
-      HardwareState* hs = &tail->state_;
+      QState& tail = queue_.back();
+      HardwareState* hs = &tail.state_;
       for (size_t i = 0; i < hs->finger_cnt; i++) {
         FingerState* fs = &hs->fingers[i];
-        tail->output_ids_[fs->tracking_id] = NextTrackingId();
-        fs->tracking_id = tail->output_ids_[fs->tracking_id];
+        tail.output_ids_[fs->tracking_id] = NextTrackingId();
+        fs->tracking_id = tail.output_ids_[fs->tracking_id];
       }
       if (hs->finger_cnt > 0)
-        tail->due_ += ExtraVariableDelay();
+        tail.due_ += ExtraVariableDelay();
     }
     return;
   }
 
-  QState* tail = queue_.Tail();
-  HardwareState* hs = &tail->state_;
-  QState* prev_qs = queue_.size() < 2 ? NULL : tail->prev_;
-  HardwareState* prev_hs = prev_qs ? &prev_qs->state_ : NULL;
-  QState* prev2_qs = queue_.size() < 3 ? NULL : prev_qs->prev_;
-  HardwareState* prev2_hs = prev2_qs ? &prev2_qs->state_ : NULL;
+  auto& tail = queue_.at(-1);
+  HardwareState* hs = &tail.state_;
+  QState* prev_qs = queue_.size() < 2 ? nullptr : &(queue_.at(-2));
+  HardwareState* prev_hs = prev_qs ? &prev_qs->state_ : nullptr;
+  QState* prev2_qs = queue_.size() < 3 ? nullptr : &(queue_.at(-3));
+  HardwareState* prev2_hs = prev2_qs ? &prev2_qs->state_ : nullptr;
 
-  RemoveMissingIdsFromMap(&tail->output_ids_, *hs);
+  RemoveMissingIdsFromMap(&tail.output_ids_, *hs);
   float dt = prev_hs ? hs->timestamp - prev_hs->timestamp : 1.0;
   float prev_dt =
       prev_hs && prev2_hs ? prev_hs->timestamp - prev2_hs->timestamp : 1.0;
@@ -186,15 +189,15 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
     FingerState* fs = &hs->fingers[i];
     const short old_id = fs->tracking_id;
     bool new_finger = false;
-    if (!MapContainsKey(tail->output_ids_, fs->tracking_id)) {
-      tail->output_ids_[fs->tracking_id] = NextTrackingId();
+    if (!MapContainsKey(tail.output_ids_, fs->tracking_id)) {
+      tail.output_ids_[fs->tracking_id] = NextTrackingId();
       new_finger_present = new_finger = true;
     }
-    fs->tracking_id = tail->output_ids_[fs->tracking_id];
+    fs->tracking_id = tail.output_ids_[fs->tracking_id];
     if (new_finger)
       continue;
     if (!prev_hs) {
-      Err("How is prev_hs NULL?");
+      Err("How is prev_hs null?");
       continue;
     }
     // Consider breaking the connection between this frame and the previous
@@ -206,7 +209,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
     FingerState* prev_fs =
         prev_hs->GetFingerState(prev_qs->output_ids_[old_id]);
     if (!prev_fs) {
-      Err("How is prev_fs NULL?");
+      Err("How is prev_fs null?");
       continue;
     }
 
@@ -217,7 +220,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
     if (dist_sq > max_dist_sq)
       max_dist_sq = dist_sq;
 
-    FingerState* prev2_fs = NULL;
+    FingerState* prev2_fs = nullptr;
 
     if (prev2_hs && MapContainsKey(prev2_qs->output_ids_, old_id))
       prev2_fs = prev2_hs->GetFingerState(prev2_qs->output_ids_[old_id]);
@@ -239,8 +242,8 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
         if (prev_qs->output_ids_[old_id] != prev2_qs->output_ids_[old_id]) {
           prev_qs->output_ids_[old_id] = prev2_qs->output_ids_[old_id];
           prev_fs->tracking_id = prev_qs->output_ids_[old_id];
-          tail->output_ids_[old_id] = prev2_qs->output_ids_[old_id];
-          fs->tracking_id = tail->output_ids_[old_id];
+          tail.output_ids_[old_id] = prev2_qs->output_ids_[old_id];
+          fs->tracking_id = tail.output_ids_[old_id];
           continue;
         }
       }
@@ -269,7 +272,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
         continue;
       }
       separated_fingers.insert(old_id);
-      SeparateFinger(tail, fs, old_id);
+      SeparateFinger(&tail, fs, old_id);
       // Separating fingers shouldn't tap.
       fs->flags |= GESTURES_FINGER_NO_TAP;
       // Try to also flag the previous frame, if we didn't execute it yet
@@ -298,10 +301,10 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
         Err("How is input ID missing from prev state? %d", input_id);
         continue;
       }
-      short new_bad_output_id = tail->output_ids_[input_id];
+      short new_bad_output_id = tail.output_ids_[input_id];
       short prev_output_id = prev_qs->output_ids_[input_id];
-      tail->output_ids_[input_id] = prev_output_id;
-      FingerState* fs = tail->state_.GetFingerState(new_bad_output_id);
+      tail.output_ids_[input_id] = prev_output_id;
+      FingerState* fs = tail.state_.GetFingerState(new_bad_output_id);
       if (!fs) {
         Err("Can't find finger state.");
         continue;
@@ -316,7 +319,7 @@ void LookaheadFilterInterpreter::AssignTrackingIds() {
        LiftoffJumpStarting(*hs, *prev_hs, *prev2_hs))) {
     // Possibly add some extra delay to correct, incase this separation
     // shouldn't have occurred or if the finger may be lifting from the pad.
-    tail->due_ += ExtraVariableDelay();
+    tail.due_ += ExtraVariableDelay();
   }
 }
 
@@ -356,22 +359,32 @@ void LookaheadFilterInterpreter::TapDownOccurringGesture(stime_t now) {
     return;
   if (queue_.size() < 2)
     return;  // Not enough data to know
-  HardwareState& hs = queue_.Tail()->state_;
-  if (queue_.Tail()->state_.timestamp != now)
+
+  const char name[] = "LookaheadFilterInterpreter::TapDownOccurringGesture";
+
+  HardwareState& hs = queue_.back().state_;
+  if (queue_.back().state_.timestamp != now)
     return;  // We didn't push a new hardware state now
-  // See if latest hwstate has finger that previous doesn't
-  HardwareState& prev_hs = queue_.Tail()->prev_->state_;
+  // See if latest hwstate has finger that previous doesn't.
+  // Get the state_ of back->prev
+  HardwareState& prev_hs = queue_.at(-2).state_;
   if (hs.finger_cnt > prev_hs.finger_cnt) {
     // Finger was added.
-    ProduceGesture(Gesture(kGestureFling, prev_hs.timestamp, hs.timestamp,
-                           0, 0, GESTURES_FLING_TAP_DOWN));
+    auto fling_tap_down = Gesture(kGestureFling,
+                                  prev_hs.timestamp, hs.timestamp,
+                                  0, 0, GESTURES_FLING_TAP_DOWN);
+    LogGestureProduce(name, fling_tap_down);
+    ProduceGesture(fling_tap_down);
     return;
   }
   // Go finger by finger for a final check
   for (size_t i = 0; i < hs.finger_cnt; i++)
     if (!prev_hs.GetFingerState(hs.fingers[i].tracking_id)) {
-      ProduceGesture(Gesture(kGestureFling, prev_hs.timestamp, hs.timestamp,
-                             0, 0, GESTURES_FLING_TAP_DOWN));
+      auto fling_tap_down = Gesture(kGestureFling,
+                                    prev_hs.timestamp, hs.timestamp,
+                                    0, 0, GESTURES_FLING_TAP_DOWN);
+      LogGestureProduce(name, fling_tap_down);
+      ProduceGesture(fling_tap_down);
       return;
     }
 }
@@ -396,62 +409,72 @@ short LookaheadFilterInterpreter::NextTrackingId() {
 void LookaheadFilterInterpreter::AttemptInterpolation() {
   if (queue_.size() < 2)
     return;
-  QState* new_node = queue_.Tail();
-  QState* prev = new_node->prev_;
-  if (new_node->state_.timestamp - prev->state_.timestamp <
-      split_min_period_.val_)
+  QState& new_node = queue_.at(-1);
+  QState& prev = queue_.at(-2);
+  if (new_node.state_.timestamp - prev.state_.timestamp <
+      split_min_period_.val_) {
     return;  // Nodes came in too quickly to need interpolation
-  if (!prev->state_.SameFingersAs(new_node->state_))
-    return;
-  QState* node = free_list_.PopFront();
-  if (!node) {
-    Err("out of nodes?");
-    return;
   }
-  node->state_.fingers = node->fs_.get();
-  node->completed_ = false;
-  Interpolate(prev->state_, new_node->state_, &node->state_);
+  if (!prev.state_.SameFingersAs(new_node.state_))
+    return;
+  auto node = QState(hwprops_->max_finger_cnt);
+  Interpolate(prev.state_, new_node.state_, &node.state_);
 
   double delay = max(0.0, min<stime_t>(kMaxDelay, min_delay_.val_));
-  node->due_ = node->state_.timestamp + delay;
+  node.due_ = node.state_.timestamp + delay;
 
-  if (node->state_.timestamp <= last_interpreted_time_) {
-    // Time wouldn't seem monotonically increasing w/ this new event, so
-    // discard it.
-    free_list_.PushBack(node);
-    return;
+  // Make sure time seems monotonically increasing w/ this new event
+  if (node.state_.timestamp > last_interpreted_time_) {
+    queue_.insert(--queue_.end(), std::move(node));
   }
-
-  queue_.InsertBefore(new_node, node);
 }
 
 void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
                                                  stime_t* timeout) {
-  TapDownOccurringGesture(now);
+  const char name[] = "LookaheadFilterInterpreter::HandleTimerImpl";
+  LogHandleTimerPre(name, now, timeout);
+
   stime_t next_timeout = NO_DEADLINE;
 
+  // Determine if a FlingTapDown gesture needs to be produced
+  TapDownOccurringGesture(now);
+
+  // The queue_ can have multiple nodes that are due_, so look for all
   while (true) {
-    if (interpreter_due_ > 0.0) {
-      if (interpreter_due_ > now) {
-        next_timeout = interpreter_due_ - now;
+    if (interpreter_due_deadline_ > 0.0) {
+      // Previously determined we have an expired node
+      if (interpreter_due_deadline_ > now) {
+        next_timeout = interpreter_due_deadline_ - now;
         break;  // Spurious callback
       }
-      next_timeout = NO_DEADLINE;
+
+      // Mark that we interpreted and propagate the next_ HandleTimer
       last_interpreted_time_ = now;
+      next_timeout = NO_DEADLINE;
       next_->HandleTimer(now, &next_timeout);
     } else {
-      if (queue_.Empty())
+      // No previous detection of an expired node
+      if (queue_.empty())
         break;
-      // Get next uncompleted and overdue hwstate
-      QState* node = queue_.Head();
-      while (node != queue_.Tail() && node->completed_)
-        node = node->next_;
+
+      // Get next uncompleted and overdue node
+      auto node = &queue_.back();
+      for (auto& elem : queue_) {
+        if (!elem.completed_) {
+          node = &elem;
+          break;
+        }
+      }
       if (node->completed_ || node->due_ > now)
         break;
-      next_timeout = NO_DEADLINE;
+
+      // node has not completed and is due.  Mark that we interpreted,
+      // copy the hwstate back out of the node and propagate the next_
+      // SyncInterpret
       last_interpreted_time_ = node->state_.timestamp;
       const size_t finger_cnt = node->state_.finger_cnt;
-      FingerState fs_copy[std::max(finger_cnt,(size_t)1)];
+      auto fs_copy =
+        std::make_unique<FingerState[]>(std::max(finger_cnt, (size_t)1));
       std::copy(&node->state_.fingers[0],
                 &node->state_.fingers[finger_cnt],
                 &fs_copy[0]);
@@ -460,7 +483,7 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
         node->state_.buttons_down,
         node->state_.finger_cnt,
         node->state_.touch_cnt,
-        fs_copy,
+        fs_copy.get(),
         node->state_.rel_x,
         node->state_.rel_y,
         node->state_.rel_wheel,
@@ -468,11 +491,13 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
         node->state_.rel_hwheel,
         node->state_.msc_timestamp,
       };
-      next_->SyncInterpret(&hs_copy, &next_timeout);
+      next_timeout = NO_DEADLINE;
+      next_->SyncInterpret(hs_copy, &next_timeout);
 
       // Clear previously completed nodes, but keep at least two nodes.
-      while (queue_.size() > 2 && queue_.Head()->completed_)
-        free_list_.PushBack(queue_.PopFront());
+      while (queue_.size() > 2 && queue_.front().completed_) {
+        queue_.pop_front();
+      }
 
       // Mark current node completed. This should be the only completed
       // node in the queue.
@@ -486,10 +511,14 @@ void LookaheadFilterInterpreter::HandleTimerImpl(stime_t now,
     UpdateInterpreterDue(next_timeout, now, timeout);
   }
   UpdateInterpreterDue(next_timeout, now, timeout);
+  LogHandleTimerPost(name, now, timeout);
 }
 
 void LookaheadFilterInterpreter::ConsumeGesture(const Gesture& gesture) {
-  QState* node = queue_.Head();
+  const char name[] = "LookaheadFilterInterpreter::ConsumeGesture";
+  LogGestureConsume(name, gesture);
+
+  QState& node = queue_.front();
 
   float distance_sq = 0.0;
   // Slow movements should potentially be suppressed
@@ -504,6 +533,7 @@ void LookaheadFilterInterpreter::ConsumeGesture(const Gesture& gesture) {
       break;
     default:
       // Non-movement: just allow it.
+      LogGestureProduce(name, gesture);
       ProduceGesture(gesture);
       return;
   }
@@ -512,15 +542,18 @@ void LookaheadFilterInterpreter::ConsumeGesture(const Gesture& gesture) {
       min_nonsuppress_speed_.val_ * min_nonsuppress_speed_.val_ *
       time_delta * time_delta;
   if (distance_sq >= min_nonsuppress_dist_sq) {
+    LogGestureProduce(name, gesture);
     ProduceGesture(gesture);
     return;
   }
   // Speed is slow. Suppress if fingers have changed.
-  for (QState* iter = node->next_; iter != queue_.End(); iter = iter->next_)
-    if (!node->state_.SameFingersAs(iter->state_) ||
-        (node->state_.buttons_down != iter->state_.buttons_down))
+  for (auto iter = ++queue_.begin(); iter != queue_.end(); ++iter) {
+    if (!node.state_.SameFingersAs((*iter).state_) ||
+        (node.state_.buttons_down != (*iter).state_.buttons_down))
       return; // suppress
+  }
 
+  LogGestureProduce(name, gesture);
   ProduceGesture(gesture);
 }
 
@@ -532,19 +565,18 @@ void LookaheadFilterInterpreter::UpdateInterpreterDue(
   // timeout, so we use -DBL_MAX as the invalid value.
   stime_t next_hwstate_timeout = -DBL_MAX;
   // Scan queue_ to find when next hwstate is due.
-  for (QState* node = queue_.Begin(); node != queue_.End();
-       node = node->next_) {
-    if (node->completed_)
+  for (auto& elem : queue_) {
+    if (elem.completed_)
       continue;
-    next_hwstate_timeout = node->due_ - now;
+    next_hwstate_timeout = elem.due_ - now;
     break;
   }
 
-  interpreter_due_ = -1.0;
+  interpreter_due_deadline_ = -1.0;
   if (new_interpreter_timeout >= 0.0 &&
       (new_interpreter_timeout < next_hwstate_timeout ||
        next_hwstate_timeout == -DBL_MAX)) {
-    interpreter_due_ = new_interpreter_timeout + now;
+    interpreter_due_deadline_ = new_interpreter_timeout + now;
     *timeout = new_interpreter_timeout;
   } else if (next_hwstate_timeout > -DBL_MAX) {
     *timeout = next_hwstate_timeout <= 0.0 ? NO_DEADLINE : next_hwstate_timeout;
@@ -556,14 +588,8 @@ void LookaheadFilterInterpreter::Initialize(
     Metrics* metrics,
     MetricsProperties* mprops,
     GestureConsumer* consumer) {
-  FilterInterpreter::Initialize(hwprops, NULL, mprops, consumer);
-  const size_t kMaxQNodes = 16;
-  queue_.DeleteAll();
-  free_list_.DeleteAll();
-  for (size_t i = 0; i < kMaxQNodes; ++i) {
-    QState* node = new QState(hwprops_->max_finger_cnt);
-    free_list_.PushBack(node);
-  }
+  FilterInterpreter::Initialize(hwprops, nullptr, mprops, consumer);
+  queue_.clear();
 }
 
 stime_t LookaheadFilterInterpreter::ExtraVariableDelay() const {
@@ -571,36 +597,15 @@ stime_t LookaheadFilterInterpreter::ExtraVariableDelay() const {
 }
 
 LookaheadFilterInterpreter::QState::QState()
-    : max_fingers_(0), completed_(false), next_(NULL), prev_(NULL) {
+    : max_fingers_(0) {
   fs_.reset();
-  state_.fingers = NULL;
+  state_.fingers = nullptr;
 }
 
 LookaheadFilterInterpreter::QState::QState(unsigned short max_fingers)
-    : max_fingers_(max_fingers), completed_(false), next_(NULL), prev_(NULL) {
+    : max_fingers_(max_fingers) {
   fs_.reset(new FingerState[max_fingers]);
   state_.fingers = fs_.get();
-}
-
-void LookaheadFilterInterpreter::QState::set_state(
-    const HardwareState& new_state) {
-  state_.timestamp = new_state.timestamp;
-  state_.buttons_down = new_state.buttons_down;
-  state_.touch_cnt = new_state.touch_cnt;
-  unsigned short copy_count = new_state.finger_cnt;
-  if (new_state.finger_cnt > max_fingers_) {
-    Err("State with too many fingers! (%u vs %u)",
-        new_state.finger_cnt,
-        max_fingers_);
-    copy_count = max_fingers_;
-  }
-  state_.finger_cnt = copy_count;
-  std::copy(new_state.fingers, new_state.fingers + copy_count, state_.fingers);
-  state_.rel_x = new_state.rel_x;
-  state_.rel_y = new_state.rel_y;
-  state_.rel_wheel = new_state.rel_wheel;
-  state_.rel_hwheel = new_state.rel_hwheel;
-  state_.msc_timestamp = new_state.msc_timestamp;
 }
 
 }  // namespace gestures

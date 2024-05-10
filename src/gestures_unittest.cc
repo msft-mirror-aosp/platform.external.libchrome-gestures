@@ -314,8 +314,8 @@ TEST(GesturesTest, GestureEqTest) {
 TEST(GesturesTest, SimpleTest) {
   // Simple allocate/free test
   std::unique_ptr<GestureInterpreter> gs(NewGestureInterpreter());
-  EXPECT_NE(static_cast<GestureInterpreter*>(NULL), gs.get());
-  EXPECT_EQ(static_cast<Interpreter*>(NULL), gs.get()->interpreter());
+  EXPECT_NE(nullptr, gs.get());
+  EXPECT_EQ(nullptr, gs.get()->interpreter());
 
   GestureInterpreter* gs_version_under = NewGestureInterpreterImpl(0);
   EXPECT_EQ(nullptr, gs_version_under);
@@ -411,6 +411,19 @@ TEST(GesturesTest, StimeFromTimespecTest) {
   EXPECT_DOUBLE_EQ(2000000000.999999999, StimeFromTimespec(&tv));
 }
 
+TEST(GesturesTest, FingerStateFlagsStringTest) {
+  EXPECT_EQ("0", FingerState::FlagsString(0));
+  EXPECT_EQ("GESTURES_FINGER_PALM",
+            FingerState::FlagsString(GESTURES_FINGER_PALM));
+  EXPECT_EQ("GESTURES_FINGER_PALM | GESTURES_FINGER_WARP_X_MOVE",
+            FingerState::FlagsString(
+                GESTURES_FINGER_PALM | GESTURES_FINGER_WARP_X_MOVE));
+  // 1 << 31 probably won't be used as a finger flag value anytime soon, so use
+  // it to test prepending the remaining number.
+  EXPECT_EQ("2147483648 | GESTURES_FINGER_PALM",
+            FingerState::FlagsString(GESTURES_FINGER_PALM | (1 << 31)));
+}
+
 TEST(GesturesTest, HardwareStateGetFingerStateTest) {
   FingerState fs[] = {
     { 0, 0, 0, 0, 1, 0, 150, 4000, 4, 0 },
@@ -421,27 +434,28 @@ TEST(GesturesTest, HardwareStateGetFingerStateTest) {
   EXPECT_EQ(&fs[0], hs.GetFingerState(4));
   EXPECT_EQ(&fs[1], hs.GetFingerState(2));
   EXPECT_EQ(&fs[2], hs.GetFingerState(7));
-  EXPECT_EQ(reinterpret_cast<FingerState*>(NULL), hs.GetFingerState(8));
+  EXPECT_EQ(nullptr, hs.GetFingerState(8));
 
   const HardwareState& const_hs = hs;
   EXPECT_EQ(&fs[0], const_hs.GetFingerState(4));
   EXPECT_EQ(&fs[1], const_hs.GetFingerState(2));
   EXPECT_EQ(&fs[2], const_hs.GetFingerState(7));
-  EXPECT_EQ(reinterpret_cast<const FingerState*>(NULL), hs.GetFingerState(8));
+  EXPECT_EQ(nullptr, hs.GetFingerState(8));
 }
 
 TEST(GesturesTest, HardwarePropertiesToStringTest) {
   HardwareProperties hp = {
-    1009.5, 1002.4, 1003.9, 1004.5,  // left, top, right, bottom
-    1005.4, 1006.9,  // res_x, res_y
-    1007.4, 1008.5, // x, y screen dpi
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    12,  // max fingers
-    11,  // max touches
-    0, 1, 1,  // t5r2, semi-mt, is_button_pad
-    0, 0,  // has wheel, vertical wheel is high resolution
-    0,  // is_haptic_pad
+    .left = 1009.5, .top = 1002.4, .right = 1003.9, .bottom = 1004.5,
+    .res_x = 1005.4, .res_y = 1006.9,
+    .screen_x_dpi = 1007.4,
+    .screen_y_dpi = 1008.5,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 12,
+    .max_touch_cnt = 11,
+    .supports_t5r2 = 0, .support_semi_mt = 1, .is_button_pad = 1,
+    .has_wheel = 0, .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   string str = hp.String();
   fprintf(stderr, "str: %s\n", str.c_str());
@@ -463,7 +477,7 @@ TEST(GesturesTest, HardwarePropertiesToStringTest) {
   };
   const char* last_found = str.c_str();
   for (size_t i = 0; i < arraysize(expected); i++) {
-    ASSERT_NE(static_cast<const char*>(NULL), last_found);
+    ASSERT_NE(nullptr, last_found);
     const char* found = strstr(last_found, expected[i]);
     EXPECT_GE(found, last_found) << "i=" << i;
     last_found = found;
@@ -480,7 +494,7 @@ TEST(GesturesTest, HardwareStateToStringTest) {
 
   HardwareState hs[] = {
     make_hwstate(1.123, 1, 2, 2, fs),
-    make_hwstate(2.123, 0, 0, 0, NULL)
+    make_hwstate(2.123, 0, 0, 0, nullptr)
   };
 
   const char* expected[] = {
@@ -517,14 +531,57 @@ TEST(GesturesTest, HardwareStateToStringTest) {
   string short_str = hs[1].String();
 
   for (size_t i = 0; i < arraysize(expected); i++)
-    EXPECT_NE(static_cast<char*>(NULL), strstr(long_str.c_str(), expected[i]))
+    EXPECT_NE(nullptr, strstr(long_str.c_str(), expected[i]))
         << " str: " << expected[i];
   for (size_t i = 0; i < arraysize(short_expected); i++)
-    EXPECT_NE(static_cast<char*>(NULL),
-              strstr(short_str.c_str(), short_expected[i]))
+    EXPECT_NE(nullptr, strstr(short_str.c_str(), short_expected[i]))
         << " str: " << short_expected[i];
 
   return;
+}
+
+TEST(GesturesTest, HardwareStateDeepCopyWithFingersTest) {
+  FingerState fingerStates[] = {
+    { 1.0, 2.0, 3.0, 4.5, 30.0, 11.0, 20.0, 30.0, 14, 0 },
+    { 1.5, 2.5, 3.5, 5.0, 30.5, 11.5, 20.5, 30.5, 15, 0 }
+  };
+  const HardwareState hardwareState = make_hwstate(1.123, 1, 2, 2, fingerStates);
+
+  HardwareState hardwareStateCopy;
+  hardwareStateCopy.fingers = new FingerState[hardwareState.finger_cnt];
+  hardwareStateCopy.DeepCopy(hardwareState, hardwareState.finger_cnt);
+
+  EXPECT_EQ(hardwareStateCopy.String(), hardwareState.String());
+  delete[] hardwareStateCopy.fingers;
+}
+
+TEST(GesturesTest, HardwareStateDeepCopyWithoutFingersTest) {
+  const HardwareState hardwareState = make_hwstate(1.123, 1, 0, 2, nullptr);
+
+  HardwareState hardwareStateCopy;
+  hardwareStateCopy.DeepCopy(hardwareState, hardwareState.finger_cnt);
+
+  EXPECT_EQ(hardwareStateCopy.String(), hardwareState.String());
+}
+
+TEST(GesturesTest, InvalidHardwareStateDeepCopyTest) {
+  // 2 finger_cnt without any fingersState(s) specified
+  const HardwareState invalidHardwareState = make_hwstate(1.123, 1, 2, 2, nullptr);
+
+  HardwareState hardwareStateCopy;
+  hardwareStateCopy.DeepCopy(invalidHardwareState, invalidHardwareState.finger_cnt);
+
+  EXPECT_EQ(invalidHardwareState.timestamp, hardwareStateCopy.timestamp);
+  EXPECT_EQ(invalidHardwareState.buttons_down, hardwareStateCopy.buttons_down);
+  EXPECT_EQ(invalidHardwareState.finger_cnt, hardwareStateCopy.finger_cnt);
+  EXPECT_EQ(invalidHardwareState.touch_cnt, hardwareStateCopy.touch_cnt);
+  EXPECT_EQ(invalidHardwareState.fingers, hardwareStateCopy.fingers);
+  EXPECT_EQ(invalidHardwareState.rel_x, hardwareStateCopy.rel_x);
+  EXPECT_EQ(invalidHardwareState.rel_y, hardwareStateCopy.rel_y);
+  EXPECT_EQ(invalidHardwareState.rel_wheel, hardwareStateCopy.rel_wheel);
+  EXPECT_EQ(invalidHardwareState.rel_wheel_hi_res, hardwareStateCopy.rel_wheel_hi_res);
+  EXPECT_EQ(invalidHardwareState.rel_hwheel, hardwareStateCopy.rel_wheel);
+  EXPECT_EQ(invalidHardwareState.msc_timestamp, hardwareStateCopy.msc_timestamp);
 }
 
 }  // namespace gestures

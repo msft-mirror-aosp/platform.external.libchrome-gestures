@@ -17,15 +17,17 @@ namespace gestures {
 class MouseInterpreter : public Interpreter, public PropertyDelegate {
   FRIEND_TEST(MouseInterpreterTest, SimpleTest);
   FRIEND_TEST(MouseInterpreterTest, HighResolutionVerticalScrollTest);
+  FRIEND_TEST(MouseInterpreterTest, ScrollAccelerationOnAndOffTest);
   FRIEND_TEST(MouseInterpreterTest, JankyScrollTest);
   FRIEND_TEST(MouseInterpreterTest, WheelTickReportingHighResTest);
   FRIEND_TEST(MouseInterpreterTest, WheelTickReportingLowResTest);
+  FRIEND_TEST(MouseInterpreterTest, EmulateScrollWheelTest);
  public:
   MouseInterpreter(PropRegistry* prop_reg, Tracer* tracer);
   virtual ~MouseInterpreter() {};
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout);
   // These functions interpret mouse events, which include button clicking and
   // mouse movement. This function needs two consecutive HardwareState. If no
   // mouse events are presented, result object is not modified. Scroll wheel
@@ -43,9 +45,9 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
   bool EmulateScrollWheel(const HardwareState& hwstate);
  private:
   struct WheelRecord {
-    WheelRecord(float v, stime_t t): value(v), timestamp(t) {}
-    WheelRecord(): value(0), timestamp(0) {}
-    float value;
+    WheelRecord(float v, stime_t t): change(v), timestamp(t) {}
+    WheelRecord(): change(0), timestamp(0) {}
+    float change;
     stime_t timestamp;
   };
 
@@ -58,8 +60,8 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
 
   HardwareState prev_state_;
 
-  // Records last scroll wheel event.
-  WheelRecord last_wheel_, last_hwheel_;
+  // Records last scroll wheel events.
+  std::vector<WheelRecord> last_vertical_wheels_, last_horizontal_wheels_;
 
   // Accumulators to measure scroll distance while doing scroll wheel emulation
   double wheel_emulation_accu_x_;
@@ -74,8 +76,21 @@ class MouseInterpreter : public Interpreter, public PropertyDelegate {
   // Reverse wheel scrolling.
   BoolProperty reverse_scrolling_;
 
+  // Mouse scroll acceleration.
+  BoolProperty scroll_acceleration_;
+
+  // Mouse scroll sensitivity 1..5.
+  IntProperty scroll_sensitivity_;
+
   // Enable high-resolution scrolling.
   BoolProperty hi_res_scrolling_;
+
+  // When calculating scroll velocity for the purpose of acceleration, we
+  // use the average of this many events in the same direction. This is to avoid
+  // over-accelerating if we receive batched events with timestamps that are
+  // artificially close. If we don't have enough events, we won't accelerate at
+  // all.
+  IntProperty scroll_velocity_buffer_size_;
 
   // We use normal CDF to simulate scroll wheel acceleration curve. Use the
   // following method to generate the coefficients of a degree-4 polynomial

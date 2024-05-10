@@ -13,7 +13,7 @@
 
 namespace gestures {
 
-CommandLine* CommandLine::current_process_commandline_ = NULL;
+CommandLine* CommandLine::current_process_commandline_ = nullptr;
 
 namespace {
 
@@ -59,7 +59,7 @@ void AppendSwitchesAndArguments(CommandLine& command_line,
   bool parse_switches = true;
   for (size_t i = 1; i < argv.size(); ++i) {
     std::string arg = argv[i];
-    TrimWhitespaceASCII(arg, TRIM_ALL, &arg);
+    arg = TrimWhitespaceASCII(arg);
 
     std::string switch_string;
     std::string switch_value;
@@ -97,7 +97,7 @@ bool CommandLine::Init(int argc, const char* const* argv) {
 // static
 void CommandLine::Reset() {
   delete current_process_commandline_;
-  current_process_commandline_ = NULL;
+  current_process_commandline_ = nullptr;
 }
 
 // static
@@ -131,7 +131,7 @@ std::string CommandLine::GetProgram() const {
 }
 
 void CommandLine::SetProgram(const std::string& program) {
-  TrimWhitespaceASCII(program, TRIM_ALL, &argv_[0]);
+  argv_[0] = TrimWhitespaceASCII(program);
 }
 
 bool CommandLine::HasSwitch(const std::string& switch_string) const {

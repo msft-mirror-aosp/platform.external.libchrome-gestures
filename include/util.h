@@ -5,8 +5,10 @@
 #ifndef GESTURES_UTIL_H_
 #define GESTURES_UTIL_H_
 
+#include <list>
 #include <map>
 #include <set>
+#include <vector>
 
 #include <math.h>
 
@@ -61,42 +63,30 @@ bool MapContainsKey(const Map& the_map, const Key& the_key) {
 }
 
 // Removes any ids from the map that are not finger ids in hs.
-// This implementation supports returning removed elements for
-// further processing.
-template<typename Data>
-void RemoveMissingIdsFromMap(std::map<short, Data>* the_map,
-                             const HardwareState& hs,
-                             std::map<short, Data>* removed) {
-  removed->clear();
-  for (typename std::map<short, Data>::const_iterator it =
-      the_map->begin(); it != the_map->end(); ++it)
-    if (!hs.GetFingerState((*it).first))
-      (*removed)[it->first] = it->second;
-  for (typename std::map<short, Data>::const_iterator it =
-      removed->begin(); it != removed->end(); ++it)
-    the_map->erase(it->first);
-}
-
-// Removes any ids from the map that are not finger ids in hs.
 template<typename Data>
 void RemoveMissingIdsFromMap(std::map<short, Data>* the_map,
                              const HardwareState& hs) {
   std::map<short, Data> removed;
-  RemoveMissingIdsFromMap(the_map, hs, &removed);
+  for (const auto& [key, value] : *the_map) {
+    if (!hs.GetFingerState(key))
+      removed[key] = value;
+  }
+  for (const auto& [key, value] : removed)
+    the_map->erase(key);
 }
 
 // Removes any ids from the set that are not finger ids in hs.
 static inline
 void RemoveMissingIdsFromSet(std::set<short>* the_set,
                              const HardwareState& hs) {
-  short old_ids[the_set->size() + 1];
-  size_t old_ids_len = 0;
+  std::vector<short> old_ids;
+  old_ids.reserve(the_set->size() + 1);
   for (typename std::set<short>::const_iterator it = the_set->begin();
        it != the_set->end(); ++it)
     if (!hs.GetFingerState(*it))
-      old_ids[old_ids_len++] = *it;
-  for (size_t i = 0; i < old_ids_len; i++)
-    the_set->erase(old_ids[i]);
+      old_ids.push_back(*it);
+  for (auto id : old_ids)
+    the_set->erase(id);
 }
 
 template<typename Set, typename Elt>
@@ -104,6 +94,29 @@ inline bool SetContainsValue(const Set& the_set,
                              const Elt& elt) {
   return the_set.find(elt) != the_set.end();
 }
+
+template<typename Elem>
+class List : public std::list<Elem> {
+public:
+  Elem& at(int offset) {
+    // Traverse to the appropriate offset
+    if (offset < 0) {
+      // negative offset is from end to begin
+      for (auto iter = this->rbegin(); iter != this->rend(); ++iter) {
+        if (++offset == 0)
+          return *iter;
+      }
+    } else {
+      // positive offset is from begin to end
+      for (auto iter = this->begin(); iter != this->end(); ++iter) {
+        if (offset-- == 0)
+          return *iter;
+      }
+    }
+    // Invalid offset
+    abort();
+  }
+};
 
 }  // namespace gestures
 
