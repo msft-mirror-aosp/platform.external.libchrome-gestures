@@ -48,9 +48,9 @@ stime_t StimeFromTimespec(const struct timespec*);
 struct HardwareProperties {
   // Touch properties
   // The minimum X coordinate that the device can report.
-  float left;
+  float left = 0;
   // The minimum Y coordinate that the device can report.
-  float top;
+  float top = 0;
   // The maximum X coordinate that the device can report.
   float right;
   // The maximum Y coordinate that the device can report.
@@ -101,6 +101,9 @@ struct HardwareProperties {
   // Whether the touchpad is haptic, meaning that it reports true pressure (not
   // just touch area) via the pressure axis, and can provide haptic feedback.
   unsigned is_haptic_pad:1;
+
+  // Whether the touchpad reports pressure values in any way.
+  bool reports_pressure = true;
 #ifdef __cplusplus
   std::string String() const;
 #endif  // __cplusplus
@@ -162,6 +165,10 @@ struct HardwareProperties {
 // Describes a single contact on a touch surface. Generally, the fields have the
 // same meaning as the equivalent ABS_MT_... axis in the Linux evdev protocol.
 struct FingerState {
+  enum class ToolType {
+    kFinger = 0,
+    kPalm,
+  };
   // The large and small radii of the ellipse of the finger touching the pad.
   float touch_major, touch_minor;
 
@@ -185,6 +192,8 @@ struct FingerState {
   // A bit field of flags that are used internally by the library. (See the
   // GESTURES_FINGER_* constants.) Should be set to 0 on incoming FingerStates.
   unsigned flags;
+
+  ToolType tool_type = ToolType::kFinger;
 #ifdef __cplusplus
   bool NonFlagsEquals(const FingerState& that) const {
     return touch_major == that.touch_major &&
@@ -212,6 +221,8 @@ struct FingerState {
 #define GESTURES_BUTTON_RIGHT 4
 #define GESTURES_BUTTON_BACK 8
 #define GESTURES_BUTTON_FORWARD 16
+#define GESTURES_BUTTON_SIDE 32
+#define GESTURES_BUTTON_EXTRA 64
 
 // Describes one frame of data from the input device.
 struct HardwareState {
@@ -232,12 +243,14 @@ struct HardwareState {
   // The number of fingers touching the pad, which may be more than finger_cnt.
   unsigned short touch_cnt;
   // A pointer to an array of FingerState structs with finger_cnt entries,
-  // representing the contacts currently being tracked. The order in which
-  // FingerStates appear need not be stable between HardwareStates — only the
-  // tracking ID is used to track individual contacts over time. Accordingly,
-  // when a finger is lifted from the pad (and therefore its ABS_MT_TRACKING_ID
-  // becomes -1), the client should simply stop including it in this array,
-  // rather than including a final FingerState for it.
+  // representing the contacts currently being tracked. If finger_cnt is 0, this
+  // pointer will be null.
+  //
+  // The order in which FingerStates appear need not be stable between
+  // HardwareStates — only the tracking ID is used to track individual contacts
+  // over time. Accordingly, when a finger is lifted from the pad (and therefore
+  // its ABS_MT_TRACKING_ID becomes -1), the client should simply stop including
+  // it in this array, rather than including a final FingerState for it.
   struct FingerState* fingers;
 
   // Mouse axes, which have the same meanings as the Linux evdev axes of the
@@ -550,7 +563,7 @@ typedef struct GesturesTimer GesturesTimer;
 // should be called again after that amount of delay.
 typedef stime_t (*GesturesTimerCallback)(stime_t now,
                                          void* callback_data);
-// Allocate and return a new timer, or NULL if error.
+// Allocate and return a new timer, or nullptr if error.
 typedef GesturesTimer* (*GesturesTimerCreate)(void* data);
 // Set a timer:
 typedef void (*GesturesTimerSet)(void* data,
@@ -618,11 +631,11 @@ typedef void (*GesturesPropSetHandler)(void* handler_data);
 
 // Register handlers for the client to call when a GesturesProp is accessed.
 //
-// The get handler, if not NULL, should be called immediately before the
+// The get handler, if not nullptr, should be called immediately before the
 // property's value is to be read. This gives the library a chance to update its
 // value.
 //
-// The set handler, if not NULL, should be called immediately after the
+// The set handler, if not nullptr, should be called immediately after the
 // property's value is updated. This can be used to create a property that is
 // used to trigger an action, or to force an update to multiple properties
 // atomically.
@@ -654,13 +667,12 @@ typedef struct GesturesPropProvider {
 namespace gestures {
 
 class Interpreter;
+class IntProperty;
 class PropRegistry;
 class LoggingFilterInterpreter;
 class Tracer;
 class GestureInterpreterConsumer;
 class MetricsProperties;
-
-#if __cplusplus >= 201103L
 
 struct GestureInterpreter {
  public:
@@ -701,6 +713,7 @@ struct GestureInterpreter {
   std::unique_ptr<Tracer> tracer_;
   std::unique_ptr<Interpreter> interpreter_;
   std::unique_ptr<MetricsProperties> mprops_;
+  std::unique_ptr<IntProperty> stack_version_;
 
   GesturesTimerProvider* timer_provider_;
   void* timer_provider_data_;
@@ -714,14 +727,6 @@ struct GestureInterpreter {
   GestureInterpreter(const GestureInterpreter&);
   void operator=(const GestureInterpreter&);
 };
-
-#else  // __cplusplus >= 201103L
-
-// Must be opaque under C++03 builds, since it has unique_ptr members.
-struct GestureInterpreter;
-
-#endif  // __cplusplus >= 201103L
-
 
 }  // namespace gestures
 
@@ -747,7 +752,7 @@ void GestureInterpreterSetCallback(GestureInterpreter*,
                                    GestureReadyFunction,
                                    void*);
 
-// Gestures will hold a reference to passed provider. Pass NULL to tell
+// Gestures will hold a reference to passed provider. Pass nullptr to tell
 // Gestures to stop holding a reference.
 void GestureInterpreterSetTimerProvider(GestureInterpreter*,
                                         GesturesTimerProvider*,

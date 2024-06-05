@@ -14,13 +14,12 @@ class FingerMergeFilterInterpreterTest : public ::testing::Test {};
 class FingerMergeFilterInterpreterTestInterpreter : public Interpreter {
  public:
   FingerMergeFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         handle_timer_called_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
-    EXPECT_NE(static_cast<HardwareState*>(NULL), hwstate);
-    EXPECT_EQ(2, hwstate->finger_cnt);
-    prev_ = hwstate->fingers[0];
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
+    EXPECT_EQ(2, hwstate.finger_cnt);
+    prev_ = hwstate.fingers[0];
   }
 
   virtual void HandleTimer(stime_t now, stime_t* timeout) {
@@ -47,26 +46,26 @@ TEST(FingerMergeFilterInterpreterTest, SimpleTest) {
 
   FingerMergeFilterInterpreterTestInterpreter* base_interpreter =
       new FingerMergeFilterInterpreterTestInterpreter;
-  FingerMergeFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  FingerMergeFilterInterpreter interpreter(nullptr, base_interpreter, nullptr);
 
   EXPECT_FALSE(interpreter.finger_merge_filter_enable_.val_);
   interpreter.finger_merge_filter_enable_.val_ = true;
 
   HardwareProperties hwprops = {
-    0, 0, 100, 100,  // left, top, right, bottom
-    1, 1,  // x res (pixels/mm), y res (pixels/mm)
-    1, 1,  // scrn DPI X, Y
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    5, 5,  // max fingers, max_touch,
-    0, 0, 1,  // t5r2, semi, button pad
-    0, 0,  // has wheel, vertical wheel is high resolution
-    0,  // haptic pad
+    .right = 100, .bottom = 100,
+    .res_x = 1, .res_y = 1,
+    .screen_x_dpi = 0, .screen_y_dpi = 0,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 5, .max_touch_cnt = 5,
+    .supports_t5r2 = 0, .support_semi_mt = 0, .is_button_pad = 1,
+    .has_wheel = 0, .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
   EXPECT_FALSE(base_interpreter->handle_timer_called_);
-  wrapper.HandleTimer(0.0, NULL);
+  wrapper.HandleTimer(0.0, nullptr);
   EXPECT_TRUE(base_interpreter->handle_timer_called_);
 
   FingerState finger_states[] = {
@@ -110,10 +109,10 @@ TEST(FingerMergeFilterInterpreterTest, SimpleTest) {
   };
 
   for (size_t i = 0; i < arraysize(hardware_states); i++) {
-    HardwareState *hwstate = &hardware_states[i];
-    wrapper.SyncInterpret(hwstate, NULL);
-    for (short j = 0; j < hwstate->finger_cnt; j++) {
-      FingerState *fs = hwstate->fingers;
+    HardwareState& hwstate = hardware_states[i];
+    wrapper.SyncInterpret(hwstate, nullptr);
+    for (short j = 0; j < hwstate.finger_cnt; j++) {
+      FingerState *fs = hwstate.fingers;
       EXPECT_TRUE(fs[j].flags & GESTURES_FINGER_MERGE);
     }
   }

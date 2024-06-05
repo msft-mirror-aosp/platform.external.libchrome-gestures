@@ -30,9 +30,11 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
   FRIEND_TEST(LookaheadFilterInterpreterTest, QuickMoveTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, QuickSwipeTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, SemiMtNoTrackingIdAssignmentTest);
-  FRIEND_TEST(LookaheadFilterInterpreterTest, SimpleTest);
+  FRIEND_TEST(LookaheadFilterInterpreterParmTest, SimpleTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, SpuriousCallbackTest);
   FRIEND_TEST(LookaheadFilterInterpreterTest, VariableDelayTest);
+  FRIEND_TEST(LookaheadFilterInterpreterTest, AddFingerFlingTest);
+  FRIEND_TEST(LookaheadFilterInterpreterTest, ConsumeGestureTest);
 
  public:
   LookaheadFilterInterpreter(PropRegistry* prop_reg, Interpreter* next,
@@ -40,7 +42,7 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
   virtual ~LookaheadFilterInterpreter() {}
 
  protected:
-  virtual void SyncInterpretImpl(HardwareState* hwstate,
+  virtual void SyncInterpretImpl(HardwareState& hwstate,
                                  stime_t* timeout);
 
   virtual void HandleTimerImpl(stime_t now, stime_t* timeout);
@@ -113,7 +115,8 @@ class LookaheadFilterInterpreter : public FilterInterpreter {
 
   unsigned short max_fingers_per_hwstate_;
 
-  stime_t interpreter_due_;
+  // Last detected due_ time as an absolute deadline
+  stime_t interpreter_due_deadline_;
 
   // We want to present time to next_ in a monotonically increasing manner,
   // so this keeps track of the most recent timestamp we've given next_.

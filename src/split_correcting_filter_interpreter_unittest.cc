@@ -21,25 +21,25 @@ class SplitCorrectingFilterInterpreterTestInterpreter :
       public Interpreter {
  public:
   SplitCorrectingFilterInterpreterTestInterpreter()
-      : Interpreter(NULL, NULL, false),
+      : Interpreter(nullptr, nullptr, false),
         expect_finger_ids_(true),
         iteration_(0),
         expect_warp_on_one_finger_only_(false) {}
 
-  virtual void SyncInterpret(HardwareState* hwstate, stime_t* timeout) {
+  virtual void SyncInterpret(HardwareState& hwstate, stime_t* timeout) {
     if (expect_finger_ids_) {
-      EXPECT_EQ(hwstate->finger_cnt, hwstate->touch_cnt);
-      EXPECT_EQ(hwstate->finger_cnt, expected_ids_.size());
+      EXPECT_EQ(hwstate.finger_cnt, hwstate.touch_cnt);
+      EXPECT_EQ(hwstate.finger_cnt, expected_ids_.size());
     }
-    for (size_t i = 0; i < hwstate->finger_cnt; i++) {
+    for (size_t i = 0; i < hwstate.finger_cnt; i++) {
       bool found = SetContainsValue(expected_ids_,
-                                    hwstate->fingers[i].tracking_id);
+                                    hwstate.fingers[i].tracking_id);
       if (expect_finger_ids_)
         EXPECT_TRUE(found) << iteration_ << ","
-                           << hwstate->fingers[i].tracking_id;
+                           << hwstate.fingers[i].tracking_id;
       if (expect_warp_on_one_finger_only_) {
-        EXPECT_EQ(hwstate->finger_cnt == 1,
-                  (hwstate->fingers[i].flags &
+        EXPECT_EQ(hwstate.finger_cnt == 1,
+                  (hwstate.fingers[i].flags &
                    (GESTURES_FINGER_WARP_X | GESTURES_FINGER_WARP_Y)) ==
                   (GESTURES_FINGER_WARP_X | GESTURES_FINGER_WARP_Y));
       }
@@ -65,25 +65,26 @@ namespace {
 void DoTest(InputEventWithExpectations* events, size_t events_len, bool t5r2) {
   SplitCorrectingFilterInterpreterTestInterpreter* base_interpreter
       = new SplitCorrectingFilterInterpreterTestInterpreter;
-  SplitCorrectingFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  SplitCorrectingFilterInterpreter interpreter(
+      nullptr, base_interpreter, nullptr);
   interpreter.Enable();
 
   HardwareProperties hwprops = {
-    0, 0, 100, 100,  // left, top, right, bottom
-    1,  // res_x
-    1,  // res_y
-    133,  // screen_x_dpi
-    133,  // screen_y_dpi
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    5,  // max finger cnt
-    static_cast<unsigned short>(t5r2 ? 2 : 5),  // max touch cnt
-    t5r2 ? 1u : 0u,  // supports_t5r2
-    0,   // support_semi_mt
-    1,  // is_button_pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    0,  // is_haptic_pad
+    .right = 100, .bottom = 100,
+    .res_x = 1,
+    .res_y = 1,
+    .screen_x_dpi = 0,
+    .screen_y_dpi = 0,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 5,
+    .max_touch_cnt = static_cast<unsigned short>(t5r2 ? 2 : 5),
+    .supports_t5r2 = t5r2 ? 1u : 0u,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -104,7 +105,7 @@ void DoTest(InputEventWithExpectations* events, size_t events_len, bool t5r2) {
          outidx++)
       base_interpreter->expected_ids_.insert(event->out_ids[outidx]);
     stime_t timestamp = -1.0;
-    wrapper.SyncInterpret(&hs, &timestamp);
+    wrapper.SyncInterpret(hs, &timestamp);
   }
 }
 
@@ -161,25 +162,26 @@ TEST(SplitCorrectingFilterInterpreterTest, FalseMergeTest) {
 
   SplitCorrectingFilterInterpreterTestInterpreter* base_interpreter
       = new SplitCorrectingFilterInterpreterTestInterpreter;
-  SplitCorrectingFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  SplitCorrectingFilterInterpreter interpreter(
+      nullptr, base_interpreter, nullptr);
   interpreter.Enable();
 
   HardwareProperties hwprops = {
-    0, 0, 100, 100,  // left, top, right, bottom
-    1,  // res_x
-    1,  // res_y
-    133,  // screen_x_dpi
-    133,  // screen_y_dpi
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    5,  // max finger cnt
-    5,  // max touch cnt
-    0,  // supports_t5r2
-    0,   // support_semi_mt
-    1,  // is_button_pad
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    0,  // is_haptic_pad
+    .right = 100, .bottom = 100,
+    .res_x = 1,
+    .res_y = 1,
+    .screen_x_dpi = 0,
+    .screen_y_dpi = 0,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 5,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -219,7 +221,7 @@ TEST(SplitCorrectingFilterInterpreterTest, FalseMergeTest) {
     // if the last iteration
     stime_t timestamp = -1.0;
 
-    wrapper.SyncInterpret(&hs, &timestamp);
+    wrapper.SyncInterpret(hs, &timestamp);
     base_interpreter->expect_warp_on_one_finger_only_ = true;
   }
 }
@@ -313,31 +315,30 @@ struct LumpyThumbSplitTestInputs {
 TEST(SplitCorrectingFilterInterpreterTest, LumpyThumbSplitTest) {
   SplitCorrectingFilterInterpreterTestInterpreter* base_interpreter
       = new SplitCorrectingFilterInterpreterTestInterpreter;
-  SplitCorrectingFilterInterpreter interpreter(NULL, base_interpreter, NULL);
+  SplitCorrectingFilterInterpreter interpreter(
+      nullptr, base_interpreter, nullptr);
   interpreter.Enable();
 
   base_interpreter->expected_ids_.insert(2);
   base_interpreter->expect_finger_ids_ = true;
 
   HardwareProperties hwprops = {
-    0.0,  // left edge
-    0.0,  // top edge
-    106.666672,  // right edge
-    68.0,  // bottom edge
-    1.0,  // x pixels/TP width
-    1.0,  // y pixels/TP height
-    25.4,  // x screen DPI
-    25.4,  // y screen DPI
-    -1,  // orientation minimum
-    2,   // orientation maximum
-    15,  // max fingers
-    5,  // max touch
-    0,  // t5r2
-    0,  // semi-mt
-    1,  // is button pad,
-    0,  // has_wheel
-    0,  // wheel_is_hi_res
-    0,  // is haptic pad
+    .right = 106.666672,
+    .bottom = 68.0,
+    .res_x = 1.0,
+    .res_y = 1.0,
+    .screen_x_dpi = 0,
+    .screen_y_dpi = 0,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 15,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
   };
   TestInterpreterWrapper wrapper(&interpreter, &hwprops);
 
@@ -376,7 +377,7 @@ TEST(SplitCorrectingFilterInterpreterTest, LumpyThumbSplitTest) {
     HardwareState hs =
         make_hwstate(input.now, input.buttons_down, finger_cnt, finger_cnt, fs);
     stime_t timeout = NO_DEADLINE;
-    wrapper.SyncInterpret(&hs, &timeout);
+    wrapper.SyncInterpret(hs, &timeout);
   }
   EXPECT_EQ(arraysize(inputs), base_interpreter->iteration_);
 }

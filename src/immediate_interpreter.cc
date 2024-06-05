@@ -11,6 +11,7 @@
 #include <functional>
 #include <limits>
 #include <tuple>
+#include <vector>
 
 #include "include/gestures.h"
 #include "include/logging.h"
@@ -61,9 +62,7 @@ void TapRecord::NoteTouch(short the_id, const FingerState& fs) {
   // New finger must be close enough to an existing finger
   if (!touched_.empty()) {
     bool reject_new_finger = true;
-    for (std::map<short, FingerState>::const_iterator it =
-             touched_.begin(), e = touched_.end(); it != e; ++it) {
-      const FingerState& existing_fs = (*it).second;
+    for (const auto& [tracking_id, existing_fs] : touched_) {
       if (immediate_interpreter_->metrics_->CloseEnoughToGesture(
               Vector2(existing_fs),
               Vector2(fs))) {
@@ -113,37 +112,38 @@ void TapRecord::Update(const HardwareState& hwstate,
     else if (diff < 0)
       t5r2_released_size_ += -diff;
   }
-  for (std::set<short>::const_iterator it = added.begin(),
-           e = added.end(); it != e; ++it)
-    Log("TapRecord::Update: Added: %d", *it);
-  for (std::set<short>::const_iterator it = removed.begin(),
-           e = removed.end(); it != e; ++it)
-    Log("TapRecord::Update: Removed: %d", *it);
-  for (std::set<short>::const_iterator it = dead.begin(),
-           e = dead.end(); it != e; ++it)
-    Log("TapRecord::Update: Dead: %d", *it);
+  for (short tracking_id : added) {
+    Log("TapRecord::Update: Added: %d", tracking_id);
+  }
+  for (short tracking_id: removed) {
+    Log("TapRecord::Update: Removed: %d", tracking_id);
+  }
+  for (short tracking_id : dead) {
+    Log("TapRecord::Update: Dead: %d", tracking_id);
+  }
   for_each(dead.begin(), dead.end(),
            bind(&TapRecord::Remove, this, std::placeholders::_1));
-  for (std::set<short>::const_iterator it = added.begin(),
-           e = added.end(); it != e; ++it)
-    NoteTouch(*it, *hwstate.GetFingerState(*it));
+  for (short tracking_id : added) {
+    NoteTouch(tracking_id, *hwstate.GetFingerState(tracking_id));
+  }
   for_each(removed.begin(), removed.end(),
            bind(&TapRecord::NoteRelease, this, std::placeholders::_1));
   // Check if min tap/cotap pressure met yet
   const float cotap_min_pressure = CotapMinPressure();
-  for (std::map<short, FingerState>::iterator it =
-           touched_.begin(), e = touched_.end();
-       it != e; ++it) {
-    const FingerState* fs = hwstate.GetFingerState((*it).first);
+  for (auto& [tracking_id, existing_fs] : touched_) {
+    const FingerState* fs = hwstate.GetFingerState(tracking_id);
     if (fs) {
-      if (fs->pressure >= immediate_interpreter_->tap_min_pressure())
+      if (fs->pressure >= immediate_interpreter_->tap_min_pressure() ||
+          !immediate_interpreter_->device_reports_pressure())
         min_tap_pressure_met_.insert(fs->tracking_id);
-      if (fs->pressure >= cotap_min_pressure) {
+      if (fs->pressure >= cotap_min_pressure ||
+          !immediate_interpreter_->device_reports_pressure()) {
         min_cotap_pressure_met_.insert(fs->tracking_id);
-        if ((*it).second.pressure < cotap_min_pressure) {
+        if (existing_fs.pressure < cotap_min_pressure &&
+            immediate_interpreter_->device_reports_pressure()) {
           // Update existing record, since the old one hadn't met the cotap
           // pressure
-          (*it).second = *fs;
+          existing_fs = *fs;
         }
       }
       stime_t finger_age = hwstate.timestamp -
@@ -168,23 +168,23 @@ void TapRecord::Clear() {
 bool TapRecord::Moving(const HardwareState& hwstate,
                        const float dist_max) const {
   const float cotap_min_pressure = CotapMinPressure();
-  for (std::map<short, FingerState>::const_iterator it =
-           touched_.begin(), e = touched_.end(); it != e; ++it) {
-    const FingerState* fs = hwstate.GetFingerState((*it).first);
+  for (const auto& [tracking_id, existing_fs] : touched_) {
+    const FingerState* fs = hwstate.GetFingerState(tracking_id);
     if (!fs)
       continue;
     // Only look for moving when current frame meets cotap pressure and
     // our history contains a contact that's met cotap pressure.
-    if (fs->pressure < cotap_min_pressure ||
-        (*it).second.pressure < cotap_min_pressure)
+    if ((fs->pressure < cotap_min_pressure ||
+        existing_fs.pressure < cotap_min_pressure) &&
+        immediate_interpreter_->device_reports_pressure())
       continue;
     // Compute distance moved
-    float dist_x = fs->position_x - (*it).second.position_x;
-    float dist_y = fs->position_y - (*it).second.position_y;
+    float dist_x = fs->position_x - existing_fs.position_x;
+    float dist_y = fs->position_y - existing_fs.position_y;
     // Respect WARP flags
     if (fs->flags & GESTURES_FINGER_WARP_X_TAP_MOVE)
       dist_x = 0.0;
-    if (fs->flags & GESTURES_FINGER_WARP_X_TAP_MOVE)
+    if (fs->flags & GESTURES_FINGER_WARP_Y_TAP_MOVE)
       dist_y = 0.0;
 
     bool moving =
@@ -198,16 +198,16 @@ bool TapRecord::Moving(const HardwareState& hwstate,
 bool TapRecord::Motionless(const HardwareState& hwstate, const HardwareState&
                            prev_hwstate, const float max_speed) const {
   const float cotap_min_pressure = CotapMinPressure();
-  for (std::map<short, FingerState>::const_iterator it =
-           touched_.begin(), e = touched_.end(); it != e; ++it) {
-    const FingerState* fs = hwstate.GetFingerState((*it).first);
-    const FingerState* prev_fs = prev_hwstate.GetFingerState((*it).first);
+  for (const auto& [tracking_id, _] : touched_) {
+    const FingerState* fs = hwstate.GetFingerState(tracking_id);
+    const FingerState* prev_fs = prev_hwstate.GetFingerState(tracking_id);
     if (!fs || !prev_fs)
       continue;
     // Only look for moving when current frame meets cotap pressure and
     // our history contains a contact that's met cotap pressure.
-    if (fs->pressure < cotap_min_pressure ||
-        prev_fs->pressure < cotap_min_pressure)
+    if ((fs->pressure < cotap_min_pressure ||
+        prev_fs->pressure < cotap_min_pressure) &&
+        immediate_interpreter_->device_reports_pressure())
       continue;
     // Compute distance moved
     if (DistSq(*fs, *prev_fs) > max_speed * max_speed)
@@ -228,12 +228,12 @@ bool TapRecord::TapComplete() const {
     ret = t5r2_touched_size_ && t5r2_touched_size_ == t5r2_released_size_;
   else
     ret = !touched_.empty() && (touched_.size() == released_.size());
-  for (std::map<short, FingerState>::const_iterator
-           it = touched_.begin(), e = touched_.end(); it != e; ++it)
-    Log("TapRecord::TapComplete: touched_: %d", (*it).first);
-  for (std::set<short>::const_iterator it = released_.begin(),
-           e = released_.end(); it != e; ++it)
-    Log("TapRecord::TapComplete: released_: %d", *it);
+  for (const auto& [tracking_id, finger_state] : touched_) {
+    Log("TapRecord::TapComplete: touched_: %d", tracking_id);
+  }
+  for (short tracking_id : released_) {
+    Log("TapRecord::TapComplete: released_: %d", tracking_id);
+  }
   return ret;
 }
 
@@ -330,14 +330,14 @@ void HardwareStateBuffer::Reset(size_t max_finger_cnt) {
     }
   } else {
     for (size_t i = 0; i < size_; i++) {
-      states_[i].fingers = NULL;
+      states_[i].fingers = nullptr;
     }
   }
 }
 
 void HardwareStateBuffer::PushState(const HardwareState& state) {
   newest_index_ = (newest_index_ + size_ - 1) % size_;
-  Get(0)->DeepCopy(state, max_finger_cnt_);
+  Get(0).DeepCopy(state, max_finger_cnt_);
 }
 
 void HardwareStateBuffer::PopState() {
@@ -380,12 +380,12 @@ bool ScrollManager::StationaryFingerPressureChangingSignificantly(
   bool pressure_is_increasing = false;
   bool pressure_direction_established = false;
   const FingerState* prev = &current;
-  stime_t now = state_buffer.Get(0)->timestamp;
+  stime_t now = state_buffer.Get(0).timestamp;
   stime_t duration = 0.0;
 
   if (max_pressure_change_duration_.val_ > 0.0) {
     for (size_t i = 1; i < state_buffer.Size(); i++) {
-      const HardwareState& state = *state_buffer.Get(i);
+      const HardwareState& state = state_buffer.Get(i);
       stime_t local_duration = now - state.timestamp;
       if (local_duration > max_pressure_change_duration_.val_)
         break;
@@ -414,8 +414,8 @@ bool ScrollManager::StationaryFingerPressureChangingSignificantly(
     // To disable this feature, max_pressure_change_duration_ can be set to a
     // negative number. When this occurs it reverts to just checking the last
     // event, not looking through the backlog as well.
-    prev = state_buffer.Get(1)->GetFingerState(current.tracking_id);
-    duration = now - state_buffer.Get(1)->timestamp;
+    prev = state_buffer.Get(1).GetFingerState(current.tracking_id);
+    duration = now - state_buffer.Get(1).timestamp;
   }
 
   if (max_stationary_speed_.val_ != 0.0) {
@@ -452,14 +452,13 @@ bool ScrollManager::FillResultScroll(
   float dy = 0.0;
   bool stationary = true;
   bool pressure_changing = false;
-  for (FingerMap::const_iterator it =
-           gs_fingers.begin(), e = gs_fingers.end(); it != e; ++it) {
-    const FingerState* fs = state_buffer.Get(0)->GetFingerState(*it);
-    const FingerState* prev = state_buffer.Get(1)->GetFingerState(*it);
+  for (short tracking_id : gs_fingers) {
+    const FingerState* fs = state_buffer.Get(0).GetFingerState(tracking_id);
+    const FingerState* prev = state_buffer.Get(1).GetFingerState(tracking_id);
     if (!prev)
       return false;
     const stime_t dt =
-        state_buffer.Get(0)->timestamp - state_buffer.Get(1)->timestamp;
+        state_buffer.Get(0).timestamp - state_buffer.Get(1).timestamp;
     pressure_changing =
         pressure_changing ||
         StationaryFingerPressureChangingSignificantly(state_buffer, *fs);
@@ -518,8 +517,8 @@ bool ScrollManager::FillResultScroll(
   if (max_mag_sq > 0) {
     did_generate_scroll_ = true;
     *result = Gesture(kGestureScroll,
-                      state_buffer.Get(1)->timestamp,
-                      state_buffer.Get(0)->timestamp,
+                      state_buffer.Get(1).timestamp,
+                      state_buffer.Get(0).timestamp,
                       dx, dy);
   }
   if (prev_gesture_type != kGestureTypeScroll || prev_gs_fingers != gs_fingers)
@@ -528,7 +527,7 @@ bool ScrollManager::FillResultScroll(
       !FloatEq(dx, 0.0) || !FloatEq(dy, 0.0))
     scroll_buffer->Insert(
         dx, dy,
-        state_buffer.Get(0)->timestamp - state_buffer.Get(1)->timestamp);
+        state_buffer.Get(0).timestamp - state_buffer.Get(1).timestamp);
   return true;
 }
 
@@ -698,8 +697,8 @@ done:
   float vx = out.dt ? (out.dx / out.dt) : 0.0;
   float vy = out.dt ? (out.dy / out.dt) : 0.0;
   *result = Gesture(kGestureFling,
-                    state_buffer.Get(1)->timestamp,
-                    state_buffer.Get(0)->timestamp,
+                    state_buffer.Get(1).timestamp,
+                    state_buffer.Get(0).timestamp,
                     vx,
                     vy,
                     GESTURES_FLING_START);
@@ -723,7 +722,7 @@ bool FingerButtonClick::Update(const HardwareState& hwstate,
 
   // Copy all fingers to an array, but leave out palms
   num_fingers_ = 0;
-  for (int i = 0; i < hwstate.touch_cnt; ++i) {
+  for (int i = 0; i < hwstate.finger_cnt; ++i) {
     const FingerState& fs = hwstate.fingers[i];
     if (fs.flags & (GESTURES_FINGER_PALM | GESTURES_FINGER_POSSIBLE_PALM))
       continue;
@@ -804,8 +803,8 @@ int FingerButtonClick::EvaluateTwoFingerButtonType() {
     // or the left-click of one click-and-drag gesture. Our heuristic is that
     // for real right-clicks, two finger's pressure should be roughly the same
     // and they tend not be vertically aligned.
-    const FingerState* min_fs = NULL;
-    const FingerState* fs = NULL;
+    const FingerState* min_fs = nullptr;
+    const FingerState* fs = nullptr;
     if (fingers_[0]->pressure < fingers_[1]->pressure)
       min_fs = fingers_[0], fs = fingers_[1];
     else
@@ -907,8 +906,8 @@ int FingerButtonClick::EvaluateButtonTypeUsingFigureLocation() {
                            interpreter_->button_max_dist_from_expected_.val_;
 
   // Find pair with the closest distance
-  const FingerState* pair_a = NULL;
-  const FingerState* pair_b = NULL;
+  const FingerState* pair_a = nullptr;
+  const FingerState* pair_b = nullptr;
   float pair_dist_sq = std::numeric_limits<float>::infinity();
   for (int i = 0; i < num_fingers_; ++i) {
     for (int j = 0; j < i; ++j) {
@@ -922,7 +921,7 @@ int FingerButtonClick::EvaluateButtonTypeUsingFigureLocation() {
   }
 
   int num_separate = 0;
-  const FingerState* last_separate = NULL;
+  const FingerState* last_separate = nullptr;
 
   if (interpreter_->metrics_->CloseEnoughToGesture(Vector2(*pair_a),
                                                    Vector2(*pair_b))) {
@@ -980,11 +979,11 @@ int FingerButtonClick::EvaluateButtonTypeUsingFigureLocation() {
 
 ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
                                            Tracer* tracer)
-    : Interpreter(NULL, tracer, false),
+    : Interpreter(nullptr, tracer, false),
       button_type_(0),
       finger_button_click_(this),
       sent_button_down_(false),
-      button_down_timeout_(0.0),
+      button_down_deadline_(0.0),
       started_moving_time_(-1.0),
       gs_changed_time_(-1.0),
       finger_leave_time_(-1.0),
@@ -995,6 +994,7 @@ ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
       last_movement_timestamp_(-1.0),
       swipe_is_vertical_(false),
       current_gesture_type_(kGestureTypeNull),
+      prev_gesture_type_(kGestureTypeNull),
       state_buffer_(8),
       scroll_buffer_(20),
       pinch_guess_start_(-1.0),
@@ -1139,70 +1139,73 @@ ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
   keyboard_touched_timeval_low_.SetDelegate(this);
 }
 
-void ImmediateInterpreter::SyncInterpretImpl(HardwareState* hwstate,
+void ImmediateInterpreter::SyncInterpretImpl(HardwareState& hwstate,
                                              stime_t* timeout) {
-  if (!state_buffer_.Get(0)->fingers) {
+  const char name[] = "ImmediateInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
+  if (!state_buffer_.Get(0).fingers) {
     Err("Must call SetHardwareProperties() before Push().");
     return;
   }
 
-  state_buffer_.PushState(*hwstate);
+  state_buffer_.PushState(hwstate);
 
-  FillOriginInfo(*hwstate);
+  FillOriginInfo(hwstate);
   result_.type = kGestureTypeNull;
-  const bool same_fingers = state_buffer_.Get(1)->SameFingersAs(*hwstate) &&
-      (hwstate->buttons_down == state_buffer_.Get(1)->buttons_down);
+  const bool same_fingers = state_buffer_.Get(1).SameFingersAs(hwstate) &&
+      (hwstate.buttons_down == state_buffer_.Get(1).buttons_down);
   if (!same_fingers) {
     // Fingers changed, do nothing this time
     FingerMap new_gs_fingers;
-    FingerMap gs_fingers = GetGesturingFingers(*hwstate);
+    FingerMap gs_fingers = GetGesturingFingers(hwstate);
     std::set_difference(gs_fingers.begin(), gs_fingers.end(),
                         non_gs_fingers_.begin(), non_gs_fingers_.end(),
                         std::inserter(new_gs_fingers, new_gs_fingers.begin()));
-    ResetSameFingersState(*hwstate);
-    FillStartPositions(*hwstate);
+    ResetSameFingersState(hwstate);
+    FillStartPositions(hwstate);
     if (pinch_enable_.val_ &&
-        (hwstate->finger_cnt <= 2 || new_gs_fingers.size() != 2)) {
+        (hwstate.finger_cnt <= 2 || new_gs_fingers.size() != 2)) {
       // Release the zoom lock
-      UpdatePinchState(*hwstate, true, new_gs_fingers);
+      UpdatePinchState(hwstate, true, new_gs_fingers);
     }
     moving_finger_id_ = -1;
   }
 
-  if (hwstate->finger_cnt < state_buffer_.Get(1)->finger_cnt &&
-      AnyGesturingFingerLeft(*hwstate, prev_active_gs_fingers_)) {
-    finger_leave_time_ = hwstate->timestamp;
+  if (hwstate.finger_cnt < state_buffer_.Get(1).finger_cnt &&
+      AnyGesturingFingerLeft(hwstate, prev_active_gs_fingers_)) {
+    finger_leave_time_ = hwstate.timestamp;
   }
 
   // Check if clock changed backwards
-  if (hwstate->timestamp < state_buffer_.Get(1)->timestamp)
+  if (hwstate.timestamp < state_buffer_.Get(1).timestamp)
     ResetTime();
 
-  UpdatePointingFingers(*hwstate);
-  UpdateThumbState(*hwstate);
-  FingerMap newly_moving_fingers = UpdateMovingFingers(*hwstate);
-  UpdateNonGsFingers(*hwstate);
-  FingerMap new_gs_fingers;
-  FingerMap gs_fingers = GetGesturingFingers(*hwstate);
-  std::set_difference(gs_fingers.begin(), gs_fingers.end(),
+  UpdatePointingFingers(hwstate);
+  UpdateThumbState(hwstate);
+  FingerMap newly_moving_fingers = UpdateMovingFingers(hwstate);
+  UpdateNonGsFingers(hwstate);
+  FingerMap gs_fingers;
+  FingerMap old_gs_fingers = GetGesturingFingers(hwstate);
+  std::set_difference(old_gs_fingers.begin(), old_gs_fingers.end(),
                       non_gs_fingers_.begin(), non_gs_fingers_.end(),
-                      std::inserter(new_gs_fingers, new_gs_fingers.begin()));
+                      std::inserter(gs_fingers, gs_fingers.begin()));
   if (gs_fingers != prev_gs_fingers_)
-    gs_changed_time_ = hwstate->timestamp;
-  UpdateStartedMovingTime(hwstate->timestamp, gs_fingers, newly_moving_fingers);
+    gs_changed_time_ = hwstate.timestamp;
+  UpdateStartedMovingTime(hwstate.timestamp, gs_fingers, newly_moving_fingers);
 
-  UpdateButtons(*hwstate, timeout);
-  UpdateTapGesture(hwstate,
+  UpdateButtons(hwstate, timeout);
+  UpdateTapGesture(&hwstate,
                    gs_fingers,
                    same_fingers,
-                   hwstate->timestamp,
+                   hwstate.timestamp,
                    timeout);
 
   FingerMap active_gs_fingers;
-  UpdateCurrentGestureType(*hwstate, gs_fingers, &active_gs_fingers);
+  UpdateCurrentGestureType(hwstate, gs_fingers, &active_gs_fingers);
   GenerateFingerLiftGesture();
   if (result_.type == kGestureTypeNull)
-    FillResultGesture(*hwstate, active_gs_fingers);
+    FillResultGesture(hwstate, active_gs_fingers);
 
   // Prevent moves while in a tap
   if ((tap_to_click_state_ == kTtcFirstTapBegan ||
@@ -1220,42 +1223,48 @@ void ImmediateInterpreter::SyncInterpretImpl(HardwareState* hwstate,
                         active_gs_fingers.begin(), active_gs_fingers.end(),
                         std::inserter(non_gs_fingers_,
                         non_gs_fingers_.begin()));
+    LogGestureProduce(name, result_);
     ProduceGesture(result_);
   }
+  LogHardwareStatePost(name, hwstate);
 }
 
 void ImmediateInterpreter::HandleTimerImpl(stime_t now, stime_t* timeout) {
+  const char name[] = "ImmediateInterpreter::HandleTimerImpl";
+  LogHandleTimerPre(name, now, timeout);
+
   result_.type = kGestureTypeNull;
   // Tap-to-click always aborts when real button(s) are being used, so we
   // don't need to worry about conflicts with these two types of callback.
   UpdateButtonsTimeout(now);
-  UpdateTapGesture(NULL,
+  UpdateTapGesture(nullptr,
                    FingerMap(),
                    false,
                    now,
                    timeout);
-  if (result_.type != kGestureTypeNull)
+  if (result_.type != kGestureTypeNull) {
+    LogGestureProduce(name, result_);
     ProduceGesture(result_);
+  }
+  LogHandleTimerPost(name, now, timeout);
 }
 
 void ImmediateInterpreter::FillOriginInfo(
     const HardwareState& hwstate) {
-  RemoveMissingIdsFromMap(&origin_timestamps_, hwstate);
   RemoveMissingIdsFromMap(&distance_walked_, hwstate);
   for (size_t i = 0; i < hwstate.finger_cnt; i++) {
     const FingerState& fs = hwstate.fingers[i];
-    if (MapContainsKey(origin_timestamps_, fs.tracking_id) &&
+    if (distance_walked_.find(fs.tracking_id) != distance_walked_.end() &&
         state_buffer_.Size() > 1 &&
-        state_buffer_.Get(1)->GetFingerState(fs.tracking_id)) {
+        state_buffer_.Get(1).GetFingerState(fs.tracking_id)) {
       float delta_x = hwstate.GetFingerState(fs.tracking_id)->position_x -
-          state_buffer_.Get(1)->GetFingerState(fs.tracking_id)->position_x;
+          state_buffer_.Get(1).GetFingerState(fs.tracking_id)->position_x;
       float delta_y = hwstate.GetFingerState(fs.tracking_id)->position_y -
-          state_buffer_.Get(1)->GetFingerState(fs.tracking_id)->position_y;
+          state_buffer_.Get(1).GetFingerState(fs.tracking_id)->position_y;
       distance_walked_[fs.tracking_id] += sqrtf(delta_x * delta_x +
                                                 delta_y * delta_y);
       continue;
     }
-    origin_timestamps_[fs.tracking_id] = hwstate.timestamp;
     distance_walked_[fs.tracking_id] = 0.0;
   }
 }
@@ -1330,11 +1339,11 @@ bool ImmediateInterpreter::EarlyZoomPotential(const HardwareState& hwstate)
   const FingerState* finger1 = hwstate.GetFingerState(id1);
   const FingerState* finger2 = hwstate.GetFingerState(id2);
   float pinch_eval_timeout = pinch_evaluation_timeout_.val_;
-  if (finger1 == NULL || finger2 == NULL)
+  if (finger1 == nullptr || finger2 == nullptr)
     return false;
   // Wait for a longer time if fingers arrived together
-  stime_t t1 = origin_timestamps_.at(id1);
-  stime_t t2 = origin_timestamps_.at(id2);
+  stime_t t1 = metrics_->GetFinger(id1)->origin_time();
+  stime_t t2 = metrics_->GetFinger(id2)->origin_time();
   if (fabs(t1 - t2) < evaluation_timeout_.val_ &&
       hwstate.timestamp - max(t1, t2) <
           thumb_pinch_evaluation_timeout_.val_ * thumb_pinch_delay_factor_.val_)
@@ -1358,10 +1367,10 @@ bool ImmediateInterpreter::EarlyZoomPotential(const HardwareState& hwstate)
   bool motionless_cycles = false;
   for (int i = 1;
        i < min<int>(state_buffer_.Size(), pinch_zoom_min_events_.val_); i++) {
-    const FingerState* curr1 = state_buffer_.Get(i - 1)->GetFingerState(id1);
-    const FingerState* curr2 = state_buffer_.Get(i - 1)->GetFingerState(id2);
-    const FingerState* prev1 = state_buffer_.Get(i)->GetFingerState(id1);
-    const FingerState* prev2 = state_buffer_.Get(i)->GetFingerState(id2);
+    const FingerState* curr1 = state_buffer_.Get(i - 1).GetFingerState(id1);
+    const FingerState* curr2 = state_buffer_.Get(i - 1).GetFingerState(id2);
+    const FingerState* prev1 = state_buffer_.Get(i).GetFingerState(id1);
+    const FingerState* prev2 = state_buffer_.Get(i).GetFingerState(id2);
     if (!curr1 || !curr2 || !prev1 || !prev2) {
        motionless_cycles = true;
        break;
@@ -1401,23 +1410,23 @@ bool ImmediateInterpreter::ZoomFingersAreConsistent(
   int id2 = *(++fingers_.begin());
 
   const FingerState* curr1 = state_buffer.Get(min<int>(state_buffer.Size() - 1,
-      pinch_zoom_min_events_.val_))->GetFingerState(id1);
+      pinch_zoom_min_events_.val_)).GetFingerState(id1);
   const FingerState* curr2 = state_buffer.Get(min<int>(state_buffer.Size() - 1,
-      pinch_zoom_min_events_.val_))->GetFingerState(id2);
+      pinch_zoom_min_events_.val_)).GetFingerState(id2);
   if (!curr1 || !curr2)
     return false;
   for (int i = 0;
        i < min<int>(state_buffer.Size(), pinch_zoom_min_events_.val_); i++) {
-    const FingerState* prev1 = state_buffer.Get(i)->GetFingerState(id1);
-    const FingerState* prev2 = state_buffer.Get(i)->GetFingerState(id2);
+    const FingerState* prev1 = state_buffer.Get(i).GetFingerState(id1);
+    const FingerState* prev2 = state_buffer.Get(i).GetFingerState(id2);
     if (!prev1 || !prev2)
       return false;
     float dot = FingersAngle(prev1, prev2, curr1, curr2);
     if (dot >= 0)
       return false;
   }
-  const FingerState* last1 = state_buffer.Get(0)->GetFingerState(id1);
-  const FingerState* last2 = state_buffer.Get(0)->GetFingerState(id2);
+  const FingerState* last1 = state_buffer.Get(0).GetFingerState(id1);
+  const FingerState* last2 = state_buffer.Get(0).GetFingerState(id2);
   float angle = FingersAngle(last1, last2, curr1, curr2);
   if (angle > pinch_zoom_max_angle_.val_)
     return false;
@@ -1433,19 +1442,19 @@ bool ImmediateInterpreter::InwardPinch(
 
   const FingerState* curr =
       state_buffer.Get(min<int>(state_buffer.Size(),
-          pinch_zoom_min_events_.val_))->GetFingerState(id);
+          pinch_zoom_min_events_.val_)).GetFingerState(id);
   if (!curr)
     return false;
   for (int i = 0;
        i < min<int>(state_buffer.Size(), pinch_zoom_min_events_.val_); i++) {
-    const FingerState* prev = state_buffer.Get(i)->GetFingerState(id);
+    const FingerState* prev = state_buffer.Get(i).GetFingerState(id);
     if (!prev)
       return false;
     float dot = (curr->position_y - prev->position_y);
     if (dot <= 0)
       return false;
   }
-  const FingerState* last = state_buffer.Get(0)->GetFingerState(id);
+  const FingerState* last = state_buffer.Get(0).GetFingerState(id);
   float dot_last = (curr->position_y - last->position_y);
   float size_last = sqrt((curr->position_x - last->position_x) *
                          (curr->position_x - last->position_x) +
@@ -1485,15 +1494,15 @@ float ImmediateInterpreter::FingersAngle(const FingerState* prev1,
 bool ImmediateInterpreter::ScrollAngle(const FingerState& finger1,
                                        const FingerState& finger2) {
     const FingerState* curr1 = state_buffer_.Get(
-        min<int>(state_buffer_.Size() - 1, 3))->
-            GetFingerState(finger1.tracking_id);
+        min<int>(state_buffer_.Size() - 1, 3))
+            .GetFingerState(finger1.tracking_id);
     const FingerState* curr2 = state_buffer_.Get(
-        min<int>(state_buffer_.Size() - 1, 3))->
-            GetFingerState(finger2.tracking_id);
+        min<int>(state_buffer_.Size() - 1, 3))
+            .GetFingerState(finger2.tracking_id);
     const FingerState* last1 =
-        state_buffer_.Get(0)->GetFingerState(finger1.tracking_id);
+        state_buffer_.Get(0).GetFingerState(finger1.tracking_id);
     const FingerState* last2 =
-        state_buffer_.Get(0)->GetFingerState(finger2.tracking_id);
+        state_buffer_.Get(0).GetFingerState(finger2.tracking_id);
     if (last1 && last2 && curr1 && curr2) {
       if (FingersAngle(last1, last2, curr1, curr2) < scroll_min_angle_.val_)
         return false;
@@ -1515,8 +1524,8 @@ float ImmediateInterpreter::TwoSpecificFingerDistanceSq(
   if (fingers.size() == 2) {
     const FingerState* finger_a = hwstate.GetFingerState(*fingers.begin());
     const FingerState* finger_b = hwstate.GetFingerState(*(++fingers.begin()));
-    if (finger_a == NULL || finger_b == NULL) {
-      Err("Finger unexpectedly NULL");
+    if (finger_a == nullptr || finger_b == nullptr) {
+      Err("Finger unexpectedly null");
       return -1;
     }
     return DistSq(*finger_a, *finger_b);
@@ -1533,7 +1542,7 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
   RemoveMissingIdsFromMap(&thumb_, hwstate);
   RemoveMissingIdsFromMap(&thumb_eval_timer_, hwstate);
   float min_pressure = INFINITY;
-  const FingerState* min_fs = NULL;
+  const FingerState* min_fs = nullptr;
   for (size_t i = 0; i < hwstate.finger_cnt; i++) {
     const FingerState& fs = hwstate.fingers[i];
     if (fs.flags & GESTURES_FINGER_PALM)
@@ -1556,7 +1565,7 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
                         (min_fs->flags & GESTURES_FINGER_WARP_Y_MOVE));
   float min_dist_sq = DistanceTravelledSq(*min_fs, false, true);
   float min_dt = hwstate.timestamp -
-      origin_timestamps_[min_fs->tracking_id];
+      metrics_->GetFinger(min_fs->tracking_id)->origin_time();
   float thumb_dist_sq_thresh = min_dist_sq *
       thumb_movement_factor_.val_ * thumb_movement_factor_.val_;
   float thumb_speed_sq_thresh = min_dist_sq *
@@ -1567,10 +1576,12 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
 
   if (pinch_enable_.val_ && hwstate.finger_cnt == 2) {
     float dt1 = hwstate.timestamp -
-                origin_timestamps_[hwstate.fingers[0].tracking_id];
+                metrics_->GetFinger(hwstate.fingers[0].tracking_id)
+                        ->origin_time();
     float dist_sq1 = DistanceTravelledSq(hwstate.fingers[0], true, true);
     float dt2 = hwstate.timestamp -
-                origin_timestamps_[hwstate.fingers[1].tracking_id];
+                metrics_->GetFinger(hwstate.fingers[1].tracking_id)
+                        ->origin_time();
     float dist_sq2 = DistanceTravelledSq(hwstate.fingers[1], true, true);
     if (dist_sq1 * dt1 && dist_sq2 * dt2)
       similar_movement = max((dist_sq1 * dt1 * dt1) / (dist_sq2 * dt2 * dt2),
@@ -1588,7 +1599,8 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
       thumb_dist_sq_thresh *= thumb_pinch_threshold_ratio_.val_;
     }
     float dist_sq = DistanceTravelledSq(fs, false, true);
-    float dt = hwstate.timestamp - origin_timestamps_[fs.tracking_id];
+    float dt = hwstate.timestamp -
+               metrics_->GetFinger(fs.tracking_id)->origin_time();
     bool closer_to_origin = dist_sq <= thumb_dist_sq_thresh;
     bool slower_moved = (dist_sq * min_dt &&
                          dist_sq * min_dt * min_dt <
@@ -1630,13 +1642,15 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
             dist_sq * min_dt * min_dt / (thumb_speed_sq_thresh * dt * dt) >
                 thumb_pinch_min_movement_.val_ &&
             similar_movement;
-        bool might_be_pinch = (slow_pinch_guess &&
-                               hwstate.timestamp -
-                                   origin_timestamps_[fs.tracking_id] < 2 *
-                                   thumb_pinch_evaluation_timeout_.val_ &&
-                               ZoomFingersAreConsistent(state_buffer_));
+        stime_t origin_time =
+            metrics_->GetFinger(fs.tracking_id) ->origin_time();
+        bool might_be_pinch =
+            slow_pinch_guess &&
+            hwstate.timestamp - origin_time < 2 *
+                thumb_pinch_evaluation_timeout_.val_ &&
+            ZoomFingersAreConsistent(state_buffer_);
         if (relatively_motionless ||
-            hwstate.timestamp - origin_timestamps_[fs.tracking_id] >
+            hwstate.timestamp - origin_time >
                 thumb_pinch_evaluation_timeout_.val_) {
           if (!might_be_pinch)
             continue;
@@ -1650,11 +1664,11 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
         // Decrease the timer as the finger is thumb-like in the previous
         // frame.
         const FingerState* prev =
-            state_buffer_.Get(1)->GetFingerState(fs.tracking_id);
+            state_buffer_.Get(1).GetFingerState(fs.tracking_id);
         if (!prev)
           continue;
         thumb_eval_timer_[fs.tracking_id] -=
-            hwstate.timestamp - state_buffer_.Get(1)->timestamp;
+            hwstate.timestamp - state_buffer_.Get(1).timestamp;
       } else {
         // The finger wasn't thumb-like in the frame. Remove it from the thumb
         // list.
@@ -1667,9 +1681,9 @@ void ImmediateInterpreter::UpdateThumbState(const HardwareState& hwstate) {
       thumb_eval_timer_[fs.tracking_id] = thumb_eval_timeout_.val_;
     }
   }
-  for (std::map<short, stime_t>::const_iterator it = thumb_.begin();
-       it != thumb_.end(); ++it)
-    pointing_.erase((*it).first);
+  for (const auto& [tracking_id, _] : thumb_) {
+    pointing_.erase(tracking_id);
+  }
 }
 
 void ImmediateInterpreter::UpdateNonGsFingers(const HardwareState& hwstate) {
@@ -1709,7 +1723,11 @@ FingerMap ImmediateInterpreter::GetGesturingFingers(
   if (pointing_.size() <= kMaxGesturingFingers)
     return pointing_;
 
-  const FingerState* fs[hwstate.finger_cnt];
+  if (hwstate.finger_cnt <= 0) {
+    return {};
+  }
+
+  std::vector<FingerState*> fs(hwstate.finger_cnt);
   for (size_t i = 0; i < hwstate.finger_cnt; ++i)
     fs[i] = &hwstate.fingers[i];
 
@@ -1719,11 +1737,12 @@ FingerMap ImmediateInterpreter::GetGesturingFingers(
   FingerMap ret;
   size_t sorted_cnt;
   if (hwstate.finger_cnt > kMaxGesturingFingers) {
-    std::partial_sort(fs, fs + kMaxGesturingFingers, fs + hwstate.finger_cnt,
+    std::partial_sort(fs.begin(), fs.begin() + kMaxGesturingFingers,
+                      fs.end(),
                       compare);
     sorted_cnt = kMaxGesturingFingers;
   } else {
-    std::sort(fs, fs + hwstate.finger_cnt, compare);
+    std::sort(fs.begin(), fs.end(), compare);
     sorted_cnt = hwstate.finger_cnt;
   }
   for (size_t i = 0; i < sorted_cnt; i++)
@@ -1818,8 +1837,10 @@ void ImmediateInterpreter::UpdateCurrentGestureType(
                 // ambiguous. Only move if they've been down long enough.
                 if (new_gs_type == kGestureTypeMove &&
                     hwstate.timestamp -
-                        min(origin_timestamps_[fingers[0]->tracking_id],
-                            origin_timestamps_[fingers[1]->tracking_id]) <
+                        min(metrics_->GetFinger(fingers[0]->tracking_id)
+                                    ->origin_time(),
+                            metrics_->GetFinger(fingers[1]->tracking_id)
+                                    ->origin_time()) <
                     evaluation_timeout_.val_)
                   new_gs_type = kGestureTypeNull;
               }
@@ -1857,9 +1878,7 @@ void ImmediateInterpreter::UpdateCurrentGestureType(
             }
             if (current_gesture_type_ != kGestureTypeNull) {
               active_gs_fingers->clear();
-              for (vector<short, kMaxGesturingFingers>::const_iterator it =
-                   sorted_ids.begin(), e = sorted_ids.end(); it != e; ++it)
-                active_gs_fingers->insert(*it);
+              active_gs_fingers->insert(sorted_ids.begin(), sorted_ids.end());
               break;
             }
           }
@@ -1949,8 +1968,10 @@ void ImmediateInterpreter::SortFingersByProximity(
   // that until we have enough points
   size_t dist_sq_capacity =
       (finger_ids.size() * (finger_ids.size() - 1)) / 2;
-  DistSqElt dist_sq[dist_sq_capacity];
-  size_t dist_sq_len = 0;
+
+  std::vector<DistSqElt> dist_sq;
+  dist_sq.reserve(dist_sq_capacity);
+
   for (size_t i = 0; i < hwstate.finger_cnt; i++) {
     const FingerState& fs1 = hwstate.fingers[i];
     if (!SetContainsValue(finger_ids, fs1.tracking_id))
@@ -1963,24 +1984,20 @@ void ImmediateInterpreter::SortFingersByProximity(
         DistSq(fs1, fs2),
         { fs1.tracking_id, fs2.tracking_id }
       };
-      if (dist_sq_len >= dist_sq_capacity) {
-        Err("%s: Array overrun", __func__);
-        break;
-      }
-      dist_sq[dist_sq_len++] = elt;
+      dist_sq.push_back(elt);
     }
   }
 
   DistSqCompare distSqCompare;
-  std::sort(dist_sq, dist_sq + dist_sq_len, distSqCompare);
+  std::sort(dist_sq.begin(), dist_sq.end(), distSqCompare);
 
-  if (out_sorted_ids == NULL) {
-    Err("out_sorted_ids became NULL");
+  if (out_sorted_ids == nullptr) {
+    Err("out_sorted_ids became null");
     return;
   }
-  for (size_t i = 0; i < dist_sq_len; i++) {
-    short id1 = dist_sq[i].tracking_id[0];
-    short id2 = dist_sq[i].tracking_id[1];
+  for (auto const & d: dist_sq) {
+    short id1 = d.tracking_id[0];
+    short id2 = d.tracking_id[1];
     bool contains1 = out_sorted_ids->find(id1) != out_sorted_ids->end();
     bool contains2 = out_sorted_ids->find(id2) != out_sorted_ids->end();
     if (contains1 == contains2 && !out_sorted_ids->empty()) {
@@ -2026,8 +2043,8 @@ bool ImmediateInterpreter::UpdatePinchState(
   const FingerState* finger1 = hwstate.GetFingerState(*(gs_fingers.begin()));
   const FingerState* finger2 =
       hwstate.GetFingerState(*(++gs_fingers.begin()));
-  if (finger1 == NULL || finger2 == NULL) {
-    Err("Finger unexpectedly NULL");
+  if (finger1 == nullptr || finger2 == nullptr) {
+    Err("Finger unexpectedly null");
     return false;
   }
 
@@ -2196,9 +2213,8 @@ bool ImmediateInterpreter::PalmIsArrivingOrDeparting(
 bool ImmediateInterpreter::IsTooCloseToThumb(const FingerState& finger) const {
   const float kMin2fDistThreshSq = tapping_finger_min_separation_.val_ *
       tapping_finger_min_separation_.val_;
-  for (std::map<short, stime_t>::const_iterator it = thumb_.begin();
-       it != thumb_.end(); ++it) {
-    const FingerState* thumb = state_buffer_.Get(0)->GetFingerState(it->first);
+  for (const auto& [tracking_id, _] : thumb_) {
+    const FingerState* thumb = state_buffer_.Get(0).GetFingerState(tracking_id);
     float xdist = fabsf(finger.position_x - thumb->position_x);
     float ydist = fabsf(finger.position_y - thumb->position_y);
     if (xdist * xdist + ydist * ydist < kMin2fDistThreshSq)
@@ -2437,8 +2453,10 @@ GestureType ImmediateInterpreter::GetMultiFingerGestureType(
     return kGestureTypeNull;
   }
 
-  const FingerState* x_fingers[num_fingers];
-  const FingerState* y_fingers[num_fingers];
+  assert(num_fingers <= (int) kMaxGesturingFingers);
+
+  const FingerState* x_fingers[kMaxGesturingFingers];
+  const FingerState* y_fingers[kMaxGesturingFingers];
   for (int i = 0; i < num_fingers; i++) {
     x_fingers[i] = fingers[i];
     y_fingers[i] = fingers[i];
@@ -2452,13 +2470,13 @@ GestureType ImmediateInterpreter::GetMultiFingerGestureType(
   bool horizontal =
       (x_fingers[num_fingers - 1]->position_x - x_fingers[0]->position_x) >=
       (y_fingers[num_fingers -1]->position_y - y_fingers[0]->position_y);
-  const FingerState* sorted_fingers[num_fingers];
+  const FingerState* sorted_fingers[4];
   for (int i = 0; i < num_fingers; i++) {
     sorted_fingers[i] = horizontal ? x_fingers[i] : y_fingers[i];
   }
 
-  float dx[num_fingers];
-  float dy[num_fingers];
+  float dx[kMaxGesturingFingers];
+  float dy[kMaxGesturingFingers];
   float dy_sum = 0;
   float dx_sum = 0;
   for (int i = 0; i < num_fingers; i++) {
@@ -2522,7 +2540,7 @@ stime_t ImmediateInterpreter::TimeoutForTtcState(TapToClickState state) {
     case kTtcDragRelease: return tap_drag_timeout_.val_;
     case kTtcDragRetouch: return tap_timeout_.val_;
     default:
-      Log("Unknown state!");
+      Err("Unknown TapToClickState %u!", state);
       return 0.0;
   }
 }
@@ -2549,7 +2567,7 @@ void ImmediateInterpreter::UpdateTapGesture(
   }
   Log("UpdateTapGesture: Tap Generated");
   result_ = Gesture(kGestureButtonsChange,
-                    state_buffer_.Get(1)->timestamp,
+                    state_buffer_.Get(1).timestamp,
                     now,
                     down,
                     up,
@@ -2580,14 +2598,13 @@ void ImmediateInterpreter::UpdateTapState(
           (GESTURES_FINGER_NO_TAP | GESTURES_FINGER_MERGE))
         cancel_tapping = true;
     }
-    for (FingerMap::const_iterator it =
-             gs_fingers.begin(), e = gs_fingers.end(); it != e; ++it) {
-      const FingerState* fs = hwstate->GetFingerState(*it);
+    for (short tracking_id : gs_fingers) {
+      const FingerState* fs = hwstate->GetFingerState(tracking_id);
       if (!fs) {
         Err("Missing finger state?!");
         continue;
       }
-      tap_gs_fingers.insert(*it);
+      tap_gs_fingers.insert(tracking_id);
     }
   }
   std::set<short> added_fingers;
@@ -2612,40 +2629,37 @@ void ImmediateInterpreter::UpdateTapState(
 
   if (hwstate && (!same_fingers || prev_tap_gs_fingers_ != tap_gs_fingers)) {
     // See if fingers were added
-    for (FingerMap::const_iterator it =
-             tap_gs_fingers.begin(), e = tap_gs_fingers.end(); it != e; ++it) {
+    for (short tracking_id : tap_gs_fingers) {
       // If the finger was marked as a thumb before, it is not new.
-      if (hwstate->timestamp - finger_origin_timestamp(*it) >
+      if (hwstate->timestamp - finger_origin_timestamp(tracking_id) >
                thumb_click_prevention_timeout_.val_)
         continue;
 
-      if (!SetContainsValue(prev_tap_gs_fingers_, *it)) {
+      if (!SetContainsValue(prev_tap_gs_fingers_, tracking_id)) {
         // Gesturing finger wasn't in prev state. It's new.
-        const FingerState* fs = hwstate->GetFingerState(*it);
+        const FingerState* fs = hwstate->GetFingerState(tracking_id);
         if (FingerTooCloseToTap(*hwstate, *fs) ||
-            FingerTooCloseToTap(*state_buffer_.Get(1), *fs) ||
+            FingerTooCloseToTap(state_buffer_.Get(1), *fs) ||
             SetContainsValue(tap_dead_fingers_, fs->tracking_id))
           continue;
-        added_fingers.insert(*it);
-        Log("TTC: Added %d", *it);
+        added_fingers.insert(tracking_id);
+        Log("TTC: Added %d", tracking_id);
       }
     }
 
     // See if fingers were removed or are now non-gesturing (dead)
-    for (FingerMap::const_iterator it =
-             prev_tap_gs_fingers_.begin(), e = prev_tap_gs_fingers_.end();
-         it != e; ++it) {
-      if (tap_gs_fingers.find(*it) != tap_gs_fingers.end())
+    for (short tracking_id : prev_tap_gs_fingers_) {
+      if (tap_gs_fingers.find(tracking_id) != tap_gs_fingers.end())
         // still gesturing; neither removed nor dead
         continue;
-      if (!hwstate->GetFingerState(*it)) {
+      if (!hwstate->GetFingerState(tracking_id)) {
         // Previously gesturing finger isn't in current state. It's gone.
-        removed_fingers.insert(*it);
-        Log("TTC: Removed %d", *it);
+        removed_fingers.insert(tracking_id);
+        Log("TTC: Removed %d", tracking_id);
       } else {
         // Previously gesturing finger is in current state. It's dead.
-        dead_fingers.insert(*it);
-        Log("TTC: Dead %d", *it);
+        dead_fingers.insert(tracking_id);
+        Log("TTC: Dead %d", tracking_id);
       }
     }
   }
@@ -2709,7 +2723,7 @@ void ImmediateInterpreter::UpdateTapState(
           hwstate->timestamp - last_movement_timestamp_ >=
           motion_tap_prevent_timeout_.val_) {
         tap_record_.Update(
-            *hwstate, *state_buffer_.Get(1), added_fingers, removed_fingers,
+            *hwstate, state_buffer_.Get(1), added_fingers, removed_fingers,
             dead_fingers);
         if (tap_record_.TapBegan())
           SetTapToClickState(kTtcFirstTapBegan, now);
@@ -2721,11 +2735,11 @@ void ImmediateInterpreter::UpdateTapState(
         break;
       }
       if (!hwstate) {
-        Log("hwstate NULL but no timeout?!");
+        Err("hwstate is null but not a timeout?!");
         break;
       }
       tap_record_.Update(
-          *hwstate, *state_buffer_.Get(1), added_fingers,
+          *hwstate, state_buffer_.Get(1), added_fingers,
           removed_fingers, dead_fingers);
       Log("TTC: Is tap? %d Is moving? %d",
           tap_record_.TapComplete(),
@@ -2750,7 +2764,7 @@ void ImmediateInterpreter::UpdateTapState(
 
         tap_record_.Clear();
         tap_record_.Update(
-            *hwstate, *state_buffer_.Get(1), added_fingers, removed_fingers,
+            *hwstate, state_buffer_.Get(1), added_fingers, removed_fingers,
             dead_fingers);
 
         // If more than one finger is touching: Send click
@@ -2771,14 +2785,14 @@ void ImmediateInterpreter::UpdateTapState(
       break;
     case kTtcSubsequentTapBegan:
       if (!is_timeout && !hwstate) {
-        Log("hwstate NULL but not a timeout?!");
+        Err("hwstate is null but not a timeout?!");
         break;
       }
       if (hwstate)
-        tap_record_.Update(*hwstate, *state_buffer_.Get(1), added_fingers,
+        tap_record_.Update(*hwstate, state_buffer_.Get(1), added_fingers,
                            removed_fingers, dead_fingers);
 
-      if (!tap_record_.Motionless(*hwstate, *state_buffer_.Get(1),
+      if (!tap_record_.Motionless(*hwstate, state_buffer_.Get(1),
                                   tap_max_movement_.val_)) {
         tap_drag_last_motion_time_ = now;
       }
@@ -2827,7 +2841,7 @@ void ImmediateInterpreter::UpdateTapState(
     case kTtcDrag:
       if (hwstate)
         tap_record_.Update(
-            *hwstate, *state_buffer_.Get(1), added_fingers, removed_fingers,
+            *hwstate, state_buffer_.Get(1), added_fingers, removed_fingers,
             dead_fingers);
       if (tap_record_.TapComplete()) {
         tap_record_.Clear();
@@ -2849,7 +2863,7 @@ void ImmediateInterpreter::UpdateTapState(
     case kTtcDragRelease:
       if (!added_fingers.empty()) {
         tap_record_.Update(
-            *hwstate, *state_buffer_.Get(1), added_fingers, removed_fingers,
+            *hwstate, state_buffer_.Get(1), added_fingers, removed_fingers,
             dead_fingers);
         SetTapToClickState(kTtcDragRetouch, now);
       } else if (is_timeout) {
@@ -2860,7 +2874,7 @@ void ImmediateInterpreter::UpdateTapState(
     case kTtcDragRetouch:
       if (hwstate)
         tap_record_.Update(
-            *hwstate, *state_buffer_.Get(1), added_fingers, removed_fingers,
+            *hwstate, state_buffer_.Get(1), added_fingers, removed_fingers,
             dead_fingers);
       if (tap_record_.TapComplete()) {
         *buttons_up = GESTURES_BUTTON_LEFT;
@@ -2875,7 +2889,7 @@ void ImmediateInterpreter::UpdateTapState(
         break;
       }
       if (!hwstate) {
-        Log("not timeout but hwstate is NULL?!");
+        Err("hwstate is null but not a timeout?!");
         break;
       }
       if (tap_record_.Moving(*hwstate, tap_move_dist_.val_))
@@ -3012,15 +3026,15 @@ void ImmediateInterpreter::UpdateStartedMovingTime(
     const FingerMap& gs_fingers,
     const FingerMap& newly_moving_fingers) {
   // Update started moving time if any gesturing finger is newly moving.
-  for (auto it = gs_fingers.begin(), e = gs_fingers.end(); it != e; ++it) {
-    if (SetContainsValue(newly_moving_fingers, *it)) {
+  for (short gs_tracking_id : gs_fingers) {
+    if (SetContainsValue(newly_moving_fingers, gs_tracking_id)) {
       started_moving_time_ = now;
       // Extend the thumb evaluation period for any finger that is still under
       // evaluation as there is a new moving finger.
-      for (std::map<short, stime_t>::iterator it = thumb_.begin();
-           it != thumb_.end(); ++it)
-        if ((*it).second < thumb_eval_timeout_.val_ && (*it).second > 0.0)
-          (*it).second = thumb_eval_timeout_.val_;
+      for (auto& [_, time] : thumb_) {
+        if (time < thumb_eval_timeout_.val_ && time > 0.0)
+          time = thumb_eval_timeout_.val_;
+      }
       return;
     }
   }
@@ -3029,7 +3043,7 @@ void ImmediateInterpreter::UpdateStartedMovingTime(
 void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
                                          stime_t* timeout) {
   // TODO(miletus): To distinguish between left/right buttons down
-  bool prev_button_down = state_buffer_.Get(1)->buttons_down;
+  bool prev_button_down = state_buffer_.Get(1).buttons_down;
   bool button_down = hwstate.buttons_down;
   if (!prev_button_down && !button_down)
     return;
@@ -3045,25 +3059,25 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
   if (phys_down_edge) {
     finger_seen_shortly_after_button_down_ = false;
     sent_button_down_ = false;
-    button_down_timeout_ = hwstate.timestamp + button_evaluation_timeout;
+    button_down_deadline_ = hwstate.timestamp + button_evaluation_timeout;
   }
 
   // If we haven't seen a finger on the pad shortly after the click, do nothing
   if (!finger_seen_shortly_after_button_down_ &&
-      hwstate.timestamp <= button_down_timeout_)
+      hwstate.timestamp <= button_down_deadline_)
     finger_seen_shortly_after_button_down_ = (hwstate.finger_cnt > 0);
   if (!finger_seen_shortly_after_button_down_ &&
       !zero_finger_click_enable_.val_)
     return;
 
   if (!sent_button_down_) {
-    stime_t button_down_time = button_down_timeout_ -
+    stime_t button_down_time = button_down_deadline_ -
                                button_evaluation_timeout;
     button_type_ = EvaluateButtonType(hwstate, button_down_time);
 
-    if (!hwstate.SameFingersAs(*state_buffer_.Get(0))) {
+    if (!hwstate.SameFingersAs(state_buffer_.Get(0))) {
       // Fingers have changed since last state, reset timeout
-      button_down_timeout_ = hwstate.timestamp + button_finger_timeout;
+      button_down_deadline_ = hwstate.timestamp + button_finger_timeout;
     }
 
     // button_up before button_evaluation_timeout expired.
@@ -3071,27 +3085,27 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
     if (button_type_ == GESTURES_BUTTON_NONE)
       button_type_ = prev_button_down;
     // Send button down if timeout has been reached or button up happened
-    if (button_down_timeout_ <= hwstate.timestamp ||
+    if (button_down_deadline_ <= hwstate.timestamp ||
         phys_up_edge) {
       // Send button down
       if (result_.type == kGestureTypeButtonsChange)
         Err("Gesture type already button?!");
       result_ = Gesture(kGestureButtonsChange,
-                        state_buffer_.Get(1)->timestamp,
+                        state_buffer_.Get(1).timestamp,
                         hwstate.timestamp,
                         button_type_,
                         0,
                         false); // is_tap
       sent_button_down_ = true;
     } else if (timeout) {
-      *timeout = button_down_timeout_ - hwstate.timestamp;
+      *timeout = button_down_deadline_ - hwstate.timestamp;
     }
   }
   if (phys_up_edge) {
     // Send button up
     if (result_.type != kGestureTypeButtonsChange)
       result_ = Gesture(kGestureButtonsChange,
-                        state_buffer_.Get(1)->timestamp,
+                        state_buffer_.Get(1).timestamp,
                         hwstate.timestamp,
                         0,
                         button_type_,
@@ -3100,7 +3114,7 @@ void ImmediateInterpreter::UpdateButtons(const HardwareState& hwstate,
       result_.details.buttons.up = button_type_;
     // Reset button state
     button_type_ = GESTURES_BUTTON_NONE;
-    button_down_timeout_ = 0;
+    button_down_deadline_ = 0;
     sent_button_down_ = false;
     // When a buttons_up event is generated, we need to reset the
     // finger_leave_time_ in order to defer any gesture generation
@@ -3118,7 +3132,7 @@ void ImmediateInterpreter::UpdateButtonsTimeout(stime_t now) {
     return;
   sent_button_down_ = true;
   result_ = Gesture(kGestureButtonsChange,
-                    state_buffer_.Get(1)->timestamp,
+                    state_buffer_.Get(1).timestamp,
                     now,
                     button_type_,
                     0,
@@ -3135,17 +3149,16 @@ void ImmediateInterpreter::FillResultGesture(
         return;
       // Use the finger which has moved the most to compute motion.
       // First, need to find out which finger that is.
-      const FingerState* current = NULL;
+      const FingerState* current = nullptr;
       if (moving_finger_id_ >= 0)
         current = hwstate.GetFingerState(moving_finger_id_);
 
-      const HardwareState* prev_hs = state_buffer_.Get(1);
-      if (prev_hs && !current) {
+      const HardwareState& prev_hs = state_buffer_.Get(1);
+      if (!current) {
         float curr_dist_sq = -1;
-        for (FingerMap::const_iterator it =
-                 fingers.begin(), e = fingers.end(); it != e; ++it) {
-          const FingerState* fs = hwstate.GetFingerState(*it);
-          const FingerState* prev_fs = prev_hs->GetFingerState(fs->tracking_id);
+        for (short tracking_id : fingers) {
+          const FingerState* fs = hwstate.GetFingerState(tracking_id);
+          const FingerState* prev_fs = prev_hs.GetFingerState(fs->tracking_id);
           if (!prev_fs)
             break;
           float dist_sq = DistSq(*fs, *prev_fs);
@@ -3160,14 +3173,14 @@ void ImmediateInterpreter::FillResultGesture(
 
       // Find corresponding finger id in previous state
       const FingerState* prev =
-          state_buffer_.Get(1)->GetFingerState(current->tracking_id);
-      const FingerState* prev2 = !state_buffer_.Get(2) ? NULL :
-          state_buffer_.Get(2)->GetFingerState(current->tracking_id);
+          state_buffer_.Get(1).GetFingerState(current->tracking_id);
+      const FingerState* prev2 =
+          state_buffer_.Get(2).GetFingerState(current->tracking_id);
       if (!prev || !current)
         return;
       if (current->flags & GESTURES_FINGER_MERGE)
         return;
-      stime_t dt = hwstate.timestamp - state_buffer_.Get(1)->timestamp;
+      stime_t dt = hwstate.timestamp - state_buffer_.Get(1).timestamp;
       bool suppress_finger_movement =
           scroll_manager_.SuppressStationaryFingerMovement(
               *current, *prev, dt) ||
@@ -3175,7 +3188,7 @@ void ImmediateInterpreter::FillResultGesture(
               state_buffer_, *current);
       if (quick_acceleration_factor_.val_ && prev2) {
         stime_t dt2 =
-            state_buffer_.Get(1)->timestamp - state_buffer_.Get(2)->timestamp;
+            state_buffer_.Get(1).timestamp - state_buffer_.Get(2).timestamp;
         float dist_sq = DistSq(*current, *prev);
         float dist_sq2 = DistSq(*prev, *prev2);
         if (dist_sq2 * dt &&  // have prev dist and current time
@@ -3188,7 +3201,7 @@ void ImmediateInterpreter::FillResultGesture(
       if (suppress_finger_movement) {
         scroll_manager_.prev_result_suppress_finger_movement_ = true;
         result_ = Gesture(kGestureMove,
-                          state_buffer_.Get(1)->timestamp,
+                          state_buffer_.Get(1).timestamp,
                           hwstate.timestamp,
                           0,
                           0);
@@ -3220,7 +3233,7 @@ void ImmediateInterpreter::FillResultGesture(
       if (dsq_total >= dsq_total_thresh) {
         zero_move = dsq == 0.0;
         result_ = Gesture(kGestureMove,
-                          state_buffer_.Get(1)->timestamp,
+                          state_buffer_.Get(1).timestamp,
                           hwstate.timestamp,
                           dx,
                           dy);
@@ -3251,9 +3264,8 @@ void ImmediateInterpreter::FillResultGesture(
       float finger_cnt[] = { 0.0, 0.0 };
       float FingerState::*fields[] = { &FingerState::position_x,
                                        &FingerState::position_y };
-      for (FingerMap::const_iterator it =
-               fingers.begin(), e = fingers.end(); it != e; ++it) {
-        if (!state_buffer_.Get(1)->GetFingerState(*it)) {
+      for (short tracking_id : fingers) {
+        if (!state_buffer_.Get(1).GetFingerState(tracking_id)) {
           Err("missing prev state?");
           continue;
         }
@@ -3264,8 +3276,8 @@ void ImmediateInterpreter::FillResultGesture(
           if (!valid[i] || !correct_axis)
             continue;
           float FingerState::*field = fields[i];
-          float delta = hwstate.GetFingerState(*it)->*field -
-              state_buffer_.Get(1)->GetFingerState(*it)->*field;
+          float delta = hwstate.GetFingerState(tracking_id)->*field -
+              state_buffer_.Get(1).GetFingerState(tracking_id)->*field;
           // The multiply is to see if they have the same sign:
           if (sum_delta[i] == 0.0 || sum_delta[i] * delta > 0) {
             sum_delta[i] += delta;
@@ -3278,7 +3290,7 @@ void ImmediateInterpreter::FillResultGesture(
       }
       if (current_gesture_type_ == kGestureTypeSwipe) {
         result_ = Gesture(
-            kGestureSwipe, state_buffer_.Get(1)->timestamp,
+            kGestureSwipe, state_buffer_.Get(1).timestamp,
             hwstate.timestamp,
             (!swipe_is_vertical_ && finger_cnt[0]) ?
             sum_delta[0] / finger_cnt[0] : 0.0,
@@ -3286,7 +3298,7 @@ void ImmediateInterpreter::FillResultGesture(
             sum_delta[1] / finger_cnt[1] : 0.0);
       } else if (current_gesture_type_ == kGestureTypeFourFingerSwipe) {
         result_ = Gesture(
-            kGestureFourFingerSwipe, state_buffer_.Get(1)->timestamp,
+            kGestureFourFingerSwipe, state_buffer_.Get(1).timestamp,
             hwstate.timestamp,
             (!swipe_is_vertical_ && finger_cnt[0]) ?
             sum_delta[0] / finger_cnt[0] : 0.0,
@@ -3297,14 +3309,14 @@ void ImmediateInterpreter::FillResultGesture(
     }
     case kGestureTypeSwipeLift: {
       result_ = Gesture(kGestureSwipeLift,
-                        state_buffer_.Get(1)->timestamp,
+                        state_buffer_.Get(1).timestamp,
                         hwstate.timestamp);
       break;
     }
 
     case kGestureTypeFourFingerSwipeLift: {
       result_ = Gesture(kGestureFourFingerSwipeLift,
-                        state_buffer_.Get(1)->timestamp,
+                        state_buffer_.Get(1).timestamp,
                         hwstate.timestamp);
       break;
     }
@@ -3404,9 +3416,8 @@ void ImmediateInterpreter::Initialize(const HardwareProperties* hwprops,
 
 bool AnyGesturingFingerLeft(const HardwareState& state,
                             const FingerMap& prev_gs_fingers) {
-  for (FingerMap::const_iterator it = prev_gs_fingers.begin(),
-                                 e = prev_gs_fingers.end(); it != e; ++it) {
-    if (!state.GetFingerState(*it)) {
+  for (short tracking_id : prev_gs_fingers) {
+    if (!state.GetFingerState(tracking_id)) {
       return true;
     }
   }

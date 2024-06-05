@@ -14,7 +14,7 @@ namespace gestures {
 PalmClassifyingFilterInterpreter::PalmClassifyingFilterInterpreter(
     PropRegistry* prop_reg, Interpreter* next,
     Tracer* tracer)
-    : FilterInterpreter(NULL, next, tracer, false),
+    : FilterInterpreter(nullptr, next, tracer, false),
       palm_pressure_(prop_reg, "Palm Pressure", 200.0),
       palm_width_(prop_reg, "Palm Width", 21.2),
       multi_palm_width_(prop_reg, "Multiple Palm Width", 75.0),
@@ -43,14 +43,19 @@ PalmClassifyingFilterInterpreter::PalmClassifyingFilterInterpreter(
 }
 
 void PalmClassifyingFilterInterpreter::SyncInterpretImpl(
-    HardwareState* hwstate,
+    HardwareState& hwstate,
     stime_t* timeout) {
-  FillOriginInfo(*hwstate);
-  FillMaxPressureWidthInfo(*hwstate);
-  UpdateDistanceInfo(*hwstate);
-  UpdatePalmState(*hwstate);
+  const char name[] = "PalmClassifyingFilterInterpreter::SyncInterpretImpl";
+  LogHardwareStatePre(name, hwstate);
+
+  FillOriginInfo(hwstate);
+  FillMaxPressureWidthInfo(hwstate);
+  UpdateDistanceInfo(hwstate);
+  UpdatePalmState(hwstate);
   UpdatePalmFlags(hwstate);
-  FillPrevInfo(*hwstate);
+  FillPrevInfo(hwstate);
+
+  LogHardwareStatePost(name, hwstate);
   if (next_.get())
     next_->SyncInterpret(hwstate, timeout);
 }
@@ -186,6 +191,11 @@ void PalmClassifyingFilterInterpreter::UpdatePalmState(
       pointing_.erase(fs.tracking_id);
       continue;
     }
+    // Mark externally reported palms
+    if(fs.tool_type == FingerState::ToolType::kPalm){
+      palm_.insert(fs.tracking_id);
+      pointing_.erase(fs.tracking_id);
+    }
   }
 
   if (hwstate.finger_cnt == 1 &&
@@ -289,9 +299,9 @@ void PalmClassifyingFilterInterpreter::UpdatePalmState(
   }
 }
 
-void PalmClassifyingFilterInterpreter::UpdatePalmFlags(HardwareState* hwstate) {
-  for (short i = 0; i < hwstate->finger_cnt; i++) {
-    FingerState* fs = &hwstate->fingers[i];
+void PalmClassifyingFilterInterpreter::UpdatePalmFlags(HardwareState& hwstate) {
+  for (short i = 0; i < hwstate.finger_cnt; i++) {
+    FingerState* fs = &hwstate.fingers[i];
     if (SetContainsValue(large_palm_, fs->tracking_id)) {
       fs->flags |= GESTURES_FINGER_LARGE_PALM;
     }
@@ -308,7 +318,7 @@ void PalmClassifyingFilterInterpreter::UpdatePalmFlags(HardwareState* hwstate) {
                FingerInPalmEnvelope(*fs)) {
       fs->flags |= GESTURES_FINGER_POSSIBLE_PALM;
       if (pointing_[fs->tracking_id] == kPointCloseToFinger &&
-          !FingerNearOtherFinger(*hwstate, i)) {
+          !FingerNearOtherFinger(hwstate, i)) {
         // Finger was near another finger, but it's not anymore, and it was
         // only this other finger that caused it to point. Mark it w/ warp
         // until it moves sufficiently to have another reason to be

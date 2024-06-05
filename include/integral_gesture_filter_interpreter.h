@@ -18,13 +18,14 @@ namespace gestures {
 // can be accumulated and together create a move of a single pixel.
 
 class IntegralGestureFilterInterpreter : public FilterInterpreter {
+  FRIEND_TEST(IntegralGestureFilterInterpreterTestInterpreter, ConsumeGesture);
  public:
   // Takes ownership of |next|:
   explicit IntegralGestureFilterInterpreter(Interpreter* next, Tracer* tracer);
   virtual ~IntegralGestureFilterInterpreter() {}
 
  private:
-  virtual void SyncInterpretImpl(HardwareState* hwstate, stime_t* timeout);
+  virtual void SyncInterpretImpl(HardwareState& hwstate, stime_t* timeout);
   virtual void ConsumeGesture(const Gesture& gesture);
 
  private:
