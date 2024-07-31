@@ -183,14 +183,15 @@ TEST(SplitCorrectingFilterInterpreterTest, FalseMergeTest) {
 
   for (size_t i = 0; i < arraysize(inputs); i++) {
     const FalseMergeInputs& input = inputs[i];
+    const size_t max_finger_cnt = arraysize(input.in);
     // Get finger count
     unsigned short finger_cnt = 0;
     for (size_t fidx = 0;
-         fidx < arraysize(input.in) && input.in[fidx].id_ >= 0;
+         fidx < max_finger_cnt && input.in[fidx].id_ >= 0;
          fidx++)
       finger_cnt += 1;
     // Set up hardware state
-    FingerState fs[finger_cnt];
+    FingerState fs[max_finger_cnt];
     for (size_t fidx = 0; fidx < finger_cnt; fidx++) {
       memset(&fs[fidx], 0, sizeof(fs[fidx]));
       fs[fidx].position_x  = input.in[fidx].x_;

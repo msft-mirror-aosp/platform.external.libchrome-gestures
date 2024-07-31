@@ -234,11 +234,12 @@ bool ActivityReplay::ParseHardwareState(const Json::Value& entry) {
   }
   Json::Value fingers = entry[ActivityLog::kKeyHardwareStateFingers];
   // Sanity check
-  if (fingers.size() > 30) {
+  const size_t kMaxFingers = 30;
+  if (fingers.size() > kMaxFingers) {
     Err("Too many fingers in hardware state");
     return false;
   }
-  FingerState fs[fingers.size()];
+  FingerState fs[kMaxFingers];
   for (size_t i = 0; i < fingers.size(); ++i) {
     if (!fingers.isValidIndex(i)) {
       Err("Invalid entry at index %zu", i);
