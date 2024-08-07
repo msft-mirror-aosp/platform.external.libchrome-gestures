@@ -897,10 +897,10 @@
   },
   "gnawty-elan-4.0/baseline/drag": {
     "description": "",
-    "disabled": false,
+    "disabled": true,
     "error": "",
-    "result": "success",
-    "score": 0.997738329781867
+    "result": "incomplete",
+    "score": 0
   },
   "gnawty-elan-4.0/baseline/fling": {
     "description": "",
