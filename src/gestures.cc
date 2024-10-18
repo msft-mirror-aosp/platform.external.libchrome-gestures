@@ -245,8 +245,9 @@ string Gesture::String() const {
                           details.pinch.zoom_state);
     case kGestureTypeButtonsChange:
       return StringPrintf("(Gesture type: buttons start: %f stop: "
-                          "%f down: %d up: %d)", start_time, end_time,
-                          details.buttons.down, details.buttons.up);
+                          "%f down: %d up: %d is_tap: %s)", start_time, end_time,
+                          details.buttons.down, details.buttons.up,
+                          details.buttons.is_tap ? "true" : "false");
     case kGestureTypeFling:
       return StringPrintf("(Gesture type: fling start: %f stop: "
                           "%f vx: %f vy: %f ordinal_dx: %f ordinal_dy: %f "
