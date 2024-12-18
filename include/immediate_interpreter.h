@@ -95,7 +95,7 @@ class ScrollEventBuffer {
  public:
   explicit ScrollEventBuffer(size_t size)
       : buf_(new ScrollEvent[size]), max_size_(size), size_(0), head_(0) {}
-  void Insert(float dx, float dy, float dt);
+  void Insert(float dx, float dy, stime_t timestamp, stime_t prev_timestamp);
   void Clear();
   size_t Size() const { return size_; }
   // 0 is newest, 1 is next newest, ..., size_ - 1 is oldest.
@@ -109,6 +109,7 @@ class ScrollEventBuffer {
   size_t max_size_;
   size_t size_;
   size_t head_;
+  stime_t last_scroll_timestamp_;
   DISALLOW_COPY_AND_ASSIGN(ScrollEventBuffer);
 };
 
@@ -801,6 +802,12 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   DoubleProperty change_move_distance_;
   // Speed [mm/s] a finger must move to lock on to that finger
   DoubleProperty move_lock_speed_;
+  // Speed [mm/s] a finger must move to lock on to that finger, when another
+  // finger is already locked.
+  DoubleProperty move_change_lock_speed_;
+  // How much faster a finger must move than the currently locked finger to
+  // switch the lock.
+  DoubleProperty move_change_lock_ratio_;
   // Distance [mm] a finger must move to report that movement
   DoubleProperty move_report_distance_;
   // Time [s] to block movement after number or identify of fingers change
