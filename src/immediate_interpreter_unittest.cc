@@ -3140,6 +3140,85 @@ TEST(ImmediateInterpreterTest, ClickDragLockTest) {
   }
 }
 
+struct BottomRightClickAreaParameters {
+  bool enabled;
+  double zone_height;
+  float touch_y;
+  int expected_button;
+};
+
+
+class ImmediateInterpreterBottomRightTest :
+          public testing::TestWithParam<BottomRightClickAreaParameters> {};
+
+TEST_P(ImmediateInterpreterBottomRightTest, BottomRightClickAreaTest) {
+  ImmediateInterpreter ii(nullptr, nullptr);
+  BottomRightClickAreaParameters params = GetParam();
+  ii.button_right_click_zone_enable_.val_ = params.enabled;
+  ii.button_right_click_zone_height_.val_ = params.zone_height;
+  HardwareProperties hwprops = {
+    .right = 100,
+    .bottom = 100,
+    .res_x = 1,
+    .res_y = 1,
+    .orientation_minimum = -1,
+    .orientation_maximum = 2,
+    .max_finger_cnt = 2,
+    .max_touch_cnt = 5,
+    .supports_t5r2 = 0,
+    .support_semi_mt = 0,
+    .is_button_pad = 1,
+    .has_wheel = 0,
+    .wheel_is_hi_res = 0,
+    .is_haptic_pad = 0,
+  };
+  TestInterpreterWrapper wrapper(&ii, &hwprops);
+
+  // TM, Tm, WM, Wm, Press, Orientation, X, Y, TrID
+  FingerState fs = {0, 0, 0, 0, 10, 0, 90, params.touch_y, 1, 0};
+
+  HardwareState records[] = {
+    make_hwstate(0, 0, 0, 0, nullptr),
+    make_hwstate(1.0, 0, 0, 0, nullptr),
+    make_hwstate(1.1, 0, 1, 1, &fs),
+    make_hwstate(1.2, 1, 1, 1, &fs),
+    make_hwstate(2.2, 1, 1, 1, &fs),
+    make_hwstate(2.3, 0, 1, 1, &fs),
+    make_hwstate(2.4, 0, 0, 0, nullptr),
+  };
+
+  Gesture* result = nullptr;
+  ASSERT_EQ(nullptr, wrapper.SyncInterpret(records[0], nullptr));
+  ASSERT_EQ(nullptr, wrapper.SyncInterpret(records[1], nullptr));
+  ASSERT_EQ(nullptr, wrapper.SyncInterpret(records[2], nullptr));
+  ASSERT_EQ(nullptr, wrapper.SyncInterpret(records[3], nullptr));
+  result = wrapper.SyncInterpret(records[4], nullptr);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(params.expected_button, result->details.buttons.down);
+  EXPECT_EQ(GESTURES_BUTTON_NONE, result->details.buttons.up);
+  result = wrapper.SyncInterpret(records[5], nullptr);
+  ASSERT_NE(nullptr, result);
+  EXPECT_EQ(GESTURES_BUTTON_NONE, result->details.buttons.down);
+  EXPECT_EQ(params.expected_button, result->details.buttons.up);
+  ASSERT_EQ(nullptr, wrapper.SyncInterpret(records[6], nullptr));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ImmediateInterpreterBottomRight,
+    ImmediateInterpreterBottomRightTest,
+    testing::ValuesIn<BottomRightClickAreaParameters>({
+      {.enabled = false, .zone_height = 20, .touch_y = 90,
+        .expected_button = GESTURES_BUTTON_LEFT},
+      {.enabled = true, .zone_height = 20, .touch_y = 90,
+        .expected_button = GESTURES_BUTTON_RIGHT},
+      {.enabled = true, .zone_height = 20, .touch_y = 10,
+        .expected_button = GESTURES_BUTTON_LEFT},
+      {.enabled = true, .zone_height = -1, .touch_y = 90,
+        .expected_button = GESTURES_BUTTON_RIGHT},
+      {.enabled = true, .zone_height = -1, .touch_y = 10,
+        .expected_button = GESTURES_BUTTON_RIGHT},
+    }));
+
 struct BigHandsRightClickInputAndExpectations {
   HardwareState hs;
   unsigned out_buttons_down;

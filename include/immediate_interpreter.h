@@ -340,6 +340,7 @@ class FingerButtonClick {
 };
 
 class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
+  FRIEND_TEST(ImmediateInterpreterBottomRightTest, BottomRightClickAreaTest);
   FRIEND_TEST(ImmediateInterpreterTest, AmbiguousPalmCoScrollTest);
   FRIEND_TEST(ImmediateInterpreterTest, AvoidAccidentalPinchTest);
   FRIEND_TEST(ImmediateInterpreterTest, ChangeTimeoutTest);
@@ -899,8 +900,13 @@ class ImmediateInterpreter : public Interpreter, public PropertyDelegate {
   DoubleProperty button_max_dist_from_expected_;
   // Flag to enable the right click on the right side of the hardware button
   BoolProperty button_right_click_zone_enable_;
-  // The size of the right click zone on the right side of the hardware button
-  DoubleProperty button_right_click_zone_size_;
+  // The width [mm] of the right click zone on the right side of the hardware
+  // button.
+  DoubleProperty button_right_click_zone_width_;
+  // The height [mm] of the right click zone on the bottom of the hardware
+  // button. Setting to a negative value makes the right click zone span the
+  // entire height of the touchpad.
+  DoubleProperty button_right_click_zone_height_;
   // Timeval of time when keyboard was last touched. After the low one is set,
   // the two are converted into an stime_t and stored in keyboard_touched_.
   IntProperty keyboard_touched_timeval_high_;  // seconds

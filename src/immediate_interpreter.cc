@@ -1100,8 +1100,10 @@ ImmediateInterpreter::ImmediateInterpreter(PropRegistry* prop_reg,
                                      "Button Max Distance From Expected", 20.0),
       button_right_click_zone_enable_(prop_reg,
                                       "Button Right Click Zone Enable", false),
-      button_right_click_zone_size_(prop_reg,
-                                    "Button Right Click Zone Size", 20.0),
+      button_right_click_zone_width_(prop_reg,
+                                    "Button Right Click Zone Width", 20.0),
+      button_right_click_zone_height_(prop_reg,
+                                    "Button Right Click Zone Height", 20.0),
       keyboard_touched_timeval_high_(prop_reg, "Keyboard Touched Timeval High",
                                      0),
       keyboard_touched_timeval_low_(prop_reg, "Keyboard Touched Timeval Low",
@@ -2965,7 +2967,12 @@ int ImmediateInterpreter::GetButtonTypeFromPosition(
   }
 
   const FingerState& fs = hwstate.fingers[0];
-  if (fs.position_x > hwprops_->right - button_right_click_zone_size_.val_) {
+  bool on_right = fs.position_x >
+      hwprops_->right - button_right_click_zone_width_.val_;
+  bool on_bottom = fs.position_y >
+      hwprops_->bottom - button_right_click_zone_height_.val_;
+  bool height_check_enabled = button_right_click_zone_height_.val_ > 0.0;
+  if (on_right && (!height_check_enabled || on_bottom)) {
     return GESTURES_BUTTON_RIGHT;
   }
 
