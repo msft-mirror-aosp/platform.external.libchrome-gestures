@@ -97,9 +97,11 @@ void TapRecord::Update(const HardwareState& hwstate,
                        const std::set<short>& added,
                        const std::set<short>& removed,
                        const std::set<short>& dead) {
-  if (!t5r2_ && (hwstate.finger_cnt != hwstate.touch_cnt ||
-                 prev_hwstate.finger_cnt != prev_hwstate.touch_cnt)) {
-    // switch to T5R2 mode
+  if (!t5r2_ && (hwstate.touch_cnt > hwstate.finger_cnt ||
+                 prev_hwstate.touch_cnt > prev_hwstate.finger_cnt)) {
+    Log("TapRecord::Update: switching to T5R2 mode (%d > %d || %d > %d)",
+        hwstate.touch_cnt, hwstate.finger_cnt, prev_hwstate.touch_cnt,
+        prev_hwstate.finger_cnt);
     t5r2_ = true;
     t5r2_touched_size_ = touched_.size();
     t5r2_released_size_ = released_.size();
