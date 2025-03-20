@@ -1736,9 +1736,11 @@ protected:
   }
 
   void run_test(const std::vector<HWStateGs>& states,
-                std::optional<std::string> label = std::nullopt) {
+                std::optional<std::string> label = std::nullopt,
+                const HardwareProperties* hwprops = nullptr) {
     ii_.reset(new ImmediateInterpreter(nullptr, nullptr));
-    TestInterpreterWrapper wrapper(ii_.get(), &hwprops_);
+    TestInterpreterWrapper wrapper(ii_.get(),
+                                   hwprops == nullptr ? &hwprops_ : hwprops);
     set_gesture_properties();
     check_hwstates(states, label);
   }
@@ -1793,10 +1795,7 @@ protected:
       state.hws.fingers = &finger_states[i][0];
     }
 
-    ii_.reset(new ImmediateInterpreter(nullptr, nullptr));
-    TestInterpreterWrapper wrapper(ii_.get(), &hwprops);
-    set_gesture_properties();
-    check_hwstates(states_without_pressure, "without pressure data");
+    run_test(states_without_pressure, "without pressure data", &hwprops);
   }
 
   // Zeros the touch_cnt field in the states, then tests them. This simulates
@@ -1811,10 +1810,7 @@ protected:
       state.hws.touch_cnt = 0;
     }
 
-    ii_.reset(new ImmediateInterpreter(nullptr, nullptr));
-    TestInterpreterWrapper wrapper(ii_.get(), &hwprops);
-    set_gesture_properties();
-    check_hwstates(states_without_touch_cnt, "without touch counts");
+    run_test(states_without_touch_cnt, "without touch counts", &hwprops);
   }
 
   std::unique_ptr<ImmediateInterpreter> ii_;
